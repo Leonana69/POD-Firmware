@@ -1,0 +1,40 @@
+ARM GAS  /tmp/ccqB25db.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.eabi_attribute 27, 1
+   3              		.eabi_attribute 28, 1
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"usb_otg.c"
+  14              		.text
+  15              		.section	.text.MX_USB_OTG_FS_USB_Init,"ax",%progbits
+  16              		.align	1
+  17              		.global	MX_USB_OTG_FS_USB_Init
+  18              		.arch armv7e-m
+  19              		.syntax unified
+  20              		.thumb
+  21              		.thumb_func
+  22              		.fpu fpv4-sp-d16
+  24              	MX_USB_OTG_FS_USB_Init:
+  25              		@ args = 0, pretend = 0, frame = 0
+  26              		@ frame_needed = 0, uses_anonymous_args = 0
+  27              		@ link register save eliminated.
+  28 0000 7047     		bx	lr
+  30              		.ident	"GCC: (GNU Arm Embedded Toolchain 10.3-2021.07) 10.3.1 20210621 (release)"
+ARM GAS  /tmp/ccqB25db.s 			page 2
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 usb_otg.c
+     /tmp/ccqB25db.s:16     .text.MX_USB_OTG_FS_USB_Init:0000000000000000 $t
+     /tmp/ccqB25db.s:24     .text.MX_USB_OTG_FS_USB_Init:0000000000000000 MX_USB_OTG_FS_USB_Init
+
+NO UNDEFINED SYMBOLS
