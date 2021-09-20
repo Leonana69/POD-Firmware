@@ -1,5 +1,7 @@
 # POD-Firmware
 
+This project is a transportation of crazyflie-firmware. It uses STM32CUBEMX to generate the orignal structure and uses HAL library instead of STM32 Standard Peripheral Libraries, which is deprecated.
+
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld
