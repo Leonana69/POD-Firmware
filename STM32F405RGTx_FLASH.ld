@@ -63,7 +63,10 @@ MEMORY
 {
 RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 128K
 CCMRAM (xrw)      : ORIGIN = 0x10000000, LENGTH = 64K
-FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 1024K
+/* guojun:
+ * 0x8000000 is the address for bootloader
+ * set the FLASH ORIGIN address to 0x8004000 */
+FLASH (rx)      : ORIGIN = 0x8004000, LENGTH = 1024K
 }
 
 /* Define output sections */

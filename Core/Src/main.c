@@ -19,13 +19,12 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "tim.h"
-#include "usb_otg.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "debug.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -87,18 +86,20 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USB_OTG_FS_USB_Init();
-  MX_TIM7_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_GPIO_WritePin(BLUE_L_GPIO_Port, BLUE_L_Pin, GPIO_PIN_SET);
+  DEBUG_PRINT("test0\n");
   while (1)
   {
     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_2);
     HAL_Delay(500);
+    DEBUG_PRINT("test1\n");
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
