@@ -19,12 +19,20 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "debug.h"
+#include "config.h"
+#include "_usart.h"
+#include "_tim.h"
+#include "usec_time.h"
+// FreeRTOS Includes
+#include "FreeRTOS.h"
+#include "task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -87,19 +95,22 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-
+  systemLaunch();
+  _UART_Init();
+  _TIM_Init();
+  initUsecTimer();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_GPIO_WritePin(BLUE_L_GPIO_Port, BLUE_L_Pin, GPIO_PIN_SET);
-  DEBUG_PRINT("test0\n");
   while (1)
   {
+    // TODO: toggle this for debug
     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_2);
     HAL_Delay(500);
-    DEBUG_PRINT("test1\n");
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -2,6 +2,16 @@
 
 This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate the orignal structure and uses HAL library instead of STM32 Standard Peripheral Libraries (SPL), which is deprecated.
 
+## STM32CubeMX Setup
+
+1. Active TIM7 as usecTim
+    - Prescaler: ABP1 timer clock / 1000000 (84)
+    - Counter Mode: up
+    - Counter Period: 0xFFFF (65535)
+    - auto-reload preload: Disable
+    - Tigger Event Selection: Reset
+    - Enable NVIC with Preemption Pri = 4
+
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld
@@ -9,3 +19,7 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
 Change the flash origin address to 0x8004000:
 
 ```FLASH (rx)      : ORIGIN = 0x8004000, LENGTH = 1024K```
+
+### stm32f4xx_it.c
+
+Comment the ```SVC_Handler``` and ```PendSV_Handler``` since they are used by FreeRTOS.
