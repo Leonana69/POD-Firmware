@@ -20,6 +20,9 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
     - IWDG counter clock prescaler: 32
     - IWDG down-counter reload value: 188
 
+3. Enable FreeRTOS
+    - CMSIS V2
+    - 
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld

@@ -32,7 +32,7 @@
 
 // TODO: add IWDG
 // #include "iwdg.h"
-
+#include "cmsis_os.h"
 #include "debug.h"
 #include "led.h"
 // #include "version.h"
@@ -137,14 +137,6 @@ void systemInit(void) {
   // adcInit();
   // ledseqInit();
   // pmInit();
-  vTaskDelay(1000);
-  ledClearAll();
-  vTaskDelay(1000);
-  ledSetAll();
-  vTaskDelay(1000);
-  ledClearAll();
-  vTaskDelay(1000);
-  ledSetAll();
   // TODO: remove these unnessasory modules
   // buzzerInit();
   // peerLocalizationInit();
@@ -282,7 +274,7 @@ void systemTask(void *arg) {
       while(1) {
         // TODO: add ledseq
         // ledseqRun(&seq_testFailed);
-        vTaskDelay(M2T(2000));
+        osDelay(2000);
         // System can be forced to start by setting the param to 1 from the cfclient
         if (selftestPassed) {
 	        DEBUG_PRINT("Start forced.\n");
@@ -367,25 +359,25 @@ bool systemIsArmed() {
 /*
  * This function must be defined if set configUSE_IDLE_HOOK = 1
  */
-void vApplicationIdleHook( void ) {
-  // DEBUG_PRINT("%d\n", xTaskGetTickCount());
-  static uint32_t tickOfLatestWatchdogReset = M2T(0);
+// void vApplicationIdleHook( void ) {
+//   // DEBUG_PRINT("%d\n", xTaskGetTickCount());
+//   static uint32_t tickOfLatestWatchdogReset = M2T(0);
 
-  portTickType tickCount = xTaskGetTickCount();
+//   portTickType tickCount = xTaskGetTickCount();
 
-  if (tickCount - tickOfLatestWatchdogReset > M2T(WATCHDOG_RESET_PERIOD_MS)) {
-    tickOfLatestWatchdogReset = tickCount;
-    DEBUG_PRINT("IWDG\n");
-    // TODO: add IWDG
-    // HAL_IWDG_Refresh(&hiwdg);
-  }
+//   if (tickCount - tickOfLatestWatchdogReset > M2T(WATCHDOG_RESET_PERIOD_MS)) {
+//     tickOfLatestWatchdogReset = tickCount;
+//     DEBUG_PRINT("IWDG\n");
+//     // TODO: add IWDG
+//     // HAL_IWDG_Refresh(&hiwdg);
+//   }
 
-  // Enter sleep mode. Does not work when debugging chip with SWD.
-  // Currently saves about 20mA STM32F405 current consumption (~30%).
-#ifndef DEBUG
-  { __asm volatile ("wfi"); }
-#endif
-}
+//   // Enter sleep mode. Does not work when debugging chip with SWD.
+//   // Currently saves about 20mA STM32F405 current consumption (~30%).
+// #ifndef DEBUG
+//   { __asm volatile ("wfi"); }
+// #endif
+// }
 
 /**
  * This parameter group contain read-only parameters pertaining to the CPU

@@ -38,12 +38,12 @@
   #ifndef FREERTOS_HEAP_SIZE
     #define FREERTOS_HEAP_SIZE      30000
   #endif
-  #define FREERTOS_MIN_STACK_SIZE 150       // M4-FPU register setup is bigger so stack needs to be bigger
-  #define FREERTOS_MCU_CLOCK_HZ   168000000
+  // #define FREERTOS_MIN_STACK_SIZE 150       // M4-FPU register setup is bigger so stack needs to be bigger
+  // #define FREERTOS_MCU_CLOCK_HZ   168000000
 
-  #define configGENERATE_RUN_TIME_STATS 1
-  #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() usecTimerInit()
-  #define portGET_RUN_TIME_COUNTER_VALUE() usecTimerStamp()
+  // #define configGENERATE_RUN_TIME_STATS 1
+  // #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() usecTimerInit()
+  // #define portGET_RUN_TIME_COUNTER_VALUE() usecTimerStamp()
 #endif
 
 #define WATCHDOG_RESET_PERIOD_MS 800
