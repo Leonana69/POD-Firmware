@@ -51,8 +51,8 @@
     licensing and training services.
 */
 
-#ifndef _FREERTOS_CONFIG_H_
-#define _FREERTOS_CONFIG_H_
+#ifndef __FREERTOS_CONFIG_H__
+#define __FREERTOS_CONFIG_H__
 
 #include <stdint.h>
 

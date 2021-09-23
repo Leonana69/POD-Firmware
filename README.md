@@ -16,6 +16,10 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
     - Disable IRQ handler generation for System service call via SWI instruction
     - Disable IRQ handler generation for Pendable request for system service
 
+3. Enable IWDG
+    - IWDG counter clock prescaler: 32
+    - IWDG down-counter reload value: 188
+
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld
