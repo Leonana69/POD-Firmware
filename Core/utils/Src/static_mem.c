@@ -27,6 +27,7 @@
  */
 
 #include <FreeRTOS.h>
+#include <string.h>
 #include "static_mem.h"
 
 /**
@@ -34,6 +35,7 @@
  * implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
  * used by the Idle task.
  */
+// TODO: figure out if we need this
 void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
                                     StackType_t **ppxIdleTaskStackBuffer,
                                     uint32_t *pulIdleTaskStackSize )
@@ -62,4 +64,29 @@ void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer,
   *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
   *ppxTimerTaskStackBuffer = uxTimerTaskStack;
   *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+}
+
+static osThreadAttr_t ta;
+
+osThreadAttr_t* getOsThreadAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* stack_mem, uint32_t stack_size, osPriority_t priority) {
+  memset(&ta, 0, sizeof(ta));
+  ta.name = name;
+  ta.priority = priority;
+  ta.cb_mem = cb_mem;
+  ta.cb_size = cb_size;
+  ta.stack_mem = stack_mem;
+  ta.stack_size = stack_size;
+  return &ta;
+}
+
+static osMessageQueueAttr_t mqa;
+
+osMessageQueueAttr_t* getOsMessageQueueAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* mq_mem, uint32_t mq_size) {
+  memset(&mqa, 0, sizeof(mqa));
+  mqa.name = name;
+  mqa.cb_mem = cb_mem;
+  mqa.cb_size = cb_size;
+  mqa.mq_mem = mq_mem;
+  mqa.mq_size = mq_size;
+  return &mqa;
 }

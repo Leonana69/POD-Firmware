@@ -32,6 +32,7 @@
 #pragma once
 
 #include "cfassert.h"
+#include "cmsis_os.h"
 
 /**
  * @brief Macro to indicate that a variable can be placed in the CCM
@@ -136,8 +137,17 @@
  *
  * @param NAME - the name of the queue handle
  */
-#define STATIC_MEM_QUEUE_CREATE(NAME) xQueueCreateStatic(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, osSys_ ## NAME ## Storage, &osSys_ ## NAME ## Mgm)
+// #define STATIC_MEM_QUEUE_CREATE(NAME) xQueueCreateStatic(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, osSys_ ## NAME ## Storage, &osSys_ ## NAME ## Mgm)
 
+osMessageQueueAttr_t* getOsMessageQueueAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* mq_mem, uint32_t mq_size);
+
+#define STATIC_MEM_QUEUE_CREATE(NAME) \
+  osMessageQueueNew(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, \
+    getOsMessageQueueAttr_t(#NAME, \
+    &osSys_ ## NAME ## Mgm, \
+    sizeof(osSys_ ## NAME ## Mgm), \
+    osSys_ ## NAME ## Storage, \
+    sizeof(osSys_ ## NAME ## Storage)));
 
 /**
  * @brief Creation of tasks using static memory.
@@ -205,4 +215,17 @@
  * @param PARAMETERS Passed on as argument to the function implementing the task
  * @param PRIORITY The task priority
  */
-#define STATIC_MEM_TASK_CREATE(NAME, FUNCTION, TASK_NAME, PARAMETERS, PRIORITY) xTaskCreateStatic((FUNCTION), (TASK_NAME), osSys_ ## NAME ## StackDepth, (PARAMETERS), (PRIORITY), osSys_ ## NAME ## StackBuffer, &osSys_ ## NAME ## TaskBuffer)
+// FreeRTOS realization
+//#define STATIC_MEM_TASK_CREATE(NAME, FUNCTION, TASK_NAME, PARAMETERS, PRIORITY) xTaskCreateStatic((FUNCTION), (TASK_NAME), osSys_ ## NAME ## StackDepth, (PARAMETERS), (PRIORITY), osSys_ ## NAME ## StackBuffer, &osSys_ ## NAME ## TaskBuffer)
+
+// CMSIS RTOS realization
+osThreadAttr_t* getOsThreadAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* stack_mem, uint32_t stack_size, osPriority_t priority);
+
+#define STATIC_MEM_TASK_CREATE(NAME, FUNCTION, TASK_NAME, PARAMETERS, PRIORITY) \
+  osThreadNew(FUNCTION, PARAMETERS, \
+    getOsThreadAttr_t(TASK_NAME, \
+    &osSys_ ## NAME ## TaskBuffer, \
+    sizeof(osSys_ ## NAME ## TaskBuffer), \
+    osSys_ ## NAME ## StackBuffer, \
+    osSys_ ## NAME ## StackDepth, \
+    (osPriority_t) PRIORITY));

@@ -359,6 +359,7 @@ bool systemIsArmed() {
 /*
  * This function must be defined if set configUSE_IDLE_HOOK = 1
  */
+// TODO: realize this in freeRTOS.c
 // void vApplicationIdleHook( void ) {
 //   // DEBUG_PRINT("%d\n", xTaskGetTickCount());
 //   static uint32_t tickOfLatestWatchdogReset = M2T(0);
