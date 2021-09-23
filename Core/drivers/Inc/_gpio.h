@@ -6,6 +6,7 @@
  */
 #include "gpio.h"
 
+void _GPIO_Init();
 void HAL_RCC_GPIO_CLK_ENABLE(GPIO_TypeDef *PORT);
 void HAL_RCC_GPIO_CLK_DISABLE(GPIO_TypeDef *PORT);
 

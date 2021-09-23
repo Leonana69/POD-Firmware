@@ -61,9 +61,20 @@
 /*
  * GPIO
  */
-#define NRF_FC_PIN_PORT GPIOA
-#define NRF_FC_PIN      GPIO_PIN_4
-#define NRF_TX_PIN_PORT GPIOC
-#define NRF_TX_PIN      GPIO_PIN_7
+#define NRF_FC_GPIO_Port  GPIOA
+#define NRF_FC_Pin        GPIO_PIN_4
+#define NRF_TX_GPIO_Port  GPIOC
+#define NRF_TX_Pin        GPIO_PIN_7
+
+#define GREEN_L_Pin       GPIO_PIN_0
+#define GREEN_L_GPIO_Port GPIOC
+#define RED_L_Pin         GPIO_PIN_1
+#define RED_L_GPIO_Port   GPIOC
+#define GREEN_R_Pin       GPIO_PIN_2
+#define GREEN_R_GPIO_Port GPIOC
+#define RED_R_Pin         GPIO_PIN_3
+#define RED_R_GPIO_Port   GPIOC
+#define BLUE_L_Pin        GPIO_PIN_2
+#define BLUE_L_GPIO_Port  GPIOD
 
 #endif /* __CONFIG_H__ */

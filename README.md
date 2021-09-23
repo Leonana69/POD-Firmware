@@ -12,6 +12,10 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
     - Tigger Event Selection: Reset
     - Enable NVIC with Preemption Pri = 4
 
+2. NVIC Code generation
+    - Disable IRQ handler generation for System service call via SWI instruction
+    - Disable IRQ handler generation for Pendable request for system service
+
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld
@@ -22,4 +26,3 @@ Change the flash origin address to 0x8004000:
 
 ### stm32f4xx_it.c
 
-Comment the ```SVC_Handler``` and ```PendSV_Handler``` since they are used by FreeRTOS.

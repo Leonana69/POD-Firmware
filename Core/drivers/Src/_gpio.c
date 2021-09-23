@@ -1,4 +1,5 @@
 #include "_gpio.h"
+#include "config.h"
 
 void HAL_RCC_GPIO_CLK_ENABLE(GPIO_TypeDef *PORT) {
     if (PORT == GPIOA)
@@ -28,4 +29,8 @@ void HAL_RCC_GPIO_CLK_DISABLE(GPIO_TypeDef *PORT) {
         __HAL_RCC_GPIOE_CLK_DISABLE ();
     else if (PORT == GPIOH)
         __HAL_RCC_GPIOH_CLK_DISABLE ();
+}
+
+void _GPIO_Init() {
+    
 }

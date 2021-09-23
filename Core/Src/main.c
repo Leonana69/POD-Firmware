@@ -29,7 +29,9 @@
 #include "config.h"
 #include "_usart.h"
 #include "_tim.h"
+#include "_gpio.h"
 #include "usec_time.h"
+#include "led.h"
 // FreeRTOS Includes
 #include "FreeRTOS.h"
 #include "task.h"
@@ -97,7 +99,8 @@ int main(void)
   MX_USART3_UART_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-  systemLaunch();
+  // systemLaunch();
+  _GPIO_Init();
   _UART_Init();
   _TIM_Init();
   initUsecTimer();
@@ -105,6 +108,10 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  ledInit();
+  ledSetAll();
+  HAL_Delay(1000);
+  ledClearAll();
   while (1)
   {
     // TODO: toggle this for debug
