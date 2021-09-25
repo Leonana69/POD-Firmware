@@ -85,13 +85,12 @@ static bool armed = ARM_INIT;
 static bool forceArm;
 static bool isInit;
 
-static char nrf_version[16];
+// static char nrf_version[16];
 
 STATIC_MEM_TASK_ALLOC(systemTask, SYSTEM_TASK_STACKSIZE);
 
 /* System wide synchronisation */
-xSemaphoreHandle canStartMutex;
-static StaticSemaphore_t canStartMutexBuffer;
+STATIC_MEM_MUTEX_ALLOC(canStartMutex);
 
 /* Private functions */
 static void systemTask(void *arg);
@@ -106,7 +105,7 @@ void systemInit(void) {
   if (isInit)
     return;
 
-  canStartMutex = xSemaphoreCreateMutexStatic(&canStartMutexBuffer);
+  canStartMutex = STATIC_MUTEX_CREATE(canStartMutex);
   xSemaphoreTake(canStartMutex, portMAX_DELAY);
 
   // usblinkInit();
@@ -177,8 +176,10 @@ void systemTask(void *arg) {
 #ifdef ENABLE_UART2
   uart2Init(115200);
 #endif
-
+  // TODO: check if this is essential
   usecTimerInit();
+
+  // init by stm32cubemx
   // i2cdevInit(I2C3_DEV);
   // i2cdevInit(I2C1_DEV);
 

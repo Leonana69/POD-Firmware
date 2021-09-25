@@ -1,31 +1,7 @@
 /**
- * ,---------,       ____  _ __
- * |  ,-^-,  |      / __ )(_) /_______________ _____  ___
- * | (  O  ) |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
- * | / ,--'  |    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
- *    +------`   /_____/_/\__/\___/_/   \__,_/ /___/\___/
- *
- * Crazyflie control firmware
- *
- * Copyright (C) 2019 Bitcraze AB
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, in version 3.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
  * @file static_mem.h
  * @brief Utility macros to create static memory for OS objects such as
  * queues, semaphores and so on.
- *
- * @copyright Copyright (c) 2019
  *
  */
 
@@ -137,10 +113,11 @@
  *
  * @param NAME - the name of the queue handle
  */
+// FreeRTOS realization
 // #define STATIC_MEM_QUEUE_CREATE(NAME) xQueueCreateStatic(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, osSys_ ## NAME ## Storage, &osSys_ ## NAME ## Mgm)
 
+// CMSIS RTOS realization
 osMessageQueueAttr_t* getOsMessageQueueAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* mq_mem, uint32_t mq_size);
-
 #define STATIC_MEM_QUEUE_CREATE(NAME) \
   osMessageQueueNew(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, \
     getOsMessageQueueAttr_t(#NAME, \
@@ -183,8 +160,7 @@ osMessageQueueAttr_t* getOsMessageQueueAttr_t(char* name, void* cb_mem, uint32_t
  * @param STACK_DEPTH The stack depth in nr of StackType_t entries.
  */
 #define STATIC_MEM_TASK_ALLOC(NAME, STACK_DEPTH) \
-  static const int osSys_ ## NAME ## StackDepth = (STACK_DEPTH); \
-  static StackType_t osSys_ ## NAME ## StackBuffer[(STACK_DEPTH)]; \
+  static uint64_t osSys_ ## NAME ## StackBuffer[(STACK_DEPTH)]; \
   NO_DMA_CCM_SAFE_ZERO_INIT static StaticTask_t osSys_ ## NAME ## TaskBuffer;
 
 /**
@@ -199,8 +175,7 @@ osMessageQueueAttr_t* getOsMessageQueueAttr_t(char* name, void* cb_mem, uint32_t
  * @param STACK_DEPTH The stack depth in nr of StackType_t entries.
  */
 #define STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(NAME, STACK_DEPTH) \
-  static const int osSys_ ## NAME ## StackDepth = (STACK_DEPTH); \
-  NO_DMA_CCM_SAFE_ZERO_INIT static StackType_t osSys_ ## NAME ## StackBuffer[(STACK_DEPTH)]; \
+  NO_DMA_CCM_SAFE_ZERO_INIT static uint64_t osSys_ ## NAME ## StackBuffer[(STACK_DEPTH)]; \
   NO_DMA_CCM_SAFE_ZERO_INIT static StaticTask_t osSys_ ## NAME ## TaskBuffer;
 
 /**
@@ -220,12 +195,25 @@ osMessageQueueAttr_t* getOsMessageQueueAttr_t(char* name, void* cb_mem, uint32_t
 
 // CMSIS RTOS realization
 osThreadAttr_t* getOsThreadAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* stack_mem, uint32_t stack_size, osPriority_t priority);
-
 #define STATIC_MEM_TASK_CREATE(NAME, FUNCTION, TASK_NAME, PARAMETERS, PRIORITY) \
   osThreadNew(FUNCTION, PARAMETERS, \
     getOsThreadAttr_t(TASK_NAME, \
     &osSys_ ## NAME ## TaskBuffer, \
     sizeof(osSys_ ## NAME ## TaskBuffer), \
     osSys_ ## NAME ## StackBuffer, \
-    osSys_ ## NAME ## StackDepth, \
+    sizeof(osSys_ ## NAME ## StackBuffer), \
     (osPriority_t) PRIORITY));
+
+/**
+ * @brief Create a static mutex
+ */
+#define STATIC_MEM_MUTEX_ALLOC(NAME) \
+  osMutexId_t NAME; \
+	static StaticSemaphore_t mutex_ ## NAME ## _ControlBlock;
+
+osMutexAttr_t* getOsMutexAttr_t(char* name, void* cb_mem, uint32_t cb_size);
+
+#define STATIC_MUTEX_CREATE(NAME) \
+  osMutexNew(getOsMutexAttr_t(#NAME, \
+  & mutex_ ## NAME ## _ControlBlock, \
+  sizeof(mutex_ ## NAME ## _ControlBlock)));

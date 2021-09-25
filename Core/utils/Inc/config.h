@@ -46,9 +46,7 @@
   // #define portGET_RUN_TIME_COUNTER_VALUE() usecTimerStamp()
 #endif
 
-#define WATCHDOG_RESET_PERIOD_MS 800
-// TODO: change to 80
-// #define WATCHDOG_RESET_PERIOD_MS 80
+#define WATCHDOG_RESET_PERIOD_MS 80
 
 //The radio channel. From 0 to 125
 #define RADIO_CHANNEL 80
@@ -69,6 +67,9 @@
 // ****** TIM ******
 #define usecTim         htim7
 
+// ****** I2C ******
+#define eepromI2CHandle hi2c1
+#define sensorI2CHandle hi2c3
 /*
  * GPIO
  */

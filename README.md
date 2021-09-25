@@ -23,6 +23,19 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
 3. Enable FreeRTOS
     - CMSIS V2
     - 
+
+4. Enable I2C1
+    - I2C Speed Mode: Fast Mode
+    - I2C Clock Speed: 400000
+    - Fast Mode Duty Cycle: 2
+    - Enable Rx DMA
+        - Mode: Normal
+        - Use Fifo: One Quarter Full
+        - Increment Address: enable Memory Inc
+        - Data Width: Byte, Byte
+        - Burst Size: Single, Single
+    - Enable I2C1 event interrupt: 7
+    - Enable I2C1 error interrupt: 7
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld
@@ -31,5 +44,6 @@ Change the flash origin address to 0x8004000:
 
 ```FLASH (rx)      : ORIGIN = 0x8004000, LENGTH = 1024K```
 
+Add _param, _log, _deckDriver, _eventtrigger to the ld file.
 ### stm32f4xx_it.c
 

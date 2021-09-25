@@ -66,27 +66,34 @@ void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer,
   *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
 
-static osThreadAttr_t ta;
-
 osThreadAttr_t* getOsThreadAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* stack_mem, uint32_t stack_size, osPriority_t priority) {
-  memset(&ta, 0, sizeof(ta));
-  ta.name = name;
-  ta.priority = priority;
-  ta.cb_mem = cb_mem;
-  ta.cb_size = cb_size;
-  ta.stack_mem = stack_mem;
-  ta.stack_size = stack_size;
-  return &ta;
+  static osThreadAttr_t attr;
+  memset(&attr, 0, sizeof(attr));
+  attr.name = name;
+  attr.priority = priority;
+  attr.cb_mem = cb_mem;
+  attr.cb_size = cb_size;
+  attr.stack_mem = stack_mem;
+  attr.stack_size = stack_size;
+  return &attr;
 }
 
-static osMessageQueueAttr_t mqa;
-
 osMessageQueueAttr_t* getOsMessageQueueAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* mq_mem, uint32_t mq_size) {
-  memset(&mqa, 0, sizeof(mqa));
-  mqa.name = name;
-  mqa.cb_mem = cb_mem;
-  mqa.cb_size = cb_size;
-  mqa.mq_mem = mq_mem;
-  mqa.mq_size = mq_size;
-  return &mqa;
+  static osMessageQueueAttr_t attr;
+  memset(&attr, 0, sizeof(attr));
+  attr.name = name;
+  attr.cb_mem = cb_mem;
+  attr.cb_size = cb_size;
+  attr.mq_mem = mq_mem;
+  attr.mq_size = mq_size;
+  return &attr;
+}
+
+osMutexAttr_t* getOsMutexAttr_t(char* name, void* cb_mem, uint32_t cb_size) {
+  static osMutexAttr_t attr;
+  memset(&attr, 0, sizeof(attr));
+  attr.name = name;
+  attr.cb_mem = cb_mem;
+  attr.cb_size = cb_size;
+  return &attr;
 }

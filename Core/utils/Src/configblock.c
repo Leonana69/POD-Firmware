@@ -25,15 +25,28 @@
  */
 #define DEBUG_MODULE "CFGBLK"
 
-#include "cal.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "config.h"
-#include "configblock.h"
 #include "debug.h"
+// #include "i2cdev.h"
+#include "configblock.h"
+#include "eeprom.h"
+#include "cal.h"
+
+#include "_i2c.h"
+
 
 /* Internal format of the config block */
 #define MAGIC 0x43427830
-#define VERSION 0
+#define VERSION 1
+#define HEADER_SIZE_BYTES 5 // magic + version
+#define OVERHEAD_SIZE_BYTES (HEADER_SIZE_BYTES + 1) // + cksum
+
+// Current version
 struct configblock_s {
   /* header */
   uint32_t magic;
@@ -43,59 +56,142 @@ struct configblock_s {
   uint8_t radioSpeed;
   float calibPitch;
   float calibRoll;
+  uint8_t radioAddress_upper;
+  uint32_t radioAddress_lower;
   /* Simple modulo 256 checksum */
   uint8_t cksum;
 } __attribute__((__packed__));
 
-static struct configblock_s *configblock;
+typedef struct configblock_s configblock_t;
 
-static bool cb_ok=false;
+static configblock_t configblock;
+static configblock_t configblockDefault = {
+    .magic = MAGIC,
+    .version = VERSION,
+    .radioChannel = RADIO_CHANNEL,
+    .radioSpeed = RADIO_DATARATE,
+    .calibPitch = 0.0,
+    .calibRoll = 0.0,
+    .radioAddress_upper = ((uint64_t)RADIO_ADDRESS >> 32),
+    .radioAddress_lower = (RADIO_ADDRESS & 0xFFFFFFFFULL),
+};
+
+static bool isInit = false;
+static bool cb_ok = false;
+
+// static bool configblockCheckMagic(configblock_t *configblock);
+// static bool configblockCheckVersion(configblock_t *configblock);
+static bool configblockCheckChecksum(configblock_t *configblock);
+// static bool configblockCheckDataIntegrity(uint8_t *data, uint8_t version);
+static bool configblockWrite(configblock_t *configblock);
 
 int configblockInit(void) {
-  configblock = (void*) CONFIG_BLOCK_ADDRESS;
+  if (isInit)
+    return 0;
 
-  //Verify the config block
-  if (configblock->magic!=MAGIC || configblock->version!= VERSION || 
-      calculate_cksum(configblock, sizeof(*configblock))) {
-    DEBUG_PRINT("Verification [FAIL]\n");
-    return -1;
+  eepromInit();
+
+  // Because of strange behavior from I2C device during expansion port test
+  // the first read needs to be discarded
+  eepromTestConnection();
+
+  if (eepromTestConnection()) {
+    if (eepromReadBuffer((uint8_t *)&configblock, 0, sizeof(configblock))) {
+      // Verify the config block
+      if (configblock.magic == MAGIC && configblock.version == VERSION &&
+          configblockCheckChecksum(&configblock)) {
+        DEBUG_PRINT("v%d, verification [OK]\n", configblock.version);
+        cb_ok = true;
+      } else
+        DEBUG_PRINT("Verification [FAIL]: %lx %d\n", configblock.magic, configblock.version);
+    }
   } else {
-    DEBUG_PRINT("v%d, verification [OK]\n", configblock->version);
-    cb_ok = true;
+    DEBUG_PRINT("EEPROM Connection [FAIL]\n");
+    return -1;
   }
+
+  if (cb_ok == false) {
+    DEBUG_PRINT("Try to write default configuration...\n");
+    // Copy default data to used structure.
+    memcpy((uint8_t *)&configblock, (uint8_t *)&configblockDefault, sizeof(configblock));
+    // Write default configuration to eeprom
+    if (configblockWrite(&configblockDefault))
+      cb_ok = true;
+    else {
+      DEBUG_PRINT("Write failed!\n");
+      return -1;
+    }
+  }
+
+  isInit = true;
   return 0;
 }
 
 bool configblockTest(void) {
+  return eepromTest();
+}
+
+// static bool configblockCheckMagic(configblock_t *configblock) {
+//   return (configblock->magic == MAGIC);
+// }
+
+// static bool configblockCheckVersion(configblock_t *configblock) {
+//   return (configblock->version == VERSION);
+// }
+
+static bool configblockCheckChecksum(configblock_t *configblock) {
+  return (configblock->cksum == calculate_cksum(configblock, sizeof(configblock_t) - 1));
+}
+
+// static bool configblockCheckDataIntegrity(uint8_t *data, uint8_t version) {
+//   bool status = false;
+//   configblock_t *v1 = ( struct configblock_t *)data;
+//     status = (v1->cksum == calculate_cksum(data, sizeof(struct configblock_t) - 1));
+//   return status;
+// }
+
+static bool configblockWrite(configblock_t *configblock) {
+  // Write default configuration to eeprom
+  configblock->cksum = calculate_cksum(configblock, sizeof(configblock_t) - 1);
+  if (!eepromWriteBuffer((uint8_t *)configblock, 0, sizeof(configblock_t))) {
+    return false;
+  }
+
   return true;
 }
 
 /* Static accessors */
 int configblockGetRadioChannel(void) {
   if (cb_ok)
-    return configblock->radioChannel;
+    return configblock.radioChannel;
   else
     return RADIO_CHANNEL;
 }
 
 int configblockGetRadioSpeed(void) {
   if (cb_ok)
-    return configblock->radioSpeed;
+    return configblock.radioSpeed;
   else
     return RADIO_DATARATE;
 }
 
+uint64_t configblockGetRadioAddress(void) {
+  if (cb_ok)
+    return ((uint64_t)configblock.radioAddress_upper << 32) | (uint64_t)configblock.radioAddress_lower;
+  else
+    return RADIO_ADDRESS;
+}
+
 float configblockGetCalibPitch(void) {
   if (cb_ok)
-    return configblock->calibPitch;
+    return configblock.calibPitch;
   else
     return 0;
 }
 
 float configblockGetCalibRoll(void) {
   if (cb_ok)
-    return configblock->calibRoll;
+    return configblock.calibRoll;
   else
     return 0;
 }
-
