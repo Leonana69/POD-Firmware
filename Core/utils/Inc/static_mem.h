@@ -212,7 +212,6 @@ osThreadAttr_t* getOsThreadAttr_t(char* name, void* cb_mem, uint32_t cb_size, vo
 	static StaticSemaphore_t mutex_ ## NAME ## _ControlBlock;
 
 osMutexAttr_t* getOsMutexAttr_t(char* name, void* cb_mem, uint32_t cb_size);
-
 #define STATIC_MUTEX_CREATE(NAME) \
   osMutexNew(getOsMutexAttr_t(#NAME, \
   & mutex_ ## NAME ## _ControlBlock, \

@@ -86,8 +86,6 @@ bool eepromTestConnection(void) {
   if (!isInit)
     return false;
 
-	DEBUG_PRINT("EEPROM TEST CONNECTION: 0x%x\n", devAddr);
-
   status = I2CRead16(I2Cx, devAddr, 0, 1, &tmp);
   return status == HAL_OK;
 }

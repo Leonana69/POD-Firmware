@@ -69,7 +69,7 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+#include "configblock.h"
 /* USER CODE END 0 */
 
 /**
@@ -110,6 +110,7 @@ int main(void)
   _UART_Init();
   _TIM_Init();
   _I2C_Init();
+
   systemLaunch();
   /* USER CODE END 2 */
 

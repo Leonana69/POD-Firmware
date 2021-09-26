@@ -79,10 +79,7 @@ static configblock_t configblockDefault = {
 static bool isInit = false;
 static bool cb_ok = false;
 
-// static bool configblockCheckMagic(configblock_t *configblock);
-// static bool configblockCheckVersion(configblock_t *configblock);
 static bool configblockCheckChecksum(configblock_t *configblock);
-// static bool configblockCheckDataIntegrity(uint8_t *data, uint8_t version);
 static bool configblockWrite(configblock_t *configblock);
 
 int configblockInit(void) {
@@ -90,10 +87,6 @@ int configblockInit(void) {
     return 0;
 
   eepromInit();
-
-  // Because of strange behavior from I2C device during expansion port test
-  // the first read needs to be discarded
-  eepromTestConnection();
 
   if (eepromTestConnection()) {
     if (eepromReadBuffer((uint8_t *)&configblock, 0, sizeof(configblock))) {
@@ -131,24 +124,9 @@ bool configblockTest(void) {
   return eepromTest();
 }
 
-// static bool configblockCheckMagic(configblock_t *configblock) {
-//   return (configblock->magic == MAGIC);
-// }
-
-// static bool configblockCheckVersion(configblock_t *configblock) {
-//   return (configblock->version == VERSION);
-// }
-
 static bool configblockCheckChecksum(configblock_t *configblock) {
   return (configblock->cksum == calculate_cksum(configblock, sizeof(configblock_t) - 1));
 }
-
-// static bool configblockCheckDataIntegrity(uint8_t *data, uint8_t version) {
-//   bool status = false;
-//   configblock_t *v1 = ( struct configblock_t *)data;
-//     status = (v1->cksum == calculate_cksum(data, sizeof(struct configblock_t) - 1));
-//   return status;
-// }
 
 static bool configblockWrite(configblock_t *configblock) {
   // Write default configuration to eeprom

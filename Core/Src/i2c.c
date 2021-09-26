@@ -124,10 +124,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     hdma_i2c1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
     hdma_i2c1_rx.Init.Mode = DMA_NORMAL;
     hdma_i2c1_rx.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_i2c1_rx.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
-    hdma_i2c1_rx.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_1QUARTERFULL;
-    hdma_i2c1_rx.Init.MemBurst = DMA_MBURST_SINGLE;
-    hdma_i2c1_rx.Init.PeriphBurst = DMA_PBURST_SINGLE;
+    hdma_i2c1_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_i2c1_rx) != HAL_OK)
     {
       Error_Handler();
@@ -184,10 +181,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     hdma_i2c3_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
     hdma_i2c3_rx.Init.Mode = DMA_NORMAL;
     hdma_i2c3_rx.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_i2c3_rx.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
-    hdma_i2c3_rx.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_1QUARTERFULL;
-    hdma_i2c3_rx.Init.MemBurst = DMA_MBURST_SINGLE;
-    hdma_i2c3_rx.Init.PeriphBurst = DMA_PBURST_SINGLE;
+    hdma_i2c3_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_i2c3_rx) != HAL_OK)
     {
       Error_Handler();

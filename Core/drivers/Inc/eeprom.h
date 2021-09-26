@@ -30,7 +30,9 @@
 
 #include <stdbool.h>
 
-#define EEPROM_I2C_ADDR     0x50
+// If using HAL library, this should be 0xA0
+#define EEPROM_I2C_ADDR     0xA0
+// #define EEPROM_I2C_ADDR     0x50
 #define EEPROM_SIZE         0x1FFF
 
 /**

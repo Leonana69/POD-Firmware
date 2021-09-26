@@ -32,7 +32,7 @@
 
 // TODO: add IWDG
 // #include "iwdg.h"
-#include "cmsis_os.h"
+#include "cmsis_os2.h"
 #include "debug.h"
 #include "led.h"
 // #include "version.h"
@@ -48,6 +48,7 @@
 // #include "storage.h"
 #include "configblock.h"
 #include "worker.h"
+#include "crtp.h"
 // #include "freeRTOSdebug.h"
 // #include "uart_syslink.h"
 // #include "uart1.h"
@@ -112,8 +113,9 @@ void systemInit(void) {
   // sysLoadInit();
 
   /* Initialized here so that DEBUG_PRINT (buffered) can be used early */
+  // I don't like the SEGGER debugger
   // debugInit();
-  // crtpInit();
+  crtpInit();
   // consoleInit();
 
   DEBUG_PRINT("----------------------------\n");

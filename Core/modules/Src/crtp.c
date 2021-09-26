@@ -28,10 +28,9 @@
 #include <errno.h>
 
 /*FreeRtos includes*/
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-#include "queue.h"
+// #include "FreeRTOS.h"
+
+#include "cmsis_os2.h"
 
 #include "config.h"
 
@@ -69,16 +68,16 @@ static struct {
   uint32_t previousStatisticsTime;
 } stats;
 
-static xQueueHandle txQueue;
-
 #define CRTP_NBR_OF_PORTS 16
 #define CRTP_TX_QUEUE_SIZE 120
 #define CRTP_RX_QUEUE_SIZE 16
 
+static osMessageQueueId_t txQueue;
+static osMessageQueueId_t queues[CRTP_NBR_OF_PORTS];
+
 static void crtpTxTask(void *param);
 static void crtpRxTask(void *param);
 
-static xQueueHandle queues[CRTP_NBR_OF_PORTS];
 static volatile CrtpCallback callbacks[CRTP_NBR_OF_PORTS];
 static void updateStats();
 
@@ -86,10 +85,10 @@ STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(crtpTxTask, CRTP_TX_TASK_STACKSIZE);
 STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(crtpRxTask, CRTP_RX_TASK_STACKSIZE);
 
 void crtpInit(void) {
-  if(isInit)
+  if (isInit)
     return;
 
-  txQueue = xQueueCreate(CRTP_TX_QUEUE_SIZE, sizeof(CRTPPacket));
+  txQueue = osMessageQueueNew(CRTP_TX_QUEUE_SIZE, sizeof(CRTPPacket), NULL);
   DEBUG_QUEUE_MONITOR_REGISTER(txQueue);
 
   STATIC_MEM_TASK_CREATE(crtpTxTask, crtpTxTask, CRTP_TX_TASK_NAME, NULL, CRTP_TX_TASK_PRI);
@@ -104,35 +103,30 @@ bool crtpTest(void) {
 
 void crtpInitTaskQueue(CRTPPort portId) {
   ASSERT(queues[portId] == NULL);
-
-  queues[portId] = xQueueCreate(CRTP_RX_QUEUE_SIZE, sizeof(CRTPPacket));
+  queues[portId] = osMessageQueueNew(CRTP_RX_QUEUE_SIZE, sizeof(CRTPPacket), NULL);
   DEBUG_QUEUE_MONITOR_REGISTER(queues[portId]);
 }
 
 int crtpReceivePacket(CRTPPort portId, CRTPPacket *p) {
   ASSERT(queues[portId]);
   ASSERT(p);
-
-  return xQueueReceive(queues[portId], p, 0);
+  return osMessageQueueGet(queues[portId], p, 0, 0);
 }
 
 int crtpReceivePacketBlock(CRTPPort portId, CRTPPacket *p) {
   ASSERT(queues[portId]);
   ASSERT(p);
-
-  return xQueueReceive(queues[portId], p, portMAX_DELAY);
+  return osMessageQueueGet(queues[portId], p, 0, portMAX_DELAY);
 }
-
 
 int crtpReceivePacketWait(CRTPPort portId, CRTPPacket *p, int wait) {
   ASSERT(queues[portId]);
   ASSERT(p);
-	// TODO: fix M2T(wait)
-  return xQueueReceive(queues[portId], p, wait);
+  return osMessageQueueGet(queues[portId], p, 0, wait);
 }
 
 int crtpGetFreeTxQueuePackets(void) {
-  return (CRTP_TX_QUEUE_SIZE - uxQueueMessagesWaiting(txQueue));
+  return (CRTP_TX_QUEUE_SIZE - osMessageQueueGetCount(txQueue));
 }
 
 void crtpTxTask(void *param) {
@@ -140,7 +134,7 @@ void crtpTxTask(void *param) {
 
   while (1) {
     if (link != &nopLink) {
-      if (xQueueReceive(txQueue, &p, portMAX_DELAY) == pdTRUE) {
+      if (osMessageQueueGet(txQueue, &p, 0, portMAX_DELAY) == pdTRUE) {
         // Keep testing, if the link changes to USB it will go though
         while (link->sendPacket(&p) == false) {
           // Relaxation time
@@ -165,7 +159,7 @@ void crtpRxTask(void *param) {
       if (!link->receivePacket(&p)) {
         if (queues[p.port]) {
           // Block, since we should never drop a packet
-          xQueueSend(queues[p.port], &p, portMAX_DELAY);
+          osMessageQueuePut(queues[p.port], &p, 0, portMAX_DELAY);
         }
 
         if (callbacks[p.port]) {
@@ -193,18 +187,18 @@ int crtpSendPacket(CRTPPacket *p) {
   ASSERT(p);
   ASSERT(p->size <= CRTP_MAX_DATA_SIZE);
 
-  return xQueueSend(txQueue, p, 0);
+  return osMessageQueuePut(txQueue, p, 0, 0);
 }
 
 int crtpSendPacketBlock(CRTPPacket *p) {
   ASSERT(p);
   ASSERT(p->size <= CRTP_MAX_DATA_SIZE);
 
-  return xQueueSend(txQueue, p, portMAX_DELAY);
+  return osMessageQueuePut(txQueue, p, 0, portMAX_DELAY);
 }
 
 int crtpReset(void) {
-  xQueueReset(txQueue);
+  osMessageQueueReset(txQueue);
   if (link->reset) {
     link->reset();
   }
@@ -240,7 +234,7 @@ static void clearStats() {
 }
 
 static void updateStats() {
-  uint32_t now = xTaskGetTickCount();
+  uint32_t now = osKernelGetTickCount();
   if (now > stats.nextStatisticsTime) {
     float interval = now - stats.previousStatisticsTime;
     stats.rxRate = (uint16_t)(1000.0f * stats.rxCount / interval);
