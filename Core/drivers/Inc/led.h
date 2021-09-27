@@ -39,6 +39,7 @@ typedef enum { LED_BLUE_L = 0, LED_GREEN_L, LED_RED_L, LED_GREEN_R, LED_RED_R, L
 void ledInit();
 bool ledTest();
 
+void ledBlink(int cnt);
 // Clear all configured LEDs
 void ledClearAll(void);
 

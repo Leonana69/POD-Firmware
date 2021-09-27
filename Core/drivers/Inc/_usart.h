@@ -6,8 +6,14 @@
  */
 #include "stdbool.h"
 #include "usart.h"
-
-int uartDebugPutchar(int c);
+#include "syslink.h"
+int debugUartPutchar(int c);
 void _UART_Init(void);
 
+void nrfUartTxenIsr();
+void nrfUartDmaIsr();
+
+void nrfUartSendDataDmaBlocking(uint32_t size, uint8_t *data);
+void nrfUartGetPacketBlocking(SyslinkPacket* packet);
+void nrfUartIsr();
 #endif

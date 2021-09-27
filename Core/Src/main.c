@@ -30,10 +30,7 @@
 /* USER CODE BEGIN Includes */
 #include "debug.h"
 #include "config.h"
-#include "_usart.h"
-#include "_tim.h"
-#include "_gpio.h"
-#include "_i2c.h"
+
 #include "static_mem.h"
 #include "led.h"
 #include "system.h"
@@ -69,7 +66,7 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#include "configblock.h"
+
 /* USER CODE END 0 */
 
 /**
@@ -105,17 +102,14 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM7_Init();
   MX_I2C3_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-  _GPIO_Init();
-  _UART_Init();
-  _TIM_Init();
-  _I2C_Init();
-
-  systemLaunch();
+  
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
+  systemLaunch();
   MX_FREERTOS_Init();
   /* Start scheduler */
   osKernelStart();

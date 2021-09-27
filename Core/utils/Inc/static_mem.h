@@ -95,6 +95,7 @@
  * @param ITEM_SIZE - the size of the items in the queue
  */
 #define STATIC_MEM_QUEUE_ALLOC(NAME, LENGTH, ITEM_SIZE)\
+  static osMessageQueueId_t NAME; \
   static const int osSys_ ## NAME ## Length = (LENGTH); \
   static const int osSys_ ## NAME ## ItemSize = (ITEM_SIZE); \
   NO_DMA_CCM_SAFE_ZERO_INIT static uint8_t osSys_ ## NAME ## Storage[(LENGTH) * (ITEM_SIZE)]; \
@@ -114,7 +115,7 @@
  * @param NAME - the name of the queue handle
  */
 // FreeRTOS realization
-// #define STATIC_MEM_QUEUE_CREATE(NAME) xQueueCreateStatic(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, osSys_ ## NAME ## Storage, &osSys_ ## NAME ## Mgm)
+#define STATIC_MEM_QUEUE_CREATE_OLD(NAME) xQueueCreateStatic(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, osSys_ ## NAME ## Storage, &osSys_ ## NAME ## Mgm)
 
 // CMSIS RTOS realization
 osMessageQueueAttr_t* getOsMessageQueueAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* mq_mem, uint32_t mq_size);
@@ -208,7 +209,7 @@ osThreadAttr_t* getOsThreadAttr_t(char* name, void* cb_mem, uint32_t cb_size, vo
  * @brief Create a static mutex
  */
 #define STATIC_MEM_MUTEX_ALLOC(NAME) \
-  osMutexId_t NAME; \
+  static osMutexId_t NAME; \
 	static StaticSemaphore_t mutex_ ## NAME ## _ControlBlock;
 
 osMutexAttr_t* getOsMutexAttr_t(char* name, void* cb_mem, uint32_t cb_size);
@@ -216,3 +217,14 @@ osMutexAttr_t* getOsMutexAttr_t(char* name, void* cb_mem, uint32_t cb_size);
   osMutexNew(getOsMutexAttr_t(#NAME, \
   & mutex_ ## NAME ## _ControlBlock, \
   sizeof(mutex_ ## NAME ## _ControlBlock)));
+
+// TODO: check if dynamic alloc works
+#define STATIC_MEM_SEMAPHORE_ALLOC(NAME) \
+  static osSemaphoreId_t NAME; \
+	static StaticSemaphore_t semaphore_ ## NAME ## _ControlBlock;
+
+osSemaphoreAttr_t* getOsSemaphoreAttr_t(char* name, void* cb_mem, uint32_t cb_size);
+#define STATIC_SEMAPHORE_CREATE(NAME, MAX, INIT) \
+  osSemaphoreNew(MAX, INIT, getOsSemaphoreAttr_t(#NAME, \
+  & semaphore_ ## NAME ## _ControlBlock, \
+  sizeof(semaphore_ ## NAME ## _ControlBlock)));

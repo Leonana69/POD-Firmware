@@ -97,3 +97,12 @@ osMutexAttr_t* getOsMutexAttr_t(char* name, void* cb_mem, uint32_t cb_size) {
   attr.cb_size = cb_size;
   return &attr;
 }
+
+osSemaphoreAttr_t* getOsSemaphoreAttr_t(char* name, void* cb_mem, uint32_t cb_size) {
+  static osSemaphoreAttr_t attr;
+  memset(&attr, 0, sizeof(attr));
+  attr.name = name;
+  attr.cb_mem = cb_mem;
+  attr.cb_size = cb_size;
+  return &attr;
+}

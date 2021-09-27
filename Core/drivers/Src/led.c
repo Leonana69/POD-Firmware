@@ -41,6 +41,15 @@ void ledInit() {
   isInit = true;
 }
 
+void ledBlink(int cnt) {
+  while (cnt--) {
+    ledClearAll();
+    osDelay(500);
+    ledSetAll();
+    osDelay(500);
+  }
+}
+
 bool ledTest(void) {
   ledSet(LED_GREEN_L, 1);
   ledSet(LED_GREEN_R, 1);

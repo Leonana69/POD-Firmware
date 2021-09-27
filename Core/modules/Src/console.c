@@ -27,10 +27,11 @@
 #include <string.h>
 
 /*FreeRtos includes*/
-#include "FreeRTOS.h"
 #include "cmsis_os2.h"
-
+#include "console.h"
 #include "crtp.h"
+#include "debug.h"
+#include "config.h"
 
 #ifdef STM32F40_41xxx
 #include "stm32f4xx.h"
@@ -55,7 +56,7 @@ static void addBufferFullMarker();
  * returns TRUE if successful otherwise FALSE
  */
 static bool consoleSendMessage(void) {
-  if (crtpSendPacket(&messageToPrint) == pdTRUE) {
+  if (crtpSendPacket(&messageToPrint) == osOK) {
     messageToPrint.size = 0;
     messageSendingIsPending = false;
     return true;
@@ -70,7 +71,7 @@ void consoleInit() {
 
   messageToPrint.size = 0;
   messageToPrint.header = CRTP_HEADER(CRTP_PORT_CONSOLE, 0);
-  vSemaphoreCreateBinary(synch);
+  synch = osSemaphoreNew(1, 1, NULL);
   messageSendingIsPending = false;
 
   isInit = true;
@@ -87,10 +88,9 @@ int consolePutchar(int ch) {
 
   if (isInInterrupt)
     return consolePutcharFromISR(ch);
-
-  if (osSemaphoreAcquire(synch, portMAX_DELAY) == osOK) {
+  if (osSemaphoreAcquire(synch, osDelayMax) == osOK) {
     // Try to send if we already have a pending message
-    if (messageSendingIsPending) 
+    if (messageSendingIsPending)
       consoleSendMessage();
 
     if (!messageSendingIsPending) {
@@ -134,9 +134,9 @@ int consolePuts(char *str) {
 }
 
 void consoleFlush(void) {
-  if (osSemaphoreAcquire(synch, portMAX_DELAY) == osOK) {
+  if (osSemaphoreAcquire(synch, osDelayMax) == osOK) {
     consoleSendMessage();
-    xSemaphoreGive(synch);
+    osSemaphoreRelease(synch);
   }
 }
 

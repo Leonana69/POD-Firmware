@@ -62,7 +62,8 @@
 
 // ****** UART ******
 // #define uartMain        huart6
-#define uartDebug       huart3
+#define debugUart       huart3
+#define nrfUart         huart6
 
 // ****** TIM ******
 #define usecTim         htim7
@@ -70,6 +71,9 @@
 // ****** I2C ******
 #define eepromI2CHandle hi2c1
 #define sensorI2CHandle hi2c3
+
+// ****** DMA ******
+#define nrfUartTxDmaHandle hdma_usart6_tx
 /*
  * GPIO
  */
@@ -89,6 +93,7 @@
 #define BLUE_L_Pin        GPIO_PIN_2
 #define BLUE_L_GPIO_Port  GPIOD
 
+#define osDelayMax        0xFFFF
 
 /*
  * FreeRTOS

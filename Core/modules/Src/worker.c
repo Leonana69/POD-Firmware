@@ -43,7 +43,6 @@ struct worker_work {
   void* arg;
 };
 
-static xQueueHandle workerQueue;
 STATIC_MEM_QUEUE_ALLOC(workerQueue, WORKER_QUEUE_LENGTH, sizeof(struct worker_work));
 
 void workerInit() {

@@ -27,8 +27,10 @@
 
 /* FreeRtos includes */
 #include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
+#include "_usart.h"
+#include "_tim.h"
+#include "_gpio.h"
+#include "_i2c.h"
 
 // TODO: add IWDG
 // #include "iwdg.h"
@@ -53,10 +55,10 @@
 // #include "uart_syslink.h"
 // #include "uart1.h"
 // #include "uart2.h"
-// #include "comm.h"
+#include "comm.h"
 // #include "stabilizer.h"
 // #include "commander.h"
-// #include "console.h"
+#include "console.h"
 // #include "usblink.h"
 // #include "mem.h"
 // #include "proximity.h"
@@ -74,6 +76,8 @@
 // #include "i2cdev.h"
 #include "cfassert.h"
 
+#include <string.h>
+
 #ifndef START_DISARMED
 #define ARM_INIT true
 #else
@@ -86,7 +90,7 @@ static bool armed = ARM_INIT;
 static bool forceArm;
 static bool isInit;
 
-// static char nrf_version[16];
+static char nrf_version[16];
 
 STATIC_MEM_TASK_ALLOC(systemTask, SYSTEM_TASK_STACKSIZE);
 
@@ -98,6 +102,10 @@ static void systemTask(void *arg);
 
 /* Public functions */
 void systemLaunch(void) {
+  _GPIO_Init();
+  _UART_Init();
+  _TIM_Init();
+  _I2C_Init();
   STATIC_MEM_TASK_CREATE(systemTask, systemTask, SYSTEM_TASK_NAME, NULL, SYSTEM_TASK_PRI);
 }
 
@@ -107,17 +115,32 @@ void systemInit(void) {
     return;
 
   canStartMutex = STATIC_MUTEX_CREATE(canStartMutex);
-  xSemaphoreTake(canStartMutex, portMAX_DELAY);
+  osSemaphoreAcquire(canStartMutex, osDelayMax);
 
+  // move led and uart here to make the structure more clear
+  ledInit();
+  ledSet(CHG_LED, 1);
+#ifdef DEBUG_QUEUE_MONITOR
+  queueMonitorInit();
+#endif
+#ifdef ENABLE_UART1
+  uart1Init(9600);
+#endif
+#ifdef ENABLE_UART2
+  uart2Init(115200);
+#endif
   // usblinkInit();
   // sysLoadInit();
 
   /* Initialized here so that DEBUG_PRINT (buffered) can be used early */
   // I don't like the SEGGER debugger
   // debugInit();
-  crtpInit();
-  // consoleInit();
 
+  // move them to commInit, make it more clear
+  // crtpInit();
+  // consoleInit();
+  commInit();
+  
   DEBUG_PRINT("----------------------------\n");
   // DEBUG_PRINT("%s is up and running!\n", platformConfigGetDeviceTypeName());
   // guojun: UART debug
@@ -131,8 +154,9 @@ void systemInit(void) {
   DEBUG_PRINT("I am 0x%08X%08X%08X and I have %dKB of flash!\n",
               *((int*)(MCU_ID_ADDRESS + 8)), *((int*)(MCU_ID_ADDRESS + 4)),
               *((int*)(MCU_ID_ADDRESS + 0)), *((short*)(MCU_FLASH_SIZE_ADDRESS)));
-
+  DEBUG_PRINT_CONSOLE("Console\n");
   configblockInit();
+  
   // storageInit();
   workerInit();
   // adcInit();
@@ -163,21 +187,6 @@ bool systemTest() {
 
 void systemTask(void *arg) {
   bool pass = true;
-
-  ledInit();
-  ledSet(CHG_LED, 1);
-
-#ifdef DEBUG_QUEUE_MONITOR
-  queueMonitorInit();
-#endif
-
-#ifdef ENABLE_UART1
-  uart1Init(9600);
-#endif
-
-#ifdef ENABLE_UART2
-  uart2Init(115200);
-#endif
   // TODO: check if this is essential
   usecTimerInit();
 
@@ -187,7 +196,7 @@ void systemTask(void *arg) {
 
   // // Init the high-levels modules
   systemInit();
-  // commInit();
+  // 
   // commanderInit();
 
   // StateEstimatorType estimator = anyEstimator;
@@ -297,14 +306,13 @@ void systemTask(void *arg) {
   // Should never reach this point!
   DEBUG_PRINT("RUN INTO WRONG POINT!\n");
   while(1)
-    vTaskDelay(portMAX_DELAY);
+    osDelay(portMAX_DELAY);
 }
 
 
 /* Global system variables */
 void systemStart() {
-  DEBUG_PRINT("SYSTEM START\n ");
-  xSemaphoreGive(canStartMutex);
+  osMutexRelease(canStartMutex);
 #ifndef DEBUG
   // TODO: init IWDG
   // watchdogInit();
@@ -317,8 +325,8 @@ void systemWaitStart(void) {
   while (!isInit)
     vTaskDelay(2);
 
-  xSemaphoreTake(canStartMutex, portMAX_DELAY);
-  xSemaphoreGive(canStartMutex);
+  osMutexAcquire(canStartMutex, portMAX_DELAY);
+  osMutexRelease(canStartMutex);
 }
 
 void systemSetArmed(bool val) {
@@ -345,19 +353,17 @@ bool systemIsArmed() {
 //   syslinkSendPacket(&slp);
 // }
 
-// void systemSyslinkReceive(SyslinkPacket *slp)
-// {
-//   if (slp->type == SYSLINK_SYS_NRF_VERSION)
-//   {
-//     size_t len = slp->length - 2;
+void systemSyslinkReceive(SyslinkPacket *slp) {
+  if (slp->type == SYSLINK_SYS_NRF_VERSION) {
+    size_t len = slp->length - 2;
 
-//     if (sizeof(nrf_version) - 1 <=  len) {
-//       len = sizeof(nrf_version) - 1;
-//     }
-//     memcpy(&nrf_version, &slp->data[0], len);
-//     DEBUG_PRINT("NRF51 version: %s\n", nrf_version);
-//   }
-// }
+    if (sizeof(nrf_version) - 1 <=  len) {
+      len = sizeof(nrf_version) - 1;
+    }
+    memcpy(&nrf_version, &slp->data[0], len);
+    DEBUG_PRINT("NRF51 version: %s\n", nrf_version);
+  }
+}
 
 /*
  * This function must be defined if set configUSE_IDLE_HOOK = 1

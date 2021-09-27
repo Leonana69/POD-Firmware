@@ -116,7 +116,7 @@ int crtpReceivePacket(CRTPPort portId, CRTPPacket *p) {
 int crtpReceivePacketBlock(CRTPPort portId, CRTPPacket *p) {
   ASSERT(queues[portId]);
   ASSERT(p);
-  return osMessageQueueGet(queues[portId], p, 0, portMAX_DELAY);
+  return osMessageQueueGet(queues[portId], p, 0, osDelayMax);
 }
 
 int crtpReceivePacketWait(CRTPPort portId, CRTPPacket *p, int wait) {
@@ -126,7 +126,8 @@ int crtpReceivePacketWait(CRTPPort portId, CRTPPacket *p, int wait) {
 }
 
 int crtpGetFreeTxQueuePackets(void) {
-  return (CRTP_TX_QUEUE_SIZE - osMessageQueueGetCount(txQueue));
+  // return (CRTP_TX_QUEUE_SIZE - osMessageQueueGetCount(txQueue));
+  return osMessageQueueGetSpace(txQueue);
 }
 
 void crtpTxTask(void *param) {
@@ -134,7 +135,7 @@ void crtpTxTask(void *param) {
 
   while (1) {
     if (link != &nopLink) {
-      if (osMessageQueueGet(txQueue, &p, 0, portMAX_DELAY) == pdTRUE) {
+      if (osMessageQueueGet(txQueue, &p, 0, osDelayMax) == osOK) {
         // Keep testing, if the link changes to USB it will go though
         while (link->sendPacket(&p) == false) {
           // Relaxation time
@@ -144,10 +145,8 @@ void crtpTxTask(void *param) {
         stats.txCount++;
         updateStats();
       }
-    } else {
+    } else
       osDelay(10);
-			// vTaskDelay(M2T(10));
-    }
   }
 }
 
@@ -159,20 +158,17 @@ void crtpRxTask(void *param) {
       if (!link->receivePacket(&p)) {
         if (queues[p.port]) {
           // Block, since we should never drop a packet
-          osMessageQueuePut(queues[p.port], &p, 0, portMAX_DELAY);
+          osMessageQueuePut(queues[p.port], &p, 0, osDelayMax);
         }
 
-        if (callbacks[p.port]) {
+        if (callbacks[p.port])
           callbacks[p.port](&p);
-        }
 
         stats.rxCount++;
         updateStats();
       }
-    } else {
+    } else
 			osDelay(10);
-      // vTaskDelay(M2T(10));
-    }
   }
 }
 
@@ -194,7 +190,7 @@ int crtpSendPacketBlock(CRTPPacket *p) {
   ASSERT(p);
   ASSERT(p->size <= CRTP_MAX_DATA_SIZE);
 
-  return osMessageQueuePut(txQueue, p, 0, portMAX_DELAY);
+  return osMessageQueuePut(txQueue, p, 0, osDelayMax);
 }
 
 int crtpReset(void) {

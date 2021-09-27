@@ -34,6 +34,17 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
         - Data Width: Byte, Byte
     - Enable I2C1 event interrupt: 7
     - Enable I2C1 error interrupt: 7
+
+5. Enable USART6
+    - Baud Rate: 1000000
+    - Enable TX DMA: DMA2 Stream 7
+    - Pull up GPIOs
+
+6. Enable PA4 (GPIO_EXTI4)
+    - GPIO Mode: External Interrupt Mode with Rising/Falling edge trigger detection
+    - GPIO Pull-up/Pull-down: Pull-up
+    - NVIC: Enable EXTI line4 interrupt: 5, 0
+
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld

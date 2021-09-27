@@ -93,7 +93,7 @@ int configblockInit(void) {
       // Verify the config block
       if (configblock.magic == MAGIC && configblock.version == VERSION &&
           configblockCheckChecksum(&configblock)) {
-        DEBUG_PRINT("v%d, verification [OK]\n", configblock.version);
+        DEBUG_PRINT("EEPROM: v%d, verification [OK]\n", configblock.version);
         cb_ok = true;
       } else
         DEBUG_PRINT("Verification [FAIL]: %lx %d\n", configblock.magic, configblock.version);
