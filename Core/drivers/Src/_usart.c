@@ -10,6 +10,8 @@
 #include "debug.h"
 #include "queue.h"
 
+#include "led.h"
+
 STATIC_MEM_SEMAPHORE_ALLOC(nrfUartWaitS);
 STATIC_MEM_SEMAPHORE_ALLOC(nrfUartBusyS);
 STATIC_MEM_QUEUE_ALLOC(syslinkPacketDelivery, 8, sizeof(SyslinkPacket));
@@ -105,7 +107,7 @@ int nrfUartPutchar(int ch) {
 // }
 
 void nrfUartSendDataDmaBlocking(uint32_t size, uint8_t *data) {
-	DEBUG_PRINT("dma\n");
+	DEBUG_PRINT_UART("dma\n");
 	osSemaphoreAcquire(nrfUartBusyS, osDelayMax);
 
 	// while (DMA_GetCmdStatus() != 0);
@@ -198,7 +200,7 @@ void nrfUartHandleDataFromIsr(uint8_t c) {
 					osMessageQueuePut(syslinkPacketDelivery, (void *)&slp, 0, 0);
 					// xQueueSendFromISR(syslinkPacketDelivery, (void *)&slp, pxHigherPriorityTaskWoken);
 					if (slp.type != 4)
-					DEBUG_PRINT("#s:%d,%d,%sn", slp.type, slp.length, slp.data);
+					DEBUG_PRINT_UART("send: %d, %d, %s\n", slp.type, slp.length, slp.data);
 				} else {
 						ASSERT(0); // Queue overflow
 				}
@@ -221,7 +223,8 @@ void nrfUartHandleDataFromIsr(uint8_t c) {
 }
 
 void nrfUartIsr() {
-	if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_RXNE)) {
+	// if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_RXNE)) {
+	if ((nrfUart.Instance->SR & (1<<5)) != 0) {
 		uint8_t rxDataInterrupt = (uint8_t)(huart6.Instance->DR & 0xFF);
 		nrfUartHandleDataFromIsr(rxDataInterrupt);
 	}

@@ -182,7 +182,7 @@ void EXTI4_IRQHandler(void)
   /* USER CODE END EXTI4_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
   /* USER CODE BEGIN EXTI4_IRQn 1 */
-  nrfUartTxenIsr();
+  // nrfUartTxenIsr();
   /* USER CODE END EXTI4_IRQn 1 */
 }
 
@@ -318,7 +318,6 @@ void DMA2_Stream7_IRQHandler(void)
 void USART6_IRQHandler(void)
 {
   /* USER CODE BEGIN USART6_IRQn 0 */
-
   nrfUartIsr();
   // return;
   /* USER CODE END USART6_IRQn 0 */

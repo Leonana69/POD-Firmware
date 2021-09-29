@@ -164,9 +164,9 @@ void StartDefaultTask(void *argument)
     // osMessageQueueGet(syslinkPacketDelivery, &x, 0, 0);
     // DEBUG_PRINT("space after: %d, data: %d\n", osMessageQueueGetSpace(syslinkPacketDelivery), x);
     
-    // ledSetAll();
-    // osDelay(1000);
-    // ledClearAll();
+    ledSet(1, 1);
+    osDelay(1000);
+    ledSet(1, 0);
     osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */

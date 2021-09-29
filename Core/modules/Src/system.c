@@ -273,7 +273,7 @@ void systemTask(void *arg) {
 
   /* Start the firmware */
   if (pass) {
-    DEBUG_PRINT("Self test passed!\n");
+    DEBUG_PRINT_UART("Self test passed!\n");
     selftestPassed = 1;
     systemStart();
     // TODO: add sound and ledseq

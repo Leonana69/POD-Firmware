@@ -91,10 +91,12 @@ void radiolinkInit(void) {
   ASSERT(crtpPacketDelivery);
   syslinkInit();
 
+  ledSet(0, 1);
   radiolinkSetChannel(configblockGetRadioChannel());
+  osDelay(2); // there shuold be an interval, otherwise it won't get the response from nrf
   radiolinkSetDatarate(configblockGetRadioSpeed());
+  osDelay(2);
   radiolinkSetAddress(configblockGetRadioAddress());
-	
   isInit = true;
 }
 
@@ -140,7 +142,7 @@ void radiolinkSetPowerDbm(int8_t powerDbm) {
 
 void radiolinkSyslinkDispatch(SyslinkPacket *slp) {
   if (slp->type != 4)
-  DEBUG_PRINT("d: %d\n", slp->type);
+  DEBUG_PRINT_UART("d: %d\n", slp->type);
   static SyslinkPacket txPacket;
 
   if (slp->type == SYSLINK_RADIO_RAW || slp->type == SYSLINK_RADIO_RAW_BROADCAST) {

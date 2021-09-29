@@ -47,6 +47,7 @@
 
 #include "cmsis_os2.h"
 #include "_usart.h"
+#include "led.h"
 
 #ifdef UART2_LINK_COMM
 #include "uart2.h"
@@ -66,7 +67,6 @@ static void syslinkTask(void *param) {
   SyslinkPacket slp;
 
   while (1) {
-    DEBUG_PRINT("r\n");
     nrfUartGetPacketBlocking(&slp);
     syslinkRouteIncommingPacket(&slp);
   }
@@ -87,7 +87,6 @@ static void uart2Task(void *param) {
 #endif
 
 static void syslinkRouteIncommingPacket(SyslinkPacket *slp) {
-  DEBUG_PRINT("srip:%d\n", slp->type) ;
   uint8_t groupType;
   groupType = slp->type & SYSLINK_GROUP_MASK;
 
