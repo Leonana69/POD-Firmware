@@ -48,5 +48,5 @@ void ledSetAll(void);
 
 // Procedures to set the status of the LEDs
 void ledSet(led_t led, bool value);
-
+void ledToggle0();
 #endif

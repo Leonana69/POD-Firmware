@@ -84,3 +84,14 @@ void ledSet(led_t led, bool value) {
     return;
 	HAL_GPIO_WritePin(led_port[led], led_pin[led], value == led_polarity[led]);
 }
+
+void ledToggle0() {
+  static bool s;
+  if (s == 0) {
+    ledSet(0, 1);
+    s = 1;
+  } else {
+    ledSet(0, 0);
+    s = 0;
+  }
+}

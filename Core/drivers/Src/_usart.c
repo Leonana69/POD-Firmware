@@ -145,6 +145,7 @@ void nrfUartDmaIsr() {
 		callbackCnt = 0;
 	}
 }
+
 static volatile SyslinkPacket slp = { 0 };
 static volatile uint8_t dataIndex = 0;
 static volatile uint8_t cksum[2] = { 0 };
@@ -185,31 +186,17 @@ void nrfUartHandleDataFromIsr(uint8_t c) {
 		case waitForChksum1:
 			if (cksum[0] == c) {
 				rxState = waitForChksum2;
-			} else {
+			} else
 				rxState = waitForFirstStart; //Checksum error
-				// if(!(CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk)) {
-				// 	// Only assert if debugger is not connected
-				// 	ASSERT(0);
-				// }
-			}
 			break;
 		case waitForChksum2:
 			if (cksum[1] == c) {
 				// Post the packet to the queue if there's room
 				if (osMessageQueueGetSpace(syslinkPacketDelivery)) {
 					osMessageQueuePut(syslinkPacketDelivery, (void *)&slp, 0, 0);
-					// xQueueSendFromISR(syslinkPacketDelivery, (void *)&slp, pxHigherPriorityTaskWoken);
-					if (slp.type != 4)
-					DEBUG_PRINT_UART("send: %d, %d, %s\n", slp.type, slp.length, slp.data);
 				} else {
-						ASSERT(0); // Queue overflow
+					ASSERT(0); // Queue overflow
 				}
-				// else if (!(CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk)) {
-				// 	// Only assert if debugger is not connected
-				// 	DEBUG_PRINT("over\n");
-				// 	while(1);
-				// 	ASSERT(0); // Queue overflow
-				// }
 			} else {
 				rxState = waitForFirstStart; //Checksum error
 				ASSERT(0);
@@ -224,7 +211,7 @@ void nrfUartHandleDataFromIsr(uint8_t c) {
 
 void nrfUartIsr() {
 	// if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_RXNE)) {
-	if ((nrfUart.Instance->SR & (1<<5)) != 0) {
+	if ((nrfUart.Instance->SR & (1 << 5)) != 0) {
 		uint8_t rxDataInterrupt = (uint8_t)(huart6.Instance->DR & 0xFF);
 		nrfUartHandleDataFromIsr(rxDataInterrupt);
 	}
@@ -232,12 +219,12 @@ void nrfUartIsr() {
 		
 	// 	if (outDataIsr && (dataIndexIsr < dataSizeIsr)) {
 	// 		DEBUG_PRINT("tx\n");
-  //     HAL_UART_Transmit(&nrfUart, &outDataIsr[dataIndexIsr], 1, HAL_TIMEOUT);
-  //     dataIndexIsr++;
-  //   } else {
+  	//     HAL_UART_Transmit(&nrfUart, &outDataIsr[dataIndexIsr], 1, HAL_TIMEOUT);
+  	//     dataIndexIsr++;
+  	//   } else {
 
-  //     __HAL_UART_DISABLE_IT(&nrfUart, UART_IT_TXE);
-  //   	osSemaphoreRelease(nrfUartWaitS);
-  //   }
+  	//     __HAL_UART_DISABLE_IT(&nrfUart, UART_IT_TXE);
+  	//   	osSemaphoreRelease(nrfUartWaitS);
+  	//   }
 	// }
 }

@@ -115,7 +115,7 @@
  * @param NAME - the name of the queue handle
  */
 // FreeRTOS realization
-#define STATIC_MEM_QUEUE_CREATE_OLD(NAME) xQueueCreateStatic(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, osSys_ ## NAME ## Storage, &osSys_ ## NAME ## Mgm)
+// #define STATIC_MEM_QUEUE_CREATE_OLD(NAME) xQueueCreateStatic(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, osSys_ ## NAME ## Storage, &osSys_ ## NAME ## Mgm)
 
 // CMSIS RTOS realization
 osMessageQueueAttr_t* getOsMessageQueueAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* mq_mem, uint32_t mq_size);
@@ -228,3 +228,5 @@ osSemaphoreAttr_t* getOsSemaphoreAttr_t(char* name, void* cb_mem, uint32_t cb_si
   osSemaphoreNew(MAX, INIT, getOsSemaphoreAttr_t(#NAME, \
   & semaphore_ ## NAME ## _ControlBlock, \
   sizeof(semaphore_ ## NAME ## _ControlBlock)));
+
+

@@ -108,7 +108,7 @@ C_SOURCES += _gpio.c _usart.c _tim.c _i2c.c led.c eeprom.c syslink.c radiolink.c
 
 # modules
 VPATH += Core/modules/Src
-C_SOURCES += worker.c queuemonitor.c system.c mem.c crtp.c console.c comm.c
+C_SOURCES += worker.c queuemonitor.c system.c mem.c crtp.c console.c comm.c ledseq.c
 
 # FreeRTOS
 # VPATH += $(FREERTOS)

@@ -41,7 +41,7 @@
 #include "config.h"
 // #include "param.h"
 // #include "log.h"
-// #include "ledseq.h"
+#include "ledseq.h"
 // #include "pm.h"
 
 #include "system.h"
@@ -160,7 +160,7 @@ void systemInit(void) {
   // storageInit();
   workerInit();
   // adcInit();
-  // ledseqInit();
+  ledseqInit();
   // pmInit();
   // TODO: remove these unnessasory modules
   // buzzerInit();
@@ -278,8 +278,8 @@ void systemTask(void *arg) {
     systemStart();
     // TODO: add sound and ledseq
     // soundSetEffect(SND_STARTUP);
-    // ledseqRun(&seq_alive);
-    // ledseqRun(&seq_testPassed);
+    ledseqRun(&seq_alive);
+    ledseqRun(&seq_testPassed);
   } else {
     selftestPassed = 0;
     if (systemTest()) {
@@ -323,9 +323,9 @@ void systemWaitStart(void) {
   // This permits to guarantee that the system task is initialized before other
   // tasks waits for the start event.
   while (!isInit)
-    vTaskDelay(2);
+    osDelay(2);
 
-  osMutexAcquire(canStartMutex, portMAX_DELAY);
+  osMutexAcquire(canStartMutex, osWaitForever);
   osMutexRelease(canStartMutex);
 }
 

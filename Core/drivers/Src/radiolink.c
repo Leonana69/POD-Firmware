@@ -91,9 +91,8 @@ void radiolinkInit(void) {
   ASSERT(crtpPacketDelivery);
   syslinkInit();
 
-  ledSet(0, 1);
   radiolinkSetChannel(configblockGetRadioChannel());
-  osDelay(2); // there shuold be an interval, otherwise it won't get the response from nrf
+  osDelay(3); // there shuold be an interval, otherwise it won't get the response from nrf
   radiolinkSetDatarate(configblockGetRadioSpeed());
   osDelay(2);
   radiolinkSetAddress(configblockGetRadioAddress());
