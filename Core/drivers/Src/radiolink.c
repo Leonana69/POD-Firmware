@@ -40,7 +40,7 @@
 #include "configblock.h"
 // #include "log.h"
 #include "led.h"
-// #include "ledseq.h"
+#include "ledseq.h"
 #include "queuemonitor.h"
 #include "static_mem.h"
 #include "cfassert.h"
@@ -140,24 +140,18 @@ void radiolinkSetPowerDbm(int8_t powerDbm) {
 }
 
 void radiolinkSyslinkDispatch(SyslinkPacket *slp) {
-  if (slp->type != 4)
-  DEBUG_PRINT_UART("d: %d\n", slp->type);
   static SyslinkPacket txPacket;
-
   if (slp->type == SYSLINK_RADIO_RAW || slp->type == SYSLINK_RADIO_RAW_BROADCAST) {
     lastPacketTick = osKernelGetTickCount();
   }
 
   if (slp->type == SYSLINK_RADIO_RAW) {
-    // DEBUG_PRINT("radio raw\n");
     slp->length--; // Decrease to get CRTP size.
     // Assert that we are not dopping any packets
     ASSERT(osMessageQueuePut(crtpPacketDelivery, &slp->length, 0, 0) == osOK);
-		// TODO: add led seq
-    // ledseqRun(&seq_linkUp);
+    ledseqRun(&seq_linkUp);
     // If a radio packet is received, one can be sent
     if (osMessageQueueGet(txQueue, &txPacket, 0, 0) == osOK) {
-			ledBlink(3);
       // ledseqRun(&seq_linkDown);
       syslinkSendPacket(&txPacket);
     }
@@ -165,13 +159,13 @@ void radiolinkSyslinkDispatch(SyslinkPacket *slp) {
     slp->length--; // Decrease to get CRTP size.
     // broadcasts are best effort, so no need to handle the case where the queue is full
     osMessageQueuePut(crtpPacketDelivery, &slp->length, 0, 0);
-    // ledseqRun(&seq_linkUp);
+    ledseqRun(&seq_linkUp);
     // no ack for broadcasts
   } else if (slp->type == SYSLINK_RADIO_RSSI) {
     //Extract RSSI sample sent from radio
     memcpy(&rssi, slp->data, sizeof(uint8_t)); //rssi will not change on disconnect
   } else if (slp->type == SYSLINK_RADIO_P2P_BROADCAST) {
-    // ledseqRun(&seq_linkUp);
+    ledseqRun(&seq_linkUp);
     P2PPacket p2pp;
     p2pp.port = slp->data[0];
     p2pp.rssi = slp->data[1];
@@ -202,9 +196,10 @@ static int radiolinkSendCRTPPacket(CRTPPacket *p) {
   slp.type = SYSLINK_RADIO_RAW;
   slp.length = p->size + 1;
   memcpy(slp.data, &p->header, p->size + 1);
-
-  if (osMessageQueuePut(txQueue, &slp, 0, 100) == osOK)
+  if (osMessageQueuePut(txQueue, &slp, 0, 100) == osOK) {
+    DEBUG_PRINT_UART("ok\n");
     return 1;
+  }
   return 0;
 }
 

@@ -182,6 +182,7 @@ void EXTI4_IRQHandler(void)
   /* USER CODE END EXTI4_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
   /* USER CODE BEGIN EXTI4_IRQn 1 */
+  // TODO: figure out this
   // nrfUartTxenIsr();
   /* USER CODE END EXTI4_IRQn 1 */
 }
@@ -319,12 +320,10 @@ void USART6_IRQHandler(void)
 {
   /* USER CODE BEGIN USART6_IRQn 0 */
   nrfUartIsr();
-  // return;
   /* USER CODE END USART6_IRQn 0 */
   HAL_UART_IRQHandler(&huart6);
   /* USER CODE BEGIN USART6_IRQn 1 */
-  // need to enable rxne it
-  __HAL_UART_ENABLE_IT(&huart6, UART_IT_RXNE);
+  
   /* USER CODE END USART6_IRQn 1 */
 }
 

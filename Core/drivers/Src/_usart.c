@@ -64,60 +64,8 @@ int nrfUartPutchar(int ch) {
 	return (unsigned char)ch;
 }
 
-// int DMA_GetCmdStatus() {
-// 	if ((nrfUartTxDmaHandle.Instance->CR & (uint32_t)DMA_SxCR_EN) != 0)
-//   {
-//     /* The selected DMAy Streamx EN bit is set (DMA is still transferring) */
-//     return 1;
-//   }
-//   else
-//   {
-//     /* The selected DMAy Streamx EN bit is cleared (DMA is disabled and 
-//         all transfers are complete) */
-//     return 0;
-//   }
-// }
-
-// void DMA_SetConfig(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t DataLength)
-// {
-//   /* Clear DBM bit */
-//   hdma->Instance->CR &= (uint32_t)(~DMA_SxCR_DBM);
-
-//   /* Configure DMA Stream data length */
-//   hdma->Instance->NDTR = DataLength;
-
-//   /* Memory to Peripheral */
-//   if((hdma->Init.Direction) == DMA_MEMORY_TO_PERIPH)
-//   {
-//     /* Configure DMA Stream destination address */
-//     hdma->Instance->PAR = DstAddress;
-
-//     /* Configure DMA Stream source address */
-//     hdma->Instance->M0AR = SrcAddress;
-//   }
-//   /* Peripheral to Memory */
-//   else
-//   {
-//     /* Configure DMA Stream source address */
-//     hdma->Instance->PAR = SrcAddress;
-
-//     /* Configure DMA Stream destination address */
-//     hdma->Instance->M0AR = DstAddress;
-//   }
-// }
-
 void nrfUartSendDataDmaBlocking(uint32_t size, uint8_t *data) {
-	DEBUG_PRINT_UART("dma\n");
 	osSemaphoreAcquire(nrfUartBusyS, osDelayMax);
-
-	// while (DMA_GetCmdStatus() != 0);
-	// memcpy(nrfUartTxDmaBuffer, data, size);
-	// DMA_SetConfig(&hdma_usart6_tx, nrfUartTxDmaBuffer, &huart6.Instance->DR, size);
-	// __HAL_DMA_ENABLE_IT(&hdma_usart6_tx, DMA_IT_TC);
-	// huart6.Instance->CR3 |= ((uint16_t)0x0080);
-	// __HAL_DMA_CLEAR_FLAG(&hdma_usart6_tx, UART_FLAG_TC);
-	// hdma_usart6_tx.Instance->CR |= ((uint32_t)0x00000001);
-
 	while(HAL_DMA_GetState(&nrfUartTxDmaHandle) != HAL_DMA_STATE_READY);
 	memcpy(nrfUartTxDmaBuffer, data, size);
 	HAL_UART_Transmit_DMA(&nrfUart, nrfUartTxDmaBuffer, size);
@@ -210,11 +158,14 @@ void nrfUartHandleDataFromIsr(uint8_t c) {
 }
 
 void nrfUartIsr() {
-	// if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_RXNE)) {
-	if ((nrfUart.Instance->SR & (1 << 5)) != 0) {
-		uint8_t rxDataInterrupt = (uint8_t)(huart6.Instance->DR & 0xFF);
-		nrfUartHandleDataFromIsr(rxDataInterrupt);
-	}
+	if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_RXNE) != 0)
+		nrfUartHandleDataFromIsr(__HAL_UART_FLUSH_DRREGISTER(&nrfUart));
+	__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_RXNE);
+
+	// if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_RXNE) != 0) {
+		// uint8_t rxDataInterrupt = (uint8_t)(huart6.Instance->DR & 0xFF);
+	// 	nrfUartHandleDataFromIsr(rxDataInterrupt);
+	// }
 	// else if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_TXE)) {
 		
 	// 	if (outDataIsr && (dataIndexIsr < dataSizeIsr)) {
