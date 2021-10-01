@@ -12,19 +12,16 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
     - Tigger Event Selection: Reset
     - Enable NVIC with Preemption Pri = 4
 
-2. NVIC Code generation
-    - Disable IRQ handler generation for System service call via SWI instruction
-    - Disable IRQ handler generation for Pendable request for system service
+2. NVIC
+    - DMA
 
-3. Enable IWDG
-    - IWDG counter clock prescaler: 32
-    - IWDG down-counter reload value: 188
+3. SYS
+    - Timebase Source: TIM6
 
 3. Enable FreeRTOS
     - CMSIS V2
-    - 
 
-4. Enable I2C1
+4. Enable I2C1 and I2C3
     - I2C Speed Mode: Fast Mode
     - I2C Clock Speed: 400000
     - Fast Mode Duty Cycle: 2
@@ -37,13 +34,26 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
 
 5. Enable USART6
     - Baud Rate: 1000000
+    - Word Length: 8 Bits
+    - Parity: None
+    - Stop Bits: 1
+    - Data Direction: Receive and Transmit
+    - Over Sampling: 16 Samples
     - Enable TX DMA: DMA2 Stream 7
     - Pull up GPIOs
+    - Enable DMA2 strem7 global interrupt and USART6 global interrupt
 
 6. Enable PA4 (GPIO_EXTI4)
     - GPIO Mode: External Interrupt Mode with Rising/Falling edge trigger detection
     - GPIO Pull-up/Pull-down: Pull-up
     - NVIC: Enable EXTI line4 interrupt: 5, 0
+
+7. Enable GPIO PD2, PC0, PC1, PC2, PC3
+
+
+    <!-- Enable IWDG -->
+    <!-- - IWDG counter clock prescaler: 32 -->
+    <!-- - IWDG down-counter reload value: 188 -->
 
 ## Modifications to Auto-generated Files
 

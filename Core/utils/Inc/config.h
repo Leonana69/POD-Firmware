@@ -28,7 +28,7 @@
 #define __CONFIG_H__
 
 #include "usec_timer.h"
-
+#define PROTOCOL_VERSION 4
 #ifdef STM32F4XX
   #define QUAD_FORMATION_X
 

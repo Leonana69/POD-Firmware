@@ -38,7 +38,7 @@
 #include "syslink.h"
 #include "crtp.h"
 #include "configblock.h"
-// #include "log.h"
+#include "log.h"
 #include "led.h"
 #include "ledseq.h"
 #include "queuemonitor.h"
@@ -196,10 +196,9 @@ static int radiolinkSendCRTPPacket(CRTPPacket *p) {
   slp.type = SYSLINK_RADIO_RAW;
   slp.length = p->size + 1;
   memcpy(slp.data, &p->header, p->size + 1);
-  if (osMessageQueuePut(txQueue, &slp, 0, 100) == osOK) {
-    DEBUG_PRINT_UART("ok\n");
+  if (osMessageQueuePut(txQueue, &slp, 0, 100) == osOK)
     return 1;
-  }
+
   return 0;
 }
 
@@ -227,7 +226,7 @@ static int radiolinkSetEnable(bool enable) {
   return 0;
 }
 // TODO: add log
-// LOG_GROUP_START(radio)
-// LOG_ADD_CORE(LOG_UINT8, rssi, &rssi)
-// LOG_ADD_CORE(LOG_UINT8, isConnected, &isConnected)
-// LOG_GROUP_STOP(radio)
+LOG_GROUP_START(radio)
+LOG_ADD_CORE(LOG_UINT8, rssi, &rssi)
+LOG_ADD_CORE(LOG_UINT8, isConnected, &isConnected)
+LOG_GROUP_STOP(radio)

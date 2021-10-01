@@ -1,4 +1,4 @@
-/*
+/**
  *    ||          ____  _ __                           
  * +------+      / __ )(_) /_______________ _____  ___ 
  * | 0xBC |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
@@ -21,58 +21,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
- * comm.c - High level communication module
+ * crtplink.h - Used to send/receive crtp link packats
  */
 
-#include "config.h"
+#ifndef __CRTPLINK_H__
+#define __CRTPLINK_H__
 
-#include "crtp.h"
-#include "console.h"
-#include "crtp_link.h"
-#include "crtp_platform.h"
-// #include "param.h"
-#include "log.h"
-#include "_usart.h"
-#include "radiolink.h"
+#include <stdbool.h>
 
-#include "syslink.h"
-// #include "crtp_localization_service.h"
+/**
+ * Initialize the link task
+ */
+void crtpLinkInit(void);
+bool crtpLinkTest(void);
 
-#include "debug.h"
-
-static bool isInit;
-
-void commInit(void) {
-  if (isInit)
-    return;
-
-	crtpInit();
-  consoleInit();
-  radiolinkInit();
-
-  // TODO: add choice between usb and radio
-  crtpSetLink(radiolinkGetLink());
-
-  crtpLinkInit();
-  crtpPlatformInit();
-  logInit();
-  // paramInit();
-
-  // locSrvInit();
-  
-  isInit = true;
-}
-
-bool commTest(void) {
-  bool pass = isInit;
-  
-  pass &= crtpTest();
-  pass &= consoleTest();
-  pass &= radiolinkTest();
-  pass &= crtpLinkTest();
-  pass &= logTest();
-  // pass &= platformserviceTest();
-  // pass &= paramTest();
-  return pass;
-}
-
+#endif /* __CRTPLINK_H__ */

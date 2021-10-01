@@ -8,7 +8,7 @@
 
 #include "queuemonitor.h"
 #include "debug.h"
-#include "queue.h"
+#include "crtp.h"
 
 #include "led.h"
 
@@ -49,8 +49,8 @@ static uint8_t dataSizeIsr;
 void nrfUartSendDataIsrBlocking(uint32_t size, uint8_t *data) {
 	osSemaphoreAcquire(nrfUartBusyS, osDelayMax);
 	outDataIsr = data;
-  dataSizeIsr = size;
-  dataIndexIsr = 1;
+	dataSizeIsr = size;
+	dataIndexIsr = 1;
 	nrfUartSendData(1, &data[0]);
 	__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_TXE);
 	// USART_ITConfig(UARTSLK_TYPE, USART_IT_TXE, ENABLE);
@@ -64,7 +64,7 @@ int nrfUartPutchar(int ch) {
 	return (unsigned char)ch;
 }
 
-void nrfUartSendDataDmaBlocking(uint32_t size, uint8_t *data) {
+void nrfUartSendDataDmaBlocking(uint32_t size, uint8_t *data) {      
 	osSemaphoreAcquire(nrfUartBusyS, osDelayMax);
 	while(HAL_DMA_GetState(&nrfUartTxDmaHandle) != HAL_DMA_STATE_READY);
 	memcpy(nrfUartTxDmaBuffer, data, size);

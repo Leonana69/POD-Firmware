@@ -119,7 +119,8 @@ void systemInit(void) {
 
   // move led and uart here to make the structure more clear
   ledInit();
-  ledSet(CHG_LED, 1);
+  // TODO: 1
+  ledSet(CHG_LED, 0);
 #ifdef DEBUG_QUEUE_MONITOR
   queueMonitorInit();
 #endif
@@ -142,6 +143,7 @@ void systemInit(void) {
   commInit();
   
   DEBUG_PRINT("----------------------------\n");
+  DEBUG_PRINT_CONSOLE("Console Init.\n");
   // DEBUG_PRINT("%s is up and running!\n", platformConfigGetDeviceTypeName());
   // guojun: UART debug
   
@@ -154,7 +156,6 @@ void systemInit(void) {
   DEBUG_PRINT("I am 0x%08X%08X%08X and I have %dKB of flash!\n",
               *((int*)(MCU_ID_ADDRESS + 8)), *((int*)(MCU_ID_ADDRESS + 4)),
               *((int*)(MCU_ID_ADDRESS + 0)), *((short*)(MCU_FLASH_SIZE_ADDRESS)));
-  DEBUG_PRINT_CONSOLE("Console\n");
   configblockInit();
   
   // storageInit();

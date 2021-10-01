@@ -162,7 +162,6 @@ typedef struct {
 #define LOG_STOP  0
 
 /* Macros */
-
 #ifndef UNIT_TEST_MODE
 
 #define LOG_ADD(TYPE, NAME, ADDRESS) \
@@ -199,12 +198,5 @@ typedef struct {
 #define LOG_GROUP_STOP(NAME)
 
 #endif // UNIT_TEST_MODE
-
-/** @brief Core log variables
- *
- * The core log variables are considered part of the official API and are guaranteed
- * to be stable over time.
- *
- * @defgroup LOG_CORE_GROUP */
 
 #endif /* __LOG_H__ */

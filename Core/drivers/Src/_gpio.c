@@ -1,6 +1,7 @@
 #include "_gpio.h"
 #include "config.h"
 
+// TODO: remove this
 void HAL_RCC_GPIO_CLK_ENABLE(GPIO_TypeDef *PORT) {
     if (PORT == GPIOA)
         __HAL_RCC_GPIOA_CLK_ENABLE ();

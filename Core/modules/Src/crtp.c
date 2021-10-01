@@ -110,23 +110,22 @@ void crtpInitTaskQueue(CRTPPort portId) {
 int crtpReceivePacket(CRTPPort portId, CRTPPacket *p) {
   ASSERT(queues[portId]);
   ASSERT(p);
-  return osMessageQueueGet(queues[portId], p, 0, 0);
+  return osMessageQueueGet(queues[portId], p, NULL, 0);
 }
 
 int crtpReceivePacketBlock(CRTPPort portId, CRTPPacket *p) {
   ASSERT(queues[portId]);
   ASSERT(p);
-  return osMessageQueueGet(queues[portId], p, 0, osWaitForever);
+  return osMessageQueueGet(queues[portId], p, NULL, osWaitForever);
 }
 
 int crtpReceivePacketWait(CRTPPort portId, CRTPPacket *p, int wait) {
   ASSERT(queues[portId]);
   ASSERT(p);
-  return osMessageQueueGet(queues[portId], p, 0, wait);
+  return osMessageQueueGet(queues[portId], p, NULL, wait);
 }
 
 int crtpGetFreeTxQueuePackets(void) {
-  // return (CRTP_TX_QUEUE_SIZE - osMessageQueueGetCount(txQueue));
   return osMessageQueueGetSpace(txQueue);
 }
 
@@ -136,6 +135,7 @@ void crtpTxTask(void *param) {
   while (1) {
     if (link != &nopLink) {
       if (osMessageQueueGet(txQueue, &p, 0, osWaitForever) == osOK) {
+        // DEBUG_PRINT_UART("\t&tx:%d,%d,%d\n", p.port, p.size, p.channel);
         // Keep testing, if the link changes to USB it will go though
         while (link->sendPacket(&p) == false) {
           // Relaxation time
@@ -156,6 +156,8 @@ void crtpRxTask(void *param) {
     if (link != &nopLink) {
       if (!link->receivePacket(&p)) {
         if (queues[p.port]) {
+          // DEBUG_PRINT_UART("#rx:%d,%d,%d\n", p.port, p.size, p.channel);
+
           // Block, since we should never drop a packet
           osMessageQueuePut(queues[p.port], &p, 0, osWaitForever);
         }

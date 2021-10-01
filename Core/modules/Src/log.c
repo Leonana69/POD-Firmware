@@ -29,15 +29,8 @@
 
 #include <string.h>
 #include <errno.h>
-#include <stdint.h>
-#include <stdbool.h>
 
-/* FreeRtos includes */
-#include "FreeRTOS.h"
-#include "task.h"
-#include "timers.h"
-#include "semphr.h"
-
+#include "cmsis_os2.h"
 #include "config.h"
 #include "crtp.h"
 #include "log.h"
@@ -49,14 +42,9 @@
 #include "debug.h"
 #include "static_mem.h"
 
-#if 0
 #define LOG_DEBUG(fmt, ...) DEBUG_PRINT("D/log " fmt, ## __VA_ARGS__)
 #define LOG_ERROR(fmt, ...) DEBUG_PRINT("E/log " fmt, ## __VA_ARGS__)
-#else
-#define LOG_DEBUG(...)
-#define LOG_ERROR(...)
-#endif
-
+#define LOG_TYPE_MASK (0x0f)
 
 static const uint8_t typeLength[] = {
   [LOG_UINT8]  = 1,
@@ -69,15 +57,13 @@ static const uint8_t typeLength[] = {
   [LOG_FP16]   = 2,
 };
 
-#define LOG_TYPE_MASK (0x0f)
-
 typedef enum {
   acqType_memory = 0,
   acqType_function = 1,
 } acquisitionType_t;
 
 // Maximum log payload length (4 bytes are used for block id and timestamp)
-#define LOG_MAX_LEN 26
+#define LOG_MAX_LEN (CRTP_MAX_DATA_SIZE - 4)
 
 /* Log packet parameters storage */
 #define LOG_MAX_OPS 128
@@ -92,7 +78,7 @@ struct log_ops {
 
 struct log_block {
   int id;
-  xTimerHandle timer;
+  osTimerId_t timer;
   StaticTimer_t timerBuffer;
   uint32_t droppedPackets;
   struct log_ops *ops;
@@ -142,7 +128,7 @@ static void logTOCProcess(int command);
 static void logControlProcess(void);
 
 void logRunBlock(void * arg);
-void logBlockTimed(xTimerHandle timer);
+void logBlockTimed(void *param);
 
 //These are set by the Linker
 extern struct log_s _log_start;
@@ -196,7 +182,7 @@ void logInit(void) {
     } else {
       // CMD_GET_ITEM_V2 result's size is: 3 + strlen(logs[i].name) + groupNameLen + 2
       if (strlen(logs[i].name) + groupNameLen + 2 > LOG_MAX_LEN) {
-        LOG_ERROR("'%s.%s' name is too long\n", group, logs[i].name);
+        LOG_ERROR("'%s.%s' name is too long.\n", groupName, logs[i].name);
         ASSERT_FAILED();
       }
     }
@@ -216,7 +202,7 @@ void logInit(void) {
       logsCount++;
   }
 
-  //Manually free all log blocks
+  // Manually free all log blocks
   for (int i = 0; i < LOG_MAX_BLOCKS; i++)
     logBlocks[i].id = BLOCK_ID_FREE;
 
@@ -225,7 +211,7 @@ void logInit(void) {
 
   //Start the log task
   STATIC_MEM_TASK_CREATE(logTask, logTask, LOG_TASK_NAME, NULL, LOG_TASK_PRI);
-
+  DEBUG_PRINT_UART("log init\n");
   isInit = true;
 }
 
@@ -236,15 +222,15 @@ bool logTest(void) {
 void logTask(void * prm) {
 	crtpInitTaskQueue(CRTP_PORT_LOG);
 
-	while(1) {
+	while (1) {
 		crtpReceivePacketBlock(CRTP_PORT_LOG, &p);
-
-		xSemaphoreTake(logLock, portMAX_DELAY);
+    DEBUG_PRINT_UART("r:%d, %d\n", p.channel, p.data[0]);
+		osMutexAcquire(logLock, osWaitForever);
 		if (p.channel == TOC_CH)
 		  logTOCProcess(p.data[0]);
 		if (p.channel == CONTROL_CH)
 		  logControlProcess();
-		xSemaphoreGive(logLock);
+		osMutexRelease(logLock);
 	}
 }
 
@@ -409,6 +395,7 @@ void logControlProcess() {
 
 static int logCreateBlock(unsigned char id, struct ops_setting * settings, int len) {
   int i;
+  
 
   for (i = 0; i < LOG_MAX_BLOCKS; i++)
     if (id == logBlocks[i].id) return EEXIST;
@@ -419,9 +406,16 @@ static int logCreateBlock(unsigned char id, struct ops_setting * settings, int l
   if (i == LOG_MAX_BLOCKS)
     return ENOMEM;
 
+  osTimerAttr_t timAttr = {
+    .name = "logTim",
+    .cb_mem = &logBlocks[i].timerBuffer,
+    .cb_size = sizeof(&logBlocks[i].timerBuffer),
+  };
+
   logBlocks[i].id = id;
-  logBlocks[i].timer = xTimerCreateStatic("logTimer", M2T(1000), pdTRUE,
-    &logBlocks[i], logBlockTimed, &logBlocks[i].timerBuffer);
+  logBlocks[i].timer = osTimerNew(logBlockTimed, osTimerPeriodic, &logBlocks[i].id, &timAttr);
+  // logBlocks[i].timer = xTimerCreateStatic("logTimer", M2T(1000), pdTRUE,
+  //   &logBlocks[i], logBlockTimed, &logBlocks[i].timerBuffer);
   logBlocks[i].ops = NULL;
 
   if (logBlocks[i].timer == NULL) {
@@ -444,10 +438,14 @@ static int logCreateBlockV2(unsigned char id, struct ops_setting_v2 * settings, 
 
   if (i == LOG_MAX_BLOCKS)
     return ENOMEM;
+  osTimerAttr_t timAttr = {
+    .name = "logTim",
+    .cb_mem = &logBlocks[i].timerBuffer,
+    .cb_size = sizeof(&logBlocks[i].timerBuffer),
+  };
 
   logBlocks[i].id = id;
-  logBlocks[i].timer = xTimerCreateStatic("logTimer", M2T(1000), pdTRUE,
-    &logBlocks[i], logBlockTimed, &logBlocks[i].timerBuffer);
+  logBlocks[i].timer = osTimerNew(logBlockTimed, osTimerPeriodic, &logBlocks[i].id, &timAttr);
   logBlocks[i].ops = NULL;
 
   if (logBlocks[i].timer == NULL) {
@@ -464,6 +462,7 @@ static int blockCalcLength(struct log_block * block);
 static struct log_ops * opsMalloc();
 static void opsFree(struct log_ops * ops);
 static void blockAppendOps(struct log_block * block, struct log_ops * ops);
+static int blockGetIndex(int id);
 static int variableGetIndex(int id);
 
 static int logAppendBlock(int id, struct ops_setting * settings, int len) {
@@ -619,8 +618,7 @@ static int logDeleteBlock(int id) {
   }
 
   if (logBlocks[i].timer != 0) {
-    xTimerStop(logBlocks[i].timer, portMAX_DELAY);
-    xTimerDelete(logBlocks[i].timer, portMAX_DELAY);
+    osTimerDelete(logBlocks[i].timer);
     logBlocks[i].timer = 0;
   }
 
@@ -642,8 +640,9 @@ static int logStartBlock(int id, unsigned int period) {
   LOG_DEBUG("Starting block %d with period %dms\n", id, period);
 
   if (period > 0) {
-    xTimerChangePeriod(logBlocks[i].timer, M2T(period), 100);
-    xTimerStart(logBlocks[i].timer, 100);
+    osTimerStart(logBlocks[i].timer, period);
+    // xTimerChangePeriod(logBlocks[i].timer, M2T(period), 100);
+    // xTimerStart(logBlocks[i].timer, 100);
   } else {
     // single-shoot run
     workerSchedule(logRunBlock, &logBlocks[i]);
@@ -663,14 +662,15 @@ static int logStopBlock(int id) {
     return ENOENT;
   }
 
-  xTimerStop(logBlocks[i].timer, portMAX_DELAY);
+  osTimerStop(logBlocks[i].timer);
 
   return 0;
 }
 
 /* This function is called by the timer subsystem */
-void logBlockTimed(xTimerHandle timer) {
-  workerSchedule(logRunBlock, pvTimerGetTimerID(timer));
+void logBlockTimed(void *param) {
+  int i = blockGetIndex(*(int *)param);
+  workerSchedule(logRunBlock, &i);
 }
 
 /* Appends data to a packet if space is available; returns false on failure. */
@@ -684,22 +684,22 @@ static bool appendToPacket(CRTPPacket * pk, const void * data, size_t n) {
 }
 
 /* This function is usually called by the worker subsystem */
-void logRunBlock(void * arg) {
-  struct log_block *blk = arg;
+void logRunBlock(void *arg) {
+  struct log_block *blk = &logBlocks[*(int *)arg];
   struct log_ops *ops = blk->ops;
   static CRTPPacket pk;
   unsigned int timestamp;
 
-  xSemaphoreTake(logLock, portMAX_DELAY);
+  osMutexAcquire(logLock, osWaitForever);
 
-  timestamp = ((long long)xTaskGetTickCount()) / portTICK_RATE_MS;
+  timestamp = osKernelGetTickCount() / osKernelGetSysTimerFreq();
 
   pk.header = CRTP_HEADER(CRTP_PORT_LOG, LOG_CH);
   pk.size = 4;
   pk.data[0] = blk->id;
-  pk.data[1] = timestamp&0x0ff;
-  pk.data[2] = (timestamp>>8)&0x0ff;
-  pk.data[3] = (timestamp>>16)&0x0ff;
+  pk.data[1] = timestamp & 0x0ff;
+  pk.data[2] = (timestamp >> 8) & 0x0ff;
+  pk.data[3] = (timestamp >> 16) & 0x0ff;
 
   while (ops) {
     int valuei = 0;
@@ -708,7 +708,7 @@ void logRunBlock(void * arg) {
     // FPU instructions must run on aligned data.
     // We first copy the data to an (aligned) local variable, before assigning it
     switch(ops->storageType) {
-      case LOG_UINT8:
+      case LOG_UINT8: {
         uint8_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
@@ -718,7 +718,8 @@ void logRunBlock(void * arg) {
         }
         valuei = v;
         break;
-      case LOG_INT8:
+      }
+      case LOG_INT8: {
         int8_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
@@ -728,7 +729,8 @@ void logRunBlock(void * arg) {
         }
         valuei = v;
         break;
-      case LOG_UINT16:
+      }
+      case LOG_UINT16: {
         uint16_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
@@ -738,7 +740,8 @@ void logRunBlock(void * arg) {
         }
         valuei = v;
         break;
-      case LOG_INT16:
+      }
+      case LOG_INT16: {
         int16_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
@@ -748,7 +751,8 @@ void logRunBlock(void * arg) {
         }
         valuei = v;
         break;
-      case LOG_UINT32:
+      }
+      case LOG_UINT32: {
         uint32_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
@@ -758,7 +762,8 @@ void logRunBlock(void * arg) {
         }
         valuei = v;
         break;
-      case LOG_INT32:
+      }
+      case LOG_INT32: {
         int32_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
@@ -768,7 +773,8 @@ void logRunBlock(void * arg) {
         }
         valuei = v;
         break;
-      case LOG_FLOAT:
+      }
+      case LOG_FLOAT: {
         float v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
@@ -779,6 +785,7 @@ void logRunBlock(void * arg) {
         valuei = v;
         valuef = v;
         break;
+      }
     }
 
     if (ops->logType == LOG_FLOAT || ops->logType == LOG_FP16) {
@@ -787,11 +794,12 @@ void logRunBlock(void * arg) {
 
       // Try to append the next item to the packet.  If we run out of space,
       // drop this and subsequent items.
-      if (ops->logType == LOG_FLOAT)
+      if (ops->logType == LOG_FLOAT) {
         if (!appendToPacket(&pk, &valuef, 4)) break;
-      else
+      } else {
         valuei = single2half(valuef);
         if (!appendToPacket(&pk, &valuei, 2)) break;
+      }
     } else  
 			//logType is an integer
       if (!appendToPacket(&pk, &valuei, typeLength[ops->logType]))
@@ -800,7 +808,7 @@ void logRunBlock(void * arg) {
     ops = ops->next;
   }
 
-  xSemaphoreGive(logLock);
+  osMutexRelease(logLock);
 
   // Check if the connection is still up, oherwise disable
   // all the logging and flush all the CRTP queues.
@@ -816,6 +824,19 @@ void logRunBlock(void * arg) {
       }
     }
   }
+}
+
+static int blockGetIndex(int id) {
+  int i;
+  for (i = 0; i < LOG_MAX_BLOCKS; i++) {
+    if (logBlocks[i].id == id)
+      break;
+  }
+
+  if (i >= LOG_MAX_BLOCKS)
+    return -1;
+
+  return i;
 }
 
 static int variableGetIndex(int id) {
@@ -869,16 +890,16 @@ void blockAppendOps(struct log_block * block, struct log_ops * ops) {
   if (block->ops == NULL)
     block->ops = ops;
   else {
-    for (o = block->ops; o->next; o = o->next);
-    	o->next = ops;
+    for (o = block->ops; o->next != NULL; o = o->next) {};
+    o->next = ops;
   }
 }
 
 static void logReset(void) {
   if (isInit) {
-    //Stop and delete all started log blocks
+    // Stop and delete all started log blocks
     for (int i = 0; i < LOG_MAX_BLOCKS; i++)
-      if (logBlocks[i].id != -1) {
+      if (logBlocks[i].id != BLOCK_ID_FREE) {
         logStopBlock(logBlocks[i].id);
         logDeleteBlock(logBlocks[i].id);
       }
@@ -888,7 +909,7 @@ static void logReset(void) {
   for (int i = 0; i < LOG_MAX_BLOCKS; i++)
     logBlocks[i].id = BLOCK_ID_FREE;
 
-  //Force free the log ops
+  // Force free the log ops
   for (int i = 0; i < LOG_MAX_OPS; i++)
     logOps[i].variable = NULL;
 }
