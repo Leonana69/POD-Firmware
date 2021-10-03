@@ -60,6 +60,7 @@
 #include "console.h"
 // #include "usblink.h"
 #include "mem.h"
+#include "sysload.h"
 // #include "proximity.h"
 // #include "watchdog.h"
 // #include "queuemonitor.h"
@@ -165,6 +166,7 @@ void systemInit(void) {
   // TODO: remove these unnessasory modules
   // buzzerInit();
   // peerLocalizationInit();
+  sysLoadInit();
 
 #ifdef APP_ENABLED
   appInit();
@@ -180,6 +182,7 @@ bool systemTest() {
   // pass &= pmTest();
   // pass &= workerTest();
   // pass &= buzzerTest();
+  // pass &= sysLoadTest();
   return pass;
 }
 
