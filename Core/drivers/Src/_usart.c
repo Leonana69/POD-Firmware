@@ -163,46 +163,46 @@ void nrfUartIsr() {
 	__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_RXNE);
 
 	// TODO: fix this
-	if (((nrfUart.Instance->SR & USART_SR_TXE) != RESET) && ((nrfUart.Instance->CR1 & USART_CR1_TXEIE) != RESET))
-	{
-		uint16_t *tmp;
+	// if (((nrfUart.Instance->SR & USART_SR_TXE) != RESET) && ((nrfUart.Instance->CR1 & USART_CR1_TXEIE) != RESET))
+	// {
+	// 	uint16_t *tmp;
 
-		/* Check that a Tx process is ongoing */
-		if (nrfUart.gState == HAL_UART_STATE_BUSY_TX)
-		{
-			if ((nrfUart.Init.WordLength == UART_WORDLENGTH_9B) && (nrfUart.Init.Parity == UART_PARITY_NONE))
-			{
-				tmp = (uint16_t *) nrfUart.pTxBuffPtr;
-				nrfUart.Instance->DR = (uint16_t)(*tmp & (uint16_t)0x01FF);
-				nrfUart.pTxBuffPtr += 2U;
-			}
-			else
-			{
-				nrfUart.Instance->DR = (uint8_t)(*nrfUart.pTxBuffPtr++ & (uint8_t)0x00FF);
-			}
+	// 	/* Check that a Tx process is ongoing */
+	// 	if (nrfUart.gState == HAL_UART_STATE_BUSY_TX)
+	// 	{
+	// 		if ((nrfUart.Init.WordLength == UART_WORDLENGTH_9B) && (nrfUart.Init.Parity == UART_PARITY_NONE))
+	// 		{
+	// 			tmp = (uint16_t *) nrfUart.pTxBuffPtr;
+	// 			nrfUart.Instance->DR = (uint16_t)(*tmp & (uint16_t)0x01FF);
+	// 			nrfUart.pTxBuffPtr += 2U;
+	// 		}
+	// 		else
+	// 		{
+	// 			nrfUart.Instance->DR = (uint8_t)(*nrfUart.pTxBuffPtr++ & (uint8_t)0x00FF);
+	// 		}
 
-			if (--nrfUart.TxXferCount == 0U)
-			{
-				/* Disable the UART Transmit Complete Interrupt */
-				__HAL_UART_DISABLE_IT(&nrfUart, UART_IT_TXE);
+	// 		if (--nrfUart.TxXferCount == 0U)
+	// 		{
+	// 			/* Disable the UART Transmit Complete Interrupt */
+	// 			__HAL_UART_DISABLE_IT(&nrfUart, UART_IT_TXE);
 
-				/* Enable the UART Transmit Complete Interrupt */
-				__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_TC);
-			}
-		}
-		return;
-	}
+	// 			/* Enable the UART Transmit Complete Interrupt */
+	// 			__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_TC);
+	// 		}
+	// 	}
+	// 	return;
+	// }
 
-  /* UART in mode Transmitter end --------------------------------------------*/
-  if (((nrfUart.Instance->SR & USART_SR_TC) != RESET) && ((nrfUart.Instance->CR1 & USART_CR1_TCIE) != RESET))
-  {
-    /* Disable the UART Transmit Complete Interrupt */
-  	__HAL_UART_DISABLE_IT(&nrfUart, UART_IT_TC);
+  // /* UART in mode Transmitter end --------------------------------------------*/
+  // if (((nrfUart.Instance->SR & USART_SR_TC) != RESET) && ((nrfUart.Instance->CR1 & USART_CR1_TCIE) != RESET))
+  // {
+  //   /* Disable the UART Transmit Complete Interrupt */
+  // 	__HAL_UART_DISABLE_IT(&nrfUart, UART_IT_TC);
 
-  	/* Tx process is ended, restore &nrfUart->gState to Ready */
-  	nrfUart.gState = HAL_UART_STATE_READY;
-    return;
-  }
+  // 	/* Tx process is ended, restore &nrfUart->gState to Ready */
+  // 	nrfUart.gState = HAL_UART_STATE_READY;
+  //   return;
+  // }
 
 	// if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_RXNE) != 0) {
 		// uint8_t rxDataInterrupt = (uint8_t)(huart6.Instance->DR & 0xFF);

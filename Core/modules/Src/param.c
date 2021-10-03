@@ -157,7 +157,7 @@ void paramTask(void * prm) {
 
 	while (1) {
 		crtpReceivePacketBlock(CRTP_PORT_PARAM, &p);
-		DEBUG_PRINT_UART("\tp %d %d\n", p.channel, p.data[0]);
+		
 		if (p.channel == TOC_CH)
 		  paramTOCProcess(p.data[0]);
 	  else if (p.channel == READ_CH)
@@ -427,7 +427,7 @@ static void paramReadProcess() {
   if (useV2) {
     uint16_t ident;
     memcpy(&ident, &p.data[0], 2);
-		DEBUG_PRINT_UART("read:%d\n", ident);
+		
     int id = variableGetIndex(ident);
 
     if (id < 0) {

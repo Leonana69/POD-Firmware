@@ -68,7 +68,7 @@ typedef enum {
   acqType_function = 1,
 } acquisitionType_t;
 
-// Maximum log payload length (4 bytes are used for block id and timestamp)
+// Maximum log payload length (4 bytes are used for block id and timeStamp)
 #define LOG_MAX_LEN (CRTP_MAX_DATA_SIZE - 4)
 
 /* Log packet parameters storage */
@@ -228,7 +228,7 @@ void logTask(void * prm) {
 
 	while (1) {
 		crtpReceivePacketBlock(CRTP_PORT_LOG, &p);
-    DEBUG_PRINT_UART("\tl %d, %d\n", p.channel, p.data[0]);
+
 		osMutexAcquire(logLock, osWaitForever);
 		if (p.channel == TOC_CH)
 		  logTOCProcess(p.data[0]);
@@ -688,18 +688,18 @@ void logRunBlock(void *arg) {
   struct log_block *blk = &logBlocks[index];
   struct log_ops *ops = blk->ops;
   static CRTPPacket pk;
-  unsigned int timestamp;
+  unsigned int timeStamp;
 
   osMutexAcquire(logLock, osWaitForever);
-
-  timestamp = osKernelGetTickCount() / osKernelGetSysTimerFreq();
+  // timeStamp in milliseconds
+  timeStamp = osKernelGetTickCount() * 1000 / osKernelGetTickFreq();
 
   pk.header = CRTP_HEADER(CRTP_PORT_LOG, LOG_CH);
   pk.size = 4;
   pk.data[0] = blk->id;
-  pk.data[1] = timestamp & 0x0ff;
-  pk.data[2] = (timestamp >> 8) & 0x0ff;
-  pk.data[3] = (timestamp >> 16) & 0x0ff;
+  pk.data[1] = timeStamp & 0x0ff;
+  pk.data[2] = (timeStamp >> 8) & 0x0ff;
+  pk.data[3] = (timeStamp >> 16) & 0x0ff;
 
   while (ops) {
     int valuei = 0;
@@ -712,7 +712,7 @@ void logRunBlock(void *arg) {
         uint8_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
-          v = logByFunction->acquireUInt8(timestamp, logByFunction->data);
+          v = logByFunction->acquireUInt8(timeStamp, logByFunction->data);
         } else {
           memcpy(&v, ops->variable, sizeof(v));
         }
@@ -723,7 +723,7 @@ void logRunBlock(void *arg) {
         int8_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
-          v = logByFunction->acquireInt8(timestamp, logByFunction->data);
+          v = logByFunction->acquireInt8(timeStamp, logByFunction->data);
         } else {
           memcpy(&v, ops->variable, sizeof(v));
         }
@@ -734,7 +734,7 @@ void logRunBlock(void *arg) {
         uint16_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
-          v = logByFunction->acquireUInt16(timestamp, logByFunction->data);
+          v = logByFunction->acquireUInt16(timeStamp, logByFunction->data);
         } else {
           memcpy(&v, ops->variable, sizeof(v));
         }
@@ -745,7 +745,7 @@ void logRunBlock(void *arg) {
         int16_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
-          v = logByFunction->acquireInt16(timestamp, logByFunction->data);
+          v = logByFunction->acquireInt16(timeStamp, logByFunction->data);
         } else {
           memcpy(&v, ops->variable, sizeof(v));
         }
@@ -756,7 +756,7 @@ void logRunBlock(void *arg) {
         uint32_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
-          v = logByFunction->acquireUInt32(timestamp, logByFunction->data);
+          v = logByFunction->acquireUInt32(timeStamp, logByFunction->data);
         } else {
           memcpy(&v, ops->variable, sizeof(v));
         }
@@ -767,7 +767,7 @@ void logRunBlock(void *arg) {
         int32_t v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
-          v = logByFunction->acquireInt32(timestamp, logByFunction->data);
+          v = logByFunction->acquireInt32(timeStamp, logByFunction->data);
         } else {
           memcpy(&v, ops->variable, sizeof(v));
         }
@@ -778,7 +778,7 @@ void logRunBlock(void *arg) {
         float v;
         if (ops->acquisitionType == acqType_function) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
-          v = logByFunction->aquireFloat(timestamp, logByFunction->data);
+          v = logByFunction->aquireFloat(timeStamp, logByFunction->data);
         } else {
           memcpy(&v, ops->variable, sizeof(valuef));
         }

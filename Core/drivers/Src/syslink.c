@@ -92,9 +92,9 @@ static void syslinkRouteIncommingPacket(SyslinkPacket *slp) {
   groupType = slp->type & SYSLINK_GROUP_MASK;
 
   // TODO: remove debug
-  CRTPPacket* cp = (CRTPPacket *)&slp->length;
-  if (slp->type != 4 && slp->type != 19 && cp->port != 15)
-  DEBUG_PRINT_UART("r %d %d %d %d\n", slp->type, cp->port, cp->channel, cp->size - 1);
+  // CRTPPacket* cp = (CRTPPacket *)&slp->length;
+  // if (slp->type != 4 && slp->type != 19 && cp->port != 15)
+  // DEBUG_PRINT_UART("r %d %d %d %d\n", slp->type, cp->port, cp->channel, cp->size - 1);
 
   switch (groupType) {
     case SYSLINK_RADIO_GROUP:
@@ -147,8 +147,8 @@ int syslinkSendPacket(SyslinkPacket *slp) {
 	osSemaphoreAcquire(syslinkAccess, osDelayMax);
   ASSERT(slp->length <= SYSLINK_MTU);
   // TODO: remove debug
-  CRTPPacket* cp = (CRTPPacket *)&slp->length;
-  DEBUG_PRINT_UART("\tt %d %d %d\n", cp->port, cp->channel, cp->size - 1);
+  // CRTPPacket* cp = (CRTPPacket *)&slp->length;
+  // DEBUG_PRINT_UART("\tt %d %d %d\n", cp->port, cp->channel, cp->size - 1);
 
   sendBuffer[0] = SYSLINK_START_BYTE1;
   sendBuffer[1] = SYSLINK_START_BYTE2;

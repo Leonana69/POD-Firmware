@@ -163,7 +163,7 @@ void StartDefaultTask(void *argument)
     // DEBUG_PRINT("space: %d\n", osMessageQueueGetSpace(syslinkPacketDelivery));
     // osMessageQueueGet(syslinkPacketDelivery, &x, 0, 0);
     // DEBUG_PRINT("space after: %d, data: %d\n", osMessageQueueGetSpace(syslinkPacketDelivery), x);
-    
+    // DEBUG_PRINT_UART("%ld, %ld\n", osKernelGetTickCount(), osKernelGetTickFreq());
     ledSet(1, 1);
     osDelay(1000);
     ledSet(1, 0);
