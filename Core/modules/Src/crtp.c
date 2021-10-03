@@ -27,21 +27,14 @@
 #include <stdbool.h>
 #include <errno.h>
 
-/*FreeRtos includes*/
-// #include "FreeRTOS.h"
-
-#include "cmsis_os2.h"
-
 #include "config.h"
-
 #include "crtp.h"
 // TODO: fix info
 // #include "info.h"
 #include "cfassert.h"
 #include "queuemonitor.h"
 #include "static_mem.h"
-// TODO: fix log
-// #include "log.h"
+#include "log.h"
 #include "debug.h"
 
 
@@ -135,7 +128,7 @@ void crtpTxTask(void *param) {
   while (1) {
     if (link != &nopLink) {
       if (osMessageQueueGet(txQueue, &p, 0, osWaitForever) == osOK) {
-        // DEBUG_PRINT_UART("\t&tx:%d,%d,%d\n", p.port, p.size, p.channel);
+        // DEBUG_PRINT_UART("\ttx %d,%d,%d\n", p.port, p.channel, p.size);
         // Keep testing, if the link changes to USB it will go though
         while (link->sendPacket(&p) == false) {
           // Relaxation time
@@ -155,8 +148,9 @@ void crtpRxTask(void *param) {
   while (1) {
     if (link != &nopLink) {
       if (!link->receivePacket(&p)) {
+        // DEBUG_PRINT_UART("r %d,%d,%d,%d\n", p.port, p.channel, p.size, p.data[0]);
         if (queues[p.port]) {
-          // DEBUG_PRINT_UART("#rx:%d,%d,%d\n", p.port, p.size, p.channel);
+          
 
           // Block, since we should never drop a packet
           osMessageQueuePut(queues[p.port], &p, 0, osWaitForever);
@@ -243,8 +237,7 @@ static void updateStats() {
   }
 }
 
-// TODO: add log
-// LOG_GROUP_START(crtp)
-// LOG_ADD(LOG_UINT16, rxRate, &stats.rxRate)
-// LOG_ADD(LOG_UINT16, txRate, &stats.txRate)
-// LOG_GROUP_STOP(crtp)
+LOG_GROUP_START(crtp)
+LOG_ADD(LOG_UINT16, rxRate, &stats.rxRate)
+LOG_ADD(LOG_UINT16, txRate, &stats.txRate)
+LOG_GROUP_STOP(crtp)

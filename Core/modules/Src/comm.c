@@ -30,7 +30,7 @@
 #include "console.h"
 #include "crtp_link.h"
 #include "crtp_platform.h"
-// #include "param.h"
+#include "param.h"
 #include "log.h"
 #include "_usart.h"
 #include "radiolink.h"
@@ -56,7 +56,7 @@ void commInit(void) {
   crtpLinkInit();
   crtpPlatformInit();
   logInit();
-  // paramInit();
+  paramInit();
 
   // locSrvInit();
   
@@ -70,9 +70,9 @@ bool commTest(void) {
   pass &= consoleTest();
   pass &= radiolinkTest();
   pass &= crtpLinkTest();
+  pass &= crtpPlatformTest();
   pass &= logTest();
-  // pass &= platformserviceTest();
-  // pass &= paramTest();
+  pass &= paramTest();
   return pass;
 }
 

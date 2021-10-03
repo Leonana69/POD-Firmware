@@ -48,6 +48,7 @@
 #include "cmsis_os2.h"
 #include "_usart.h"
 #include "led.h"
+#include "crtp.h"
 
 #ifdef UART2_LINK_COMM
 #include "uart2.h"
@@ -90,12 +91,18 @@ static void syslinkRouteIncommingPacket(SyslinkPacket *slp) {
   uint8_t groupType;
   groupType = slp->type & SYSLINK_GROUP_MASK;
 
+  // TODO: remove debug
+  CRTPPacket* cp = (CRTPPacket *)&slp->length;
+  if (slp->type != 4 && slp->type != 19 && cp->port != 15)
+  DEBUG_PRINT_UART("r %d %d %d %d\n", slp->type, cp->port, cp->channel, cp->size - 1);
+
   switch (groupType) {
     case SYSLINK_RADIO_GROUP:
       radiolinkSyslinkDispatch(slp);
       break;
     case SYSLINK_PM_GROUP:
       // pmSyslinkUpdate(slp);
+      osDelay(2);
       break;
     case SYSLINK_OW_GROUP:
       // owSyslinkRecieve(slp);
@@ -139,6 +146,9 @@ int syslinkSendPacket(SyslinkPacket *slp) {
   uint8_t cksum[2] = {0};
 	osSemaphoreAcquire(syslinkAccess, osDelayMax);
   ASSERT(slp->length <= SYSLINK_MTU);
+  // TODO: remove debug
+  CRTPPacket* cp = (CRTPPacket *)&slp->length;
+  DEBUG_PRINT_UART("\tt %d %d %d\n", cp->port, cp->channel, cp->size - 1);
 
   sendBuffer[0] = SYSLINK_START_BYTE1;
   sendBuffer[1] = SYSLINK_START_BYTE2;

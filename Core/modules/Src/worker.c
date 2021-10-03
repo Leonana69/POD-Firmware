@@ -27,17 +27,14 @@
 
 #include <errno.h>
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include "cmsis_os.h"
 #include "static_mem.h"
 #include "queuemonitor.h"
 
-// #include "console.h"
+#include "debug.h"
 
 #define WORKER_QUEUE_LENGTH 5
 
+static bool isInit = false;
 struct worker_work {
   void (*function)(void*);
   void* arg;
@@ -46,15 +43,16 @@ struct worker_work {
 STATIC_MEM_QUEUE_ALLOC(workerQueue, WORKER_QUEUE_LENGTH, sizeof(struct worker_work));
 
 void workerInit() {
-  if (workerQueue)
+  if (isInit)
     return;
 
   workerQueue = STATIC_MEM_QUEUE_CREATE(workerQueue);
   DEBUG_QUEUE_MONITOR_REGISTER(workerQueue);
+  isInit = true;
 }
 
 bool workerTest() {
-  return (workerQueue != NULL);
+  return isInit;
 }
 
 void workerLoop() {
@@ -64,7 +62,7 @@ void workerLoop() {
     return;
 
   while (1) {
-    xQueueReceive(workerQueue, &work, portMAX_DELAY);
+    osMessageQueueGet(workerQueue, &work, NULL, osWaitForever);
 
     if (work.function)
       work.function(work.arg);
@@ -79,8 +77,8 @@ int workerSchedule(void (*function)(void*), void *arg) {
 
   work.function = function;
   work.arg = arg;
-  if (xQueueSend(workerQueue, &work, 0) == pdFALSE)
-    return ENOMEM;
 
+  if (osMessageQueuePut(workerQueue, &work, 0, 0) != osOK)
+    return ENOMEM;
   return 0;
 }

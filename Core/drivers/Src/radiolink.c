@@ -27,12 +27,6 @@
 #include <string.h>
 #include <stdint.h>
 
-/*FreeRtos includes*/
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-#include "queue.h"
-
 #include "config.h"
 #include "radiolink.h"
 #include "syslink.h"
@@ -225,7 +219,7 @@ struct crtpLinkOperations * radiolinkGetLink() {
 static int radiolinkSetEnable(bool enable) {
   return 0;
 }
-// TODO: add log
+
 LOG_GROUP_START(radio)
 LOG_ADD_CORE(LOG_UINT8, rssi, &rssi)
 LOG_ADD_CORE(LOG_UINT8, isConnected, &isConnected)

@@ -55,7 +55,7 @@ typedef struct {
 } MemoryHandlerDef_t;
 
 typedef struct {
-  uint8_t nrOfMems;
+  uint8_t nbrOfMems;
   const uint32_t size;
   bool (*getSerialNr)(const uint8_t selectedMem, uint8_t* serialNr);
   bool (*read)(const uint8_t selectedMem, const uint32_t memAddr, const uint8_t readLen, uint8_t* buffer);

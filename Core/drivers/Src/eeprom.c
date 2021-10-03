@@ -29,9 +29,6 @@
 #define DEBUG_MODULE "EEPROM"
 
 #include <string.h>
-
-#include "FreeRTOS.h"
-#include "task.h"
 #include "cmsis_os2.h"
 
 #include "eeprom.h"
@@ -127,7 +124,6 @@ bool eepromWriteBuffer(const uint8_t* buffer, uint16_t writeAddr, uint16_t len) 
       status = I2CWrite16(I2Cx, devAddr, pageAddress, pageIndex, pageBuffer);
       if (status == HAL_OK)
         break;
-      // vTaskDelay(M2T(6));
 			osDelay(6);
     }
     if (status != HAL_OK)
@@ -136,11 +132,9 @@ bool eepromWriteBuffer(const uint8_t* buffer, uint16_t writeAddr, uint16_t len) 
     // Waiting for page to be written
     for (int retry = 0; retry < 30; retry++) {
       uint8_t dummy;
-      // status = i2cdevWrite(I2Cx, devAddr, 1, &dummy);
 			status = I2CWrite16(I2Cx, devAddr, 0xFFFF, 1, &dummy);
       if (status == HAL_OK)
         break;
-      // vTaskDelay(M2T(1));
 			osDelay(1);
     }
     if (status != HAL_OK)

@@ -61,7 +61,7 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
 
 Change the flash origin address to 0x8004000:
 
-```FLASH (rx)      : ORIGIN = 0x8004000, LENGTH = 1024K```
+```FLASH (rx)      : ORIGIN = 0x8004000, LENGTH = 1008K```
 
 Add _param, _log, _deckDriver, _eventtrigger to the ld file.
 ### stm32f4xx_it.c

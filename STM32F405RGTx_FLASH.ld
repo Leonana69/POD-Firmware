@@ -66,7 +66,7 @@ CCMRAM (xrw)      : ORIGIN = 0x10000000, LENGTH = 64K
 /* guojun:
  * 0x8000000 is the address for bootloader
  * set the FLASH ORIGIN address to 0x8004000 */
-FLASH (rx)      : ORIGIN = 0x8004000, LENGTH = 1024K
+FLASH (rx)      : ORIGIN = 0x8004000, LENGTH = 1008K
 }
 
 /* Define output sections */
@@ -105,17 +105,17 @@ SECTIONS
     KEEP(*(.log.*))
     _log_stop = .;
     /* Decks */
-  . = ALIGN(4);
+  /* . = ALIGN(4);
     _deckDriver_start = .;
     KEEP(*(.deckDriver));
     KEEP(*(.deckDriver.*));
-    _deckDriver_stop = .;
+    _deckDriver_stop = .; */
     /* Event Triggers */
-  . = ALIGN(4);
+  /* . = ALIGN(4);
     _eventtrigger_start = .;
     KEEP(*(.eventtrigger));
     KEEP(*(.eventtrigger.*));
-    _eventtrigger_stop = .;
+    _eventtrigger_stop = .; */
     
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
@@ -192,7 +192,6 @@ SECTIONS
     _eccmram = .;       /* create a global symbol at ccmram end */
   } >CCMRAM AT> FLASH
 
-  
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :

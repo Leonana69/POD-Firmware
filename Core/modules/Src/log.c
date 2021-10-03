@@ -42,8 +42,14 @@
 #include "debug.h"
 #include "static_mem.h"
 
+#if 0
 #define LOG_DEBUG(fmt, ...) DEBUG_PRINT("D/log " fmt, ## __VA_ARGS__)
 #define LOG_ERROR(fmt, ...) DEBUG_PRINT("E/log " fmt, ## __VA_ARGS__)
+#else
+#define LOG_DEBUG(...)
+#define LOG_ERROR(...)
+#endif
+
 #define LOG_TYPE_MASK (0x0f)
 
 static const uint8_t typeLength[] = {
@@ -127,8 +133,8 @@ static void logTask(void * prm);
 static void logTOCProcess(int command);
 static void logControlProcess(void);
 
-void logRunBlock(void * arg);
-void logBlockTimed(void *param);
+void logRunBlock(void *arg);
+void logBlockTimed(void *arg);
 
 //These are set by the Linker
 extern struct log_s _log_start;
@@ -158,11 +164,10 @@ static acquisitionType_t acquisitionTypeFromLogType(uint8_t logType);
 STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(logTask, LOG_TASK_STACKSIZE);
 
 void logInit(void) {
-  const char *groupName = NULL;
-  int groupNameLen = 0;
-
   if (isInit)
     return;
+  const char *groupName = NULL;
+  int groupNameLen = 0;
 
   logs = &_log_start;
   logsLen = &_log_stop - &_log_start;
@@ -211,7 +216,6 @@ void logInit(void) {
 
   //Start the log task
   STATIC_MEM_TASK_CREATE(logTask, logTask, LOG_TASK_NAME, NULL, LOG_TASK_PRI);
-  DEBUG_PRINT_UART("log init\n");
   isInit = true;
 }
 
@@ -224,7 +228,7 @@ void logTask(void * prm) {
 
 	while (1) {
 		crtpReceivePacketBlock(CRTP_PORT_LOG, &p);
-    DEBUG_PRINT_UART("r:%d, %d\n", p.channel, p.data[0]);
+    DEBUG_PRINT_UART("\tl %d, %d\n", p.channel, p.data[0]);
 		osMutexAcquire(logLock, osWaitForever);
 		if (p.channel == TOC_CH)
 		  logTOCProcess(p.data[0]);
@@ -395,8 +399,6 @@ void logControlProcess() {
 
 static int logCreateBlock(unsigned char id, struct ops_setting * settings, int len) {
   int i;
-  
-
   for (i = 0; i < LOG_MAX_BLOCKS; i++)
     if (id == logBlocks[i].id) return EEXIST;
 
@@ -409,7 +411,7 @@ static int logCreateBlock(unsigned char id, struct ops_setting * settings, int l
   osTimerAttr_t timAttr = {
     .name = "logTim",
     .cb_mem = &logBlocks[i].timerBuffer,
-    .cb_size = sizeof(&logBlocks[i].timerBuffer),
+    .cb_size = sizeof(logBlocks[i].timerBuffer),
   };
 
   logBlocks[i].id = id;
@@ -441,7 +443,7 @@ static int logCreateBlockV2(unsigned char id, struct ops_setting_v2 * settings, 
   osTimerAttr_t timAttr = {
     .name = "logTim",
     .cb_mem = &logBlocks[i].timerBuffer,
-    .cb_size = sizeof(&logBlocks[i].timerBuffer),
+    .cb_size = sizeof(logBlocks[i].timerBuffer),
   };
 
   logBlocks[i].id = id;
@@ -626,9 +628,8 @@ static int logDeleteBlock(int id) {
   return 0;
 }
 
-static int logStartBlock(int id, unsigned int period) {
+static int logStartBlock(int id, unsigned int period) {\
   int i;
-
   for (i = 0; i < LOG_MAX_BLOCKS; i++)
     if (logBlocks[i].id == id) break;
 
@@ -647,7 +648,6 @@ static int logStartBlock(int id, unsigned int period) {
     // single-shoot run
     workerSchedule(logRunBlock, &logBlocks[i]);
   }
-
   return 0;
 }
 
@@ -663,14 +663,12 @@ static int logStopBlock(int id) {
   }
 
   osTimerStop(logBlocks[i].timer);
-
   return 0;
 }
 
 /* This function is called by the timer subsystem */
-void logBlockTimed(void *param) {
-  int i = blockGetIndex(*(int *)param);
-  workerSchedule(logRunBlock, &i);
+void logBlockTimed(void *arg) {
+  workerSchedule(logRunBlock, arg);
 }
 
 /* Appends data to a packet if space is available; returns false on failure. */
@@ -685,7 +683,9 @@ static bool appendToPacket(CRTPPacket * pk, const void * data, size_t n) {
 
 /* This function is usually called by the worker subsystem */
 void logRunBlock(void *arg) {
-  struct log_block *blk = &logBlocks[*(int *)arg];
+  int index = blockGetIndex(*(int *)arg);
+
+  struct log_block *blk = &logBlocks[index];
   struct log_ops *ops = blk->ops;
   static CRTPPacket pk;
   unsigned int timestamp;

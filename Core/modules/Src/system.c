@@ -26,7 +26,6 @@
 #define DEBUG_MODULE "SYS"
 
 /* FreeRtos includes */
-#include "FreeRTOS.h"
 #include "_usart.h"
 #include "_tim.h"
 #include "_gpio.h"
@@ -39,8 +38,8 @@
 #include "led.h"
 // #include "version.h"
 #include "config.h"
-// #include "param.h"
-// #include "log.h"
+#include "param.h"
+#include "log.h"
 #include "ledseq.h"
 // #include "pm.h"
 
@@ -60,7 +59,7 @@
 // #include "commander.h"
 #include "console.h"
 // #include "usblink.h"
-// #include "mem.h"
+#include "mem.h"
 // #include "proximity.h"
 // #include "watchdog.h"
 // #include "queuemonitor.h"
@@ -209,7 +208,7 @@ void systemTask(void *arg) {
   //   platformSetLowInterferenceRadioMode();
 
   // soundInit();
-  // memInit();
+  memInit();
 
 #ifdef PROXIMITY_ENABLED
   proximityInit();
@@ -277,7 +276,7 @@ void systemTask(void *arg) {
     DEBUG_PRINT_UART("Self test passed!\n");
     selftestPassed = 1;
     systemStart();
-    // TODO: add sound and ledseq
+    // TODO: add sound
     // soundSetEffect(SND_STARTUP);
     ledseqRun(&seq_alive);
     ledseqRun(&seq_testPassed);
@@ -285,8 +284,7 @@ void systemTask(void *arg) {
     selftestPassed = 0;
     if (systemTest()) {
       while(1) {
-        // TODO: add ledseq
-        // ledseqRun(&seq_testFailed);
+        ledseqRun(&seq_testFailed);
         osDelay(2000);
         // System can be forced to start by setting the param to 1 from the cfclient
         if (selftestPassed) {
@@ -307,7 +305,7 @@ void systemTask(void *arg) {
   // Should never reach this point!
   DEBUG_PRINT("RUN INTO WRONG POINT!\n");
   while(1)
-    osDelay(portMAX_DELAY);
+    osDelay(osWaitForever);
 }
 
 
@@ -396,51 +394,51 @@ void systemSyslinkReceive(SyslinkPacket *slp) {
  *
  * These could be used to identify an unique quad.
  */
-// TODO: add PARAM
-// PARAM_GROUP_START(cpu)
 
-// /**
-//  * @brief Size in kB of the device flash memory
-//  */
-// PARAM_ADD_CORE(PARAM_UINT16 | PARAM_RONLY, flash, MCU_FLASH_SIZE_ADDRESS)
+PARAM_GROUP_START(cpu)
 
-// /**
-//  * @brief Byte `0 - 3` of device unique id
-//  */
-// PARAM_ADD_CORE(PARAM_UINT32 | PARAM_RONLY, id0, MCU_ID_ADDRESS+0)
+/**
+ * @brief Size in kB of the device flash memory
+ */
+PARAM_ADD_CORE(PARAM_UINT16 | PARAM_RONLY, flash, MCU_FLASH_SIZE_ADDRESS)
 
-// /**
-//  * @brief Byte `4 - 7` of device unique id
-//  */
-// PARAM_ADD_CORE(PARAM_UINT32 | PARAM_RONLY, id1, MCU_ID_ADDRESS+4)
+/**
+ * @brief Byte `0 - 3` of device unique id
+ */
+PARAM_ADD_CORE(PARAM_UINT32 | PARAM_RONLY, id0, MCU_ID_ADDRESS+0)
 
-// /**
-//  * @brief Byte `8 - 11` of device unique id
-//  */
-// PARAM_ADD_CORE(PARAM_UINT32 | PARAM_RONLY, id2, MCU_ID_ADDRESS+8)
+/**
+ * @brief Byte `4 - 7` of device unique id
+ */
+PARAM_ADD_CORE(PARAM_UINT32 | PARAM_RONLY, id1, MCU_ID_ADDRESS+4)
 
-// PARAM_GROUP_STOP(cpu)
+/**
+ * @brief Byte `8 - 11` of device unique id
+ */
+PARAM_ADD_CORE(PARAM_UINT32 | PARAM_RONLY, id2, MCU_ID_ADDRESS+8)
 
-// PARAM_GROUP_START(system)
+PARAM_GROUP_STOP(cpu)
 
-// /**
-//  * @brief All tests passed when booting
-//  */
-// PARAM_ADD_CORE(PARAM_INT8 | PARAM_RONLY, selftestPassed, &selftestPassed)
+PARAM_GROUP_START(system)
 
-// /**
-//  * @brief Set to nonzero to force system to be armed
-//  */
-// PARAM_ADD(PARAM_INT8, forceArm, &forceArm)
+/**
+ * @brief All tests passed when booting
+ */
+PARAM_ADD_CORE(PARAM_INT8 | PARAM_RONLY, selftestPassed, &selftestPassed)
 
-// PARAM_GROUP_STOP(sytem)
+/**
+ * @brief Set to nonzero to force system to be armed
+ */
+PARAM_ADD(PARAM_INT8, forceArm, &forceArm)
 
-// /**
-//  *  System loggable variables to check different system states.
-//  */
-// LOG_GROUP_START(sys)
-// /**
-//  * @brief If zero, arming system is preventing motors to start
-//  */
-// LOG_ADD(LOG_INT8, armed, &armed)
-// LOG_GROUP_STOP(sys)
+PARAM_GROUP_STOP(sytem)
+
+/**
+ *  System loggable variables to check different system states.
+ */
+LOG_GROUP_START(sys)
+/**
+ * @brief If zero, arming system is preventing motors to start
+ */
+LOG_ADD(LOG_INT8, armed, &armed)
+LOG_GROUP_STOP(sys)

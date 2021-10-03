@@ -26,10 +26,11 @@
  * end up in the CCM. The current implementation puts is in CCM but
  * that might change later.
  */
+// TODO: CHECK .ccmbss
 #if defined(UNIT_TEST_MODE)
   #define NO_DMA_CCM_SAFE_ZERO_INIT
 #else
-  #define NO_DMA_CCM_SAFE_ZERO_INIT __attribute__((section(".ccmbss")))
+  #define NO_DMA_CCM_SAFE_ZERO_INIT __attribute__((section(".ccmram")))
 #endif
 
 /**
@@ -47,7 +48,7 @@
 #if defined(UNIT_TEST_MODE)
   #define FORCE_CCM_ZERO_INIT
 #else
-  #define FORCE_CCM_ZERO_INIT __attribute__((section(".ccmbss")))
+  #define FORCE_CCM_ZERO_INIT __attribute__((section(".ccmram")))
 #endif
 
 

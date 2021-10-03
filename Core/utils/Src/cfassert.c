@@ -30,8 +30,8 @@
 #include <stdbool.h>
 #include "FreeRTOS.h"
 #include "cfassert.h"
+#include "led.h"
 // TODO: restore these
-// #include "led.h"
 // #include "power_distribution.h"
 #include "debug.h"
 
@@ -80,10 +80,10 @@ void assertFail(char *exp, char *file, int line) {
   portDISABLE_INTERRUPTS();
   storeAssertFileData(file, line);
   DEBUG_PRINT("Assert failed %s:%d\n", file, line);
+  ledClearAll();
+  ledSet(ERR_LED1, 1);
+  ledSet(ERR_LED2, 1);
   // TODO: restore these
-  // ledClearAll();
-  // ledSet(ERR_LED1, 1);
-  // ledSet(ERR_LED2, 1);
   // powerStop();
   HAL_NVIC_SystemReset();
   // NVIC_SystemReset();

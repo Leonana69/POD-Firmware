@@ -30,7 +30,7 @@
 #include "crtp_link.h"
 #include "static_mem.h"
 #include "debug.h"
-// #include "param.h"
+#include "param.h"
 
 typedef enum {
   linkEcho   = 0x00,
@@ -75,7 +75,6 @@ static void crtpSrvTask(void* prm) {
         p.size = CRTP_MAX_DATA_SIZE;
         bzero(p.data, CRTP_MAX_DATA_SIZE);
         strcpy((char*)p.data, "Bitcraze Crazyflie");
-        osDelay(5);
         crtpSendPacketBlock(&p);
         break;
       case linkSink:
@@ -87,7 +86,6 @@ static void crtpSrvTask(void* prm) {
   }
 }
 
-// TODO: add param
-// PARAM_GROUP_START(crtpsrv)
-// PARAM_ADD(PARAM_UINT16, echoDelay, &echoDelay)
-// PARAM_GROUP_STOP(crtpsrv)
+PARAM_GROUP_START(crtpsrv)
+PARAM_ADD(PARAM_UINT16, echoDelay, &echoDelay)
+PARAM_GROUP_STOP(crtpsrv)

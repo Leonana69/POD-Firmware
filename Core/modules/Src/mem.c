@@ -25,26 +25,18 @@
  */
 
 #include <errno.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <string.h>
 
-/* FreeRtos includes */
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-
 #include "mem.h"
-// TODO: realize these
 #include "crtp.h"
 #include "system.h"
 
-// #include "console.h"
+#include "console.h"
 #include "assert.h"
 #include "debug.h"
 #include "config.h"
-// #include "log.h"
-// #include "param.h"
+#include "log.h"
+#include "param.h"
 #include "static_mem.h"
 
 #if 0
@@ -56,9 +48,6 @@
 #endif
 
 
-// Maximum payload length
-#define MEM_MAX_LEN 30
-
 #define MEM_SETTINGS_CH     0
 #define MEM_READ_CH         1
 #define MEM_WRITE_CH        2
@@ -67,8 +56,7 @@
 #define MEM_CMD_GET_INFO    2
 
 #define STATUS_OK 0
-
-#define MEM_TESTER_SIZE            0x1000
+#define MEM_TESTER_SIZE     0x1000
 
 //Private functions
 static void memTask(void * prm);
@@ -95,12 +83,12 @@ static bool isInit = false;
 static bool registrationEnabled = true;
 
 static uint8_t nbrOwMems = 0;
-static const uint8_t NoSerialNr[MEMORY_SERIAL_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0};
+static const uint8_t NoSerialNr[MEMORY_SERIAL_LENGTH] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 static CRTPPacket packet;
 
 #define MAX_NR_HANDLERS 20
 static const MemoryHandlerDef_t* handlers[MAX_NR_HANDLERS];
-static uint8_t nrOfHandlers = 0;
+static uint8_t nbrOfHandlers = 0;
 static const MemoryOwHandlerDef_t* owMemHandler = 0;
 
 STATIC_MEM_TASK_ALLOC(memTask, MEM_TASK_STACKSIZE);
@@ -118,39 +106,29 @@ void memInit(void) {
 }
 
 bool memTest(void) {
-  if (!isInit) {
-    return false;
-  }
-
-  if (owMemHandler == 0) {
-    return false;
-  }
-
-  return true;
+  return isInit && (owMemHandler != 0);
 }
 
 void memoryRegisterHandler(const MemoryHandlerDef_t* handlerDef){
-  for (int i = 0; i < nrOfHandlers; i++) {
+  for (int i = 0; i < nbrOfHandlers; i++) {
     ASSERT(handlerDef->type != handlers[i]->type);
   }
-  ASSERT(nrOfHandlers < MAX_NR_HANDLERS);
+  ASSERT(nbrOfHandlers < MAX_NR_HANDLERS);
   ASSERT(registrationEnabled);
-  handlers[nrOfHandlers] = handlerDef;
-  nrOfHandlers++;
+  handlers[nbrOfHandlers] = handlerDef;
+  nbrOfHandlers++;
 }
 
 void memoryRegisterOwHandler(const MemoryOwHandlerDef_t* handlerDef){
   ASSERT(owMemHandler == 0);
   owMemHandler = handlerDef;
 
-  nbrOwMems = handlerDef->nrOfMems;
+  nbrOwMems = handlerDef->nbrOfMems;
 }
 
 static void memTask(void* param) {
 	crtpInitTaskQueue(CRTP_PORT_MEM);
-
   systemWaitStart();
-
   // Do not allow registration of new handlers after this point as clients now can start
   // to query for available memories
   registrationEnabled = false;
@@ -196,7 +174,7 @@ static void createNbrResponse(CRTPPacket* p) {
   p->header = CRTP_HEADER(CRTP_PORT_MEM, MEM_SETTINGS_CH);
   p->size = 2;
   p->data[0] = MEM_CMD_GET_NBR;
-  p->data[1] = nbrOwMems + nrOfHandlers;
+  p->data[1] = nbrOwMems + nbrOfHandlers;
 }
 
 static void createInfoResponse(CRTPPacket* p, uint8_t memId) {
@@ -205,10 +183,10 @@ static void createInfoResponse(CRTPPacket* p, uint8_t memId) {
   p->data[0] = MEM_CMD_GET_INFO;
   p->data[1] = memId;
 
-  if (memId < nrOfHandlers) {
+  if (memId < nbrOfHandlers) {
     createInfoResponseBody(p, handlers[memId]->type, handlers[memId]->getSize(), NoSerialNr);
   } else {
-    const uint8_t selectedMem = memId - nrOfHandlers;
+    const uint8_t selectedMem = memId - nbrOfHandlers;
     uint8_t serialNr[MEMORY_SERIAL_LENGTH];
 
     // No error code if we fail, just send an empty packet back
@@ -242,12 +220,12 @@ static void memReadProcess(CRTPPacket* p) {
   uint8_t readLen = p->data[5];
   uint8_t* startOfData = &p->data[6];
 
-  if (memId < nrOfHandlers) {
+  if (memId < nbrOfHandlers) {
     if (handlers[memId]->read) {
       result = handlers[memId]->read(memAddr, readLen, startOfData);
     }
   } else {
-    uint8_t selectedMem = memId - nrOfHandlers;
+    uint8_t selectedMem = memId - nbrOfHandlers;
     result = owMemHandler->read(selectedMem, memAddr, readLen, startOfData);
   }
 
@@ -275,12 +253,12 @@ static void memWriteProcess(CRTPPacket* p) {
   p->header = CRTP_HEADER(CRTP_PORT_MEM, MEM_WRITE_CH);
   // Dont' touch the first 5 bytes, they will be the same.
 
-  if (memId < nrOfHandlers) {
+  if (memId < nbrOfHandlers) {
     if (handlers[memId]->write) {
       result = handlers[memId]->write(memAddr, writeLen, startOfData);
     }
   } else {
-    uint8_t selectedMem = memId - nrOfHandlers;
+    uint8_t selectedMem = memId - nbrOfHandlers;
     result = owMemHandler->write(selectedMem, memAddr, writeLen, startOfData);
   }
 
@@ -345,11 +323,11 @@ static bool handleMemTesterWrite(const uint32_t memAddr, const uint8_t writeLen,
 
   return true;
 }
-// TODO: add param and log
-// PARAM_GROUP_START(memTst)
-//   PARAM_ADD(PARAM_UINT8, resetW, &memTesterWriteReset)
-// PARAM_GROUP_STOP(memTst)
 
-// LOG_GROUP_START(memTst)
-//   LOG_ADD(LOG_UINT32, errCntW, &memTesterWriteErrorCount)
-// LOG_GROUP_STOP(memTst)
+PARAM_GROUP_START(memTst)
+  PARAM_ADD(PARAM_UINT8, resetW, &memTesterWriteReset)
+PARAM_GROUP_STOP(memTst)
+
+LOG_GROUP_START(memTst)
+  LOG_ADD(LOG_UINT32, errCntW, &memTesterWriteErrorCount)
+LOG_GROUP_STOP(memTst)
