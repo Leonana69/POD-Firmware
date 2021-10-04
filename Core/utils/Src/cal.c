@@ -202,3 +202,41 @@ static void crcTableInit(uint32_t* crcTable) {
       *(crcTable + dividend) = crcByBit(&dividend, 1, 0);
   } while(dividend-- > 0);
 }
+
+uint32_t quaternionCompress(float const q[4]) {
+  uint8_t l = 0;
+  uint8_t s;
+  for (uint8_t i = 0; i < 4; i++) {
+    if (fabsf(q[i]) > fabsf(q[l]))
+      l = i;
+  }
+  uint32_t cq = l & 0x3;
+  s = q[l] < 0;
+  for (uint8_t i = 0; i < 4; i++) {
+    if (i != l) {
+      uint8_t neg = (q[i] < 0) ^ s;
+      uint16_t val = ((1 << 9) - 1) * fabsf(q[i]) * M_SQRT2 + 0.5f;
+      cq = (cq << 10) | (neg << 9) | (val & 0x1FF);
+    }
+  }
+  
+  return cq;
+}
+
+void quaternionDecompress(uint32_t cq, float q[4]) {
+  const uint16_t mask = (1 << 9) - 1;
+  const float dmask = 1.0 / (float) mask;
+  uint8_t l = cq >> 30;
+  float squareSum = 1.0;
+  for (int8_t i = 3; i >= 0; i--) {
+    if (i != l) {
+      uint8_t neg = (cq >> 9) & 0x1;
+      uint16_t val = cq & mask;
+      q[i] = (M_SQRT1_2 * (float) val) * dmask;
+      if (neg) q[i] = -q[i];
+      cq = cq >> 10;
+      squareSum -= q[i] * q[i];
+    }
+  }
+  q[l] = sqrtf(squareSum);
+}

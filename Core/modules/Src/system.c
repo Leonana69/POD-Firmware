@@ -41,7 +41,7 @@
 #include "param.h"
 #include "log.h"
 #include "ledseq.h"
-// #include "pm.h"
+#include "pm.h"
 
 #include "system.h"
 #include "usec_timer.h"
@@ -50,13 +50,11 @@
 #include "configblock.h"
 #include "worker.h"
 #include "crtp.h"
-// #include "freeRTOSdebug.h"
-// #include "uart_syslink.h"
 // #include "uart1.h"
 // #include "uart2.h"
 #include "comm.h"
 // #include "stabilizer.h"
-// #include "commander.h"
+#include "commander.h"
 #include "console.h"
 // #include "usblink.h"
 #include "mem.h"
@@ -64,9 +62,6 @@
 // #include "proximity.h"
 // #include "watchdog.h"
 // #include "queuemonitor.h"
-// #include "buzzer.h"
-// #include "sound.h"
-// #include "sysload.h"
 // #include "estimator_kalman.h"
 // #include "deck.h"
 // #include "extrx.h"
@@ -114,10 +109,9 @@ void systemInit(void) {
   if (isInit)
     return;
 
-  canStartMutex = STATIC_MUTEX_CREATE(canStartMutex);
+  STATIC_MUTEX_CREATE(canStartMutex);
   osSemaphoreAcquire(canStartMutex, osDelayMax);
 
-  // move led and uart here to make the structure more clear
   ledInit();
   // TODO: 1
   ledSet(CHG_LED, 0);
@@ -130,16 +124,8 @@ void systemInit(void) {
 #ifdef ENABLE_UART2
   uart2Init(115200);
 #endif
-  // usblinkInit();
-  // sysLoadInit();
-
-  /* Initialized here so that DEBUG_PRINT (buffered) can be used early */
-  // I don't like the SEGGER debugger
-  // debugInit();
-
-  // move them to commInit, make it more clear
-  // crtpInit();
-  // consoleInit();
+  
+  // communication module init
   commInit();
   
   DEBUG_PRINT("----------------------------\n");
@@ -156,17 +142,22 @@ void systemInit(void) {
   DEBUG_PRINT("I am 0x%08X%08X%08X and I have %dKB of flash!\n",
               *((int*)(MCU_ID_ADDRESS + 8)), *((int*)(MCU_ID_ADDRESS + 4)),
               *((int*)(MCU_ID_ADDRESS + 0)), *((short*)(MCU_FLASH_SIZE_ADDRESS)));
-  configblockInit();
   
-  // storageInit();
+  configblockInit();
   workerInit();
-  // adcInit();
   ledseqInit();
-  // pmInit();
-  // TODO: remove these unnessasory modules
+  // adcInit();
+  
+  pmInit();
+  
+  sysLoadInit();
+  commanderInit();
+
+  /* these modules are not used by us */
+  // storageInit();
   // buzzerInit();
   // peerLocalizationInit();
-  sysLoadInit();
+  // debugInit();
 
 #ifdef APP_ENABLED
   appInit();
@@ -183,6 +174,7 @@ bool systemTest() {
   // pass &= workerTest();
   // pass &= buzzerTest();
   // pass &= sysLoadTest();
+  // pass &= pmTest();
   return pass;
 }
 
@@ -339,21 +331,21 @@ bool systemIsArmed() {
   return armed || forceArm;
 }
 
-// void systemRequestShutdown() {
-//   SyslinkPacket slp;
+void systemRequestShutdown() {
+  SyslinkPacket slp;
 
-//   slp.type = SYSLINK_PM_ONOFF_SWITCHOFF;
-//   slp.length = 0;
-//   syslinkSendPacket(&slp);
-// }
+  slp.type = SYSLINK_PM_ONOFF_SWITCHOFF;
+  slp.length = 0;
+  syslinkSendPacket(&slp);
+}
 
-// void systemRequestNRFVersion() {
-//   SyslinkPacket slp;
+void systemRequestNRFVersion() {
+  SyslinkPacket slp;
 
-//   slp.type = SYSLINK_SYS_NRF_VERSION;
-//   slp.length = 0;
-//   syslinkSendPacket(&slp);
-// }
+  slp.type = SYSLINK_SYS_NRF_VERSION;
+  slp.length = 0;
+  syslinkSendPacket(&slp);
+}
 
 void systemSyslinkReceive(SyslinkPacket *slp) {
   if (slp->type == SYSLINK_SYS_NRF_VERSION) {

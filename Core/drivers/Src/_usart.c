@@ -21,10 +21,9 @@ static uint8_t nrfUartTxDmaBuffer[64];
 extern DMA_HandleTypeDef nrfUartTxDmaHandle;
 
 void _UART_Init(void) {
-
-	nrfUartWaitS = STATIC_SEMAPHORE_CREATE(nrfUartWaitS, 1, 0);
+	STATIC_SEMAPHORE_CREATE(nrfUartWaitS, 1, 0);
 	// not busy in the beginning
-	nrfUartBusyS = STATIC_SEMAPHORE_CREATE(nrfUartBusyS, 1, 1);
+	STATIC_SEMAPHORE_CREATE(nrfUartBusyS, 1, 1);
 
 	syslinkPacketDelivery = STATIC_MEM_QUEUE_CREATE(syslinkPacketDelivery);
   DEBUG_QUEUE_MONITOR_REGISTER(syslinkPacketDelivery);
@@ -77,7 +76,7 @@ void nrfUartGetPacketBlocking(SyslinkPacket* packet) {
 	osMessageQueueGet(syslinkPacketDelivery, packet, 0, osDelayMax);
 }
 
-void nrfUartTxenIsr() {
+void nrfUartTxenFlowCtrlIsr() {
 	if (HAL_GPIO_ReadPin(NRF_FC_GPIO_Port, NRF_FC_Pin) == GPIO_PIN_SET)
 		HAL_UART_DMAPause(&nrfUart);
 	else

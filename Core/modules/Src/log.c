@@ -200,7 +200,7 @@ void logInit(void) {
   }
 
   // Big lock that protects the log datastructures
-  logLock = STATIC_MUTEX_CREATE(logLock);
+  STATIC_MUTEX_CREATE(logLock);
 
   for (int i = 0; i < logsLen; i++) {
     if (!(logs[i].type & LOG_GROUP))

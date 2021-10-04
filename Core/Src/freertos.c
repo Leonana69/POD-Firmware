@@ -148,6 +148,8 @@ void MX_FREERTOS_Init(void) {
 #include "led.h"
 #include "static_mem.h"
 #include "debug.h"
+#include "param.h"
+static int p = 0;
 // STATIC_MEM_QUEUE_ALLOC(syslinkPacketDelivery, 8, sizeof(uint8_t));
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
@@ -163,7 +165,7 @@ void StartDefaultTask(void *argument)
     // DEBUG_PRINT("space: %d\n", osMessageQueueGetSpace(syslinkPacketDelivery));
     // osMessageQueueGet(syslinkPacketDelivery, &x, 0, 0);
     // DEBUG_PRINT("space after: %d, data: %d\n", osMessageQueueGetSpace(syslinkPacketDelivery), x);
-    // DEBUG_PRINT_UART("%ld, %ld\n", osKernelGetTickCount(), osKernelGetTickFreq());
+    // DEBUG_PRINT_UART("p: %d\n", p);
     ledSet(1, 1);
     osDelay(1000);
     ledSet(1, 0);
@@ -174,7 +176,9 @@ void StartDefaultTask(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-
+PARAM_GROUP_START(freeRTOS)
+  PARAM_ADD(PARAM_INT32, p, &p)
+PARAM_GROUP_STOP(freeRTOS)
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

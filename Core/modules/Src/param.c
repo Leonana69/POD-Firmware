@@ -299,7 +299,6 @@ void paramTOCProcess(int command) {
 }
 
 static void paramWriteProcess() {
-	DEBUG_PRINT_UART("w\n");
   if (useV2) {
     uint16_t ident;
     memcpy(&ident, &p.data[0], 2);

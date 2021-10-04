@@ -49,7 +49,7 @@ void commInit(void) {
 	crtpInit();
   consoleInit();
   radiolinkInit();
-
+  // usblinkInit();
   // TODO: add choice between usb and radio
   crtpSetLink(radiolinkGetLink());
 
@@ -69,6 +69,7 @@ bool commTest(void) {
   pass &= crtpTest();
   pass &= consoleTest();
   pass &= radiolinkTest();
+  // pass &= usblinkTest();
   pass &= crtpLinkTest();
   pass &= crtpPlatformTest();
   pass &= logTest();

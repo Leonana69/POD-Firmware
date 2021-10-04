@@ -122,9 +122,8 @@ static void syslinkRouteIncommingPacket(SyslinkPacket *slp) {
  */
 
 void syslinkInit() {
-  if (isInit) {
+  if (isInit)
     return;
-  }
 
   STATIC_SEMAPHORE_CREATE(syslinkAccess, 1, 1);
   STATIC_MEM_TASK_CREATE(syslinkTask, syslinkTask, SYSLINK_TASK_NAME, NULL, SYSLINK_TASK_PRI);

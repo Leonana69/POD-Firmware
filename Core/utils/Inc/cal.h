@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#define MIN(a, b) ((b) < (a) ? (b) : (a))
+#define MAX(a, b) ((b) > (a) ? (b) : (a))
+
 uint8_t calculate_cksum(void* data, size_t len);
 
 uint16_t single2half(float number);
@@ -66,5 +69,8 @@ uint32_t crc32Out(const crc32Context_t *context);
  * @return The CRC32 checksum
  */
 uint32_t crc32CalculateBuffer(const void* buffer, size_t size);
+
+uint32_t quaternionCompress(float const q[4]);
+void quaternionDecompress(uint32_t cq, float q[4]);
 
 #endif

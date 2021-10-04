@@ -215,7 +215,7 @@ osThreadAttr_t* getOsThreadAttr_t(char* name, void* cb_mem, uint32_t cb_size, vo
 
 osMutexAttr_t* getOsMutexAttr_t(char* name, void* cb_mem, uint32_t cb_size);
 #define STATIC_MUTEX_CREATE(NAME) \
-  osMutexNew(getOsMutexAttr_t(#NAME, \
+  NAME = osMutexNew(getOsMutexAttr_t(#NAME, \
   & mutex_ ## NAME ## _ControlBlock, \
   sizeof(mutex_ ## NAME ## _ControlBlock)));
 
@@ -226,7 +226,7 @@ osMutexAttr_t* getOsMutexAttr_t(char* name, void* cb_mem, uint32_t cb_size);
 
 osSemaphoreAttr_t* getOsSemaphoreAttr_t(char* name, void* cb_mem, uint32_t cb_size);
 #define STATIC_SEMAPHORE_CREATE(NAME, MAX, INIT) \
-  osSemaphoreNew(MAX, INIT, getOsSemaphoreAttr_t(#NAME, \
+  NAME = osSemaphoreNew(MAX, INIT, getOsSemaphoreAttr_t(#NAME, \
   & semaphore_ ## NAME ## _ControlBlock, \
   sizeof(semaphore_ ## NAME ## _ControlBlock)));
 

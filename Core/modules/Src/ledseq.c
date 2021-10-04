@@ -197,7 +197,7 @@ void ledseqInit() {
   }
 	
 
-  ledseqMutex = STATIC_MUTEX_CREATE(ledseqMutex);
+  STATIC_MUTEX_CREATE(ledseqMutex);
   ledseqCmdQueue = osMessageQueueNew(10, sizeof(struct ledseqCmd_s), NULL);
 
 	osThreadAttr_t thrAttr = {
