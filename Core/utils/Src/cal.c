@@ -224,8 +224,8 @@ uint32_t quaternionCompress(float const q[4]) {
 }
 
 void quaternionDecompress(uint32_t cq, float q[4]) {
-  const uint16_t mask = (1 << 9) - 1;
-  const float dmask = 1.0 / (float) mask;
+  const static uint16_t mask = (1 << 9) - 1;
+  const static float dmask = 1.0 / (float) mask;
   uint8_t l = cq >> 30;
   float squareSum = 1.0;
   for (int8_t i = 3; i >= 0; i--) {

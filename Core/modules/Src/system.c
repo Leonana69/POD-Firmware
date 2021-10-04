@@ -113,8 +113,7 @@ void systemInit(void) {
   osSemaphoreAcquire(canStartMutex, osDelayMax);
 
   ledInit();
-  // TODO: 1
-  ledSet(CHG_LED, 0);
+  ledSet(CHG_LED, 1);
 #ifdef DEBUG_QUEUE_MONITOR
   queueMonitorInit();
 #endif
@@ -146,18 +145,16 @@ void systemInit(void) {
   configblockInit();
   workerInit();
   ledseqInit();
-  // adcInit();
-  
   pmInit();
-  
   sysLoadInit();
   commanderInit();
-
-  /* these modules are not used by us */
+  memInit();
+  /* these modules are not used */
   // storageInit();
   // buzzerInit();
   // peerLocalizationInit();
   // debugInit();
+  // adcInit();
 
 #ifdef APP_ENABLED
   appInit();
@@ -185,14 +182,8 @@ void systemTask(void *arg) {
   // TODO: check if this is essential
   usecTimerInit();
 
-  // init by stm32cubemx
-  // i2cdevInit(I2C3_DEV);
-  // i2cdevInit(I2C1_DEV);
-
-  // // Init the high-levels modules
+  // Init the high-levels modules
   systemInit();
-  // 
-  // commanderInit();
 
   // StateEstimatorType estimator = anyEstimator;
   // estimatorKalmanTaskInit();
@@ -201,10 +192,7 @@ void systemTask(void *arg) {
   // stabilizerInit(estimator);
   // if (deckGetRequiredLowInterferenceRadioMode() && platformConfigPhysicalLayoutAntennasAreClose())
   //   platformSetLowInterferenceRadioMode();
-
-  // soundInit();
-  memInit();
-
+  
 #ifdef PROXIMITY_ENABLED
   proximityInit();
 #endif
