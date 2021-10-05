@@ -64,8 +64,8 @@ static const uint8_t typeLength[] = {
 };
 
 typedef enum {
-  acqType_memory = 0,
-  acqType_function = 1,
+  acqTypeMemory = 0,
+  acqTypeFunction = 1,
 } acquisitionType_t;
 
 // Maximum log payload length (4 bytes are used for block id and timeStamp)
@@ -520,7 +520,7 @@ static int logAppendBlock(int id, struct ops_setting * settings, int len) {
       ops->variable = (void*)(&settings[i] + 1);
       ops->storageType = (settings[i].logType >> 4) & LOG_TYPE_MASK;
       ops->logType = settings[i].logType & LOG_TYPE_MASK;
-      ops->acquisitionType = acqType_memory;
+      ops->acquisitionType = acqTypeMemory;
       i += 2;
 
       LOG_DEBUG("Appended var addr 0x%x to block %d\n", (int)ops->variable, id);
@@ -586,7 +586,7 @@ static int logAppendBlockV2(int id, struct ops_setting_v2 * settings, int len) {
       ops->variable = (void*)(&settings[i] + 1);
       ops->storageType = (settings[i].logType >> 4) & LOG_TYPE_MASK;
       ops->logType = settings[i].logType & LOG_TYPE_MASK;
-      ops->acquisitionType = acqType_memory;
+      ops->acquisitionType = acqTypeMemory;
       i += 2;
 
       LOG_DEBUG("Appended var addr 0x%x to block %d\n", (int)ops->variable, id);
@@ -710,7 +710,7 @@ void logRunBlock(void *arg) {
     switch(ops->storageType) {
       case LOG_UINT8: {
         uint8_t v;
-        if (ops->acquisitionType == acqType_function) {
+        if (ops->acquisitionType == acqTypeFunction) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
           v = logByFunction->acquireUInt8(timeStamp, logByFunction->data);
         } else {
@@ -721,7 +721,7 @@ void logRunBlock(void *arg) {
       }
       case LOG_INT8: {
         int8_t v;
-        if (ops->acquisitionType == acqType_function) {
+        if (ops->acquisitionType == acqTypeFunction) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
           v = logByFunction->acquireInt8(timeStamp, logByFunction->data);
         } else {
@@ -732,7 +732,7 @@ void logRunBlock(void *arg) {
       }
       case LOG_UINT16: {
         uint16_t v;
-        if (ops->acquisitionType == acqType_function) {
+        if (ops->acquisitionType == acqTypeFunction) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
           v = logByFunction->acquireUInt16(timeStamp, logByFunction->data);
         } else {
@@ -743,7 +743,7 @@ void logRunBlock(void *arg) {
       }
       case LOG_INT16: {
         int16_t v;
-        if (ops->acquisitionType == acqType_function) {
+        if (ops->acquisitionType == acqTypeFunction) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
           v = logByFunction->acquireInt16(timeStamp, logByFunction->data);
         } else {
@@ -754,7 +754,7 @@ void logRunBlock(void *arg) {
       }
       case LOG_UINT32: {
         uint32_t v;
-        if (ops->acquisitionType == acqType_function) {
+        if (ops->acquisitionType == acqTypeFunction) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
           v = logByFunction->acquireUInt32(timeStamp, logByFunction->data);
         } else {
@@ -765,7 +765,7 @@ void logRunBlock(void *arg) {
       }
       case LOG_INT32: {
         int32_t v;
-        if (ops->acquisitionType == acqType_function) {
+        if (ops->acquisitionType == acqTypeFunction) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
           v = logByFunction->acquireInt32(timeStamp, logByFunction->data);
         } else {
@@ -776,7 +776,7 @@ void logRunBlock(void *arg) {
       }
       case LOG_FLOAT: {
         float v;
-        if (ops->acquisitionType == acqType_function) {
+        if (ops->acquisitionType == acqTypeFunction) {
           logByFunction_t* logByFunction = (logByFunction_t*)ops->variable;
           v = logByFunction->aquireFloat(timeStamp, logByFunction->data);
         } else {
@@ -1014,7 +1014,7 @@ unsigned int logGetUint(logVarId_t varid) {
 
 static acquisitionType_t acquisitionTypeFromLogType(uint8_t logType) {
   if (logType & LOG_BY_FUNCTION) {
-    return acqType_function;
+    return acqTypeFunction;
   }
-  return acqType_memory;
+  return acqTypeMemory;
 }

@@ -38,10 +38,10 @@
 #define MAGIC_ASSERT_INDICATOR 0x2f8a001f
 
 enum snapshotType_e {
-  SnapshotTypeNone = 0,
-  SnapshotTypeFile = 1,
-  SnapshotTypeHardFault = 2,
-  SnapshotTypeText = 3,
+  snapshotTypeNone = 0,
+  snapshotTypeFile = 1,
+  snapshotTypeHardFault = 2,
+  snapshotTypeText = 3,
 };
 
 typedef struct SNAPSHOT_DATA {
@@ -72,7 +72,7 @@ typedef struct SNAPSHOT_DATA {
 // reset (by the watch dog for instance)
 SNAPSHOT_DATA snapshot __attribute__((section(".nzds"))) = {
   .magicNumber = 0,
-  .type = SnapshotTypeNone,
+  .type = snapshotTypeNone,
 };
 
 
@@ -91,7 +91,7 @@ void assertFail(char *exp, char *file, int line) {
 
 void storeAssertFileData(const char *file, int line) {
   snapshot.magicNumber = MAGIC_ASSERT_INDICATOR;
-  snapshot.type = SnapshotTypeFile;
+  snapshot.type = snapshotTypeFile;
   snapshot.file.fileName = file;
   snapshot.file.line = line;
 }
@@ -106,7 +106,7 @@ void storeAssertHardfaultData(
     unsigned int pc,
     unsigned int psr) {
   snapshot.magicNumber = MAGIC_ASSERT_INDICATOR;
-  snapshot.type = SnapshotTypeHardFault;
+  snapshot.type = snapshotTypeHardFault;
   snapshot.hardfault.r0 = r0;
   snapshot.hardfault.r1 = r1;
   snapshot.hardfault.r2 = r2;
@@ -119,21 +119,21 @@ void storeAssertHardfaultData(
 
 void storeAssertTextData(const char *text) {
   snapshot.magicNumber = MAGIC_ASSERT_INDICATOR;
-  snapshot.type = SnapshotTypeText;
+  snapshot.type = snapshotTypeText;
   snapshot.text.text = text;
 }
 
 static void clearAssertData() {
-  snapshot.type = SnapshotTypeNone;
+  snapshot.type = snapshotTypeNone;
 }
 
 void printAssertSnapshotData() {
   if (MAGIC_ASSERT_INDICATOR == snapshot.magicNumber) {
     switch (snapshot.type) {
-      case SnapshotTypeFile:
+      case snapshotTypeFile:
         DEBUG_PRINT("Assert failed at %s:%d\n", snapshot.file.fileName, snapshot.file.line);
         break;
-      case SnapshotTypeHardFault:
+      case snapshotTypeHardFault:
         DEBUG_PRINT("Hardfault. r0: %X, r1: %X, r2: %X, r3: %X, r12: %X, lr: %X, pc: %X, psr: %X\n",
           snapshot.hardfault.r0,
           snapshot.hardfault.r1,
@@ -144,7 +144,7 @@ void printAssertSnapshotData() {
           snapshot.hardfault.pc,
           snapshot.hardfault.psr);
         break;
-      case SnapshotTypeText:
+      case snapshotTypeText:
         DEBUG_PRINT("Assert failed: %s\n", snapshot.text.text);
         break;
       default:
@@ -157,7 +157,7 @@ void printAssertSnapshotData() {
 }
 
 static bool isAssertRegistered() {
-  return (MAGIC_ASSERT_INDICATOR == snapshot.magicNumber) && (snapshot.type != SnapshotTypeNone);
+  return (MAGIC_ASSERT_INDICATOR == snapshot.magicNumber) && (snapshot.type != snapshotTypeNone);
 }
 
 bool cfAssertNormalStartTest(void) {
