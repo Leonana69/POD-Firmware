@@ -117,7 +117,7 @@ STATIC_MEM_TASK_ALLOC(stabilizerTask, STABILIZER_TASK_STACKSIZE);
 static void stabilizerTask();
 
 static void calcSensorToOutputLatency(const sensorData_t *sensorData) {
-  uint64_t outTimestamp = usecTimeStamp();
+  uint64_t outTimestamp = usecTimerStamp();
   inToOutLatency = outTimestamp - sensorData->interruptTimestamp;
 }
 

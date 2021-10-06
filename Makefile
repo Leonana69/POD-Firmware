@@ -100,7 +100,7 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c
 ######################################
 # utils
 VPATH += Core/utils/Src
-C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c
+C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c filter.c pid.c
 
 # drivers
 VPATH += Core/drivers/Src

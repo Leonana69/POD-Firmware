@@ -72,5 +72,5 @@ uint32_t crc32CalculateBuffer(const void* buffer, size_t size);
 
 uint32_t quaternionCompress(float const q[4]);
 void quaternionDecompress(uint32_t cq, float q[4]);
-
+float fConstrain(float val, float vMin, float vMax);
 #endif

@@ -25,34 +25,33 @@
  * pid.c - implementation of the PID regulator
  */
 
+// TODO: remove this
 #ifdef IMPROVED_BARO_Z_HOLD
 #define PID_FILTER_ALL
 #endif
 
 #include "pid.h"
-#include "num.h"
-#include <math.h>
-#include <float.h>
+#include "cal.h"
 
 void pidInit(PidObject* pid, const float desired, const float kp,
              const float ki, const float kd, const float dt,
              const float samplingRate, const float cutoffFreq,
              bool enableDFilter) {
-  pid->error         = 0;
-  pid->prevError     = 0;
-  pid->integ         = 0;
-  pid->deriv         = 0;
-  pid->desired       = desired;
-  pid->kp            = kp;
-  pid->ki            = ki;
-  pid->kd            = kd;
-  pid->iLimit        = DEFAULT_PID_INTEGRATION_LIMIT;
-  pid->outputLimit   = DEFAULT_PID_OUTPUT_LIMIT;
-  pid->dt            = dt;
+  pid->error = 0;
+  pid->prevError = 0;
+  pid->integ = 0;
+  pid->deriv = 0;
+  pid->desired = desired;
+  pid->kp = kp;
+  pid->ki = ki;
+  pid->kd = kd;
+  pid->iLimit = DEFAULT_PID_INTEGRATION_LIMIT;
+  pid->outputLimit = DEFAULT_PID_OUTPUT_LIMIT;
+  pid->dt = dt;
+	pid->rdt = 1.0 / dt;
   pid->enableDFilter = enableDFilter;
-  if (pid->enableDFilter) {
+  if (pid->enableDFilter)
     lpf2pInit(&pid->dFilter, samplingRate, cutoffFreq);
-  }
 }
 
 float pidUpdate(PidObject* pid, const float measured, const bool updateError) {
@@ -61,10 +60,9 @@ float pidUpdate(PidObject* pid, const float measured, const bool updateError) {
     if (updateError)
         pid->error = pid->desired - measured;
 
-    pid->outP = pid->kp * pid->error;
-    output += pid->outP;
+    output += pid->kp * pid->error;
 
-    float deriv = (pid->error - pid->prevError) / pid->dt;
+    float deriv = (pid->error - pid->prevError) * pid->rdt;
     #ifdef PID_FILTER_ALL
       pid->deriv = deriv;
     #else
@@ -78,41 +76,32 @@ float pidUpdate(PidObject* pid, const float measured, const bool updateError) {
       pid->deriv = 0;
     }
 
-    pid->outD = pid->kd * pid->deriv;
-    output += pid->outD;
+    output += pid->kd * pid->deriv;
 
     pid->integ += pid->error * pid->dt;
 
     // Constrain the integral (unless the iLimit is zero)
     if (pid->iLimit != 0)
-    	pid->integ = constrain(pid->integ, -pid->iLimit, pid->iLimit);
+    	pid->integ = fConstrain(pid->integ, -pid->iLimit, pid->iLimit);
 
-    pid->outI = pid->ki * pid->integ;
-    output += pid->outI;
+    output += pid->ki * pid->integ;
     
     #ifdef PID_FILTER_ALL
       //filter complete output instead of only D component to compensate for increased noise from increased barometer influence
       if (pid->enableDFilter)
-      {
         output = lpf2pApply(&pid->dFilter, output);
-      }
-      else {
+      else
         output = output;
-      }
-      if (isnan(output)) {
+
+      if (isnan(output))
         output = 0;
-      }
      #endif
-      
-    
 
     // Constrain the total PID output (unless the outputLimit is zero)
     if (pid->outputLimit != 0)
-      output = constrain(output, -pid->outputLimit, pid->outputLimit);
-
+      output = fConstrain(output, -pid->outputLimit, pid->outputLimit);
 
     pid->prevError = pid->error;
-
     return output;
 }
 
@@ -122,10 +111,10 @@ void pidSetIntegralLimit(PidObject* pid, const float limit) {
 
 
 void pidReset(PidObject* pid) {
-  pid->error     = 0;
+  pid->error = 0;
   pid->prevError = 0;
-  pid->integ     = 0;
-  pid->deriv     = 0;
+  pid->integ = 0;
+  pid->deriv = 0;
 }
 
 void pidSetDesired(PidObject* pid, const float desired) {

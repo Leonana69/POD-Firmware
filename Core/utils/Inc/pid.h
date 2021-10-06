@@ -68,19 +68,20 @@
 
 typedef struct {
   float desired;      //< set point
+	float kp;           //< proportional gain
+  float ki;           //< integral gain
+  float kd;           //< derivative gain
+	float dt;           //< delta-time dt
+
   float error;        //< error
   float prevError;    //< previous error
   float integ;        //< integral
   float deriv;        //< derivative
-  float kp;           //< proportional gain
-  float ki;           //< integral gain
-  float kd;           //< derivative gain
-  float outP;         //< proportional output (debugging)
-  float outI;         //< integral output (debugging)
-  float outD;         //< derivative output (debugging)
+  
   float iLimit;       //< integral limit, absolute value. '0' means no limit.
   float outputLimit;  //< total PID output limit, absolute value. '0' means no limit.
-  float dt;           //< delta-time dt
+  
+	float rdt;					//< reciprocal of dt
   lpf2pData dFilter;  //< filter for D term
   bool enableDFilter; //< filter for D term enable flag
 } PidObject;

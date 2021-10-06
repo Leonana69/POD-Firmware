@@ -240,3 +240,7 @@ void quaternionDecompress(uint32_t cq, float q[4]) {
   }
   q[l] = sqrtf(squareSum);
 }
+
+float fConstrain(float val, const float vMin, const float vMax) {
+  return fminf(vMax, fmaxf(vMin, val));
+}
