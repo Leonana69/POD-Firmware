@@ -56,14 +56,13 @@
  * 2021.03.15, Wolfgang Hoenig: Refactored queue handling
  */
 
-#include "kalman_core.h"
-#include "kalman_supervisor.h"
+#include "kalman_filter.h"
 
 // #include "FreeRTOS.h"
 // #include "queue.h"
 // #include "task.h"
 // #include "semphr.h"
-#include "sensors.h"
+// #include "sensors.h"
 #include "static_mem.h"
 
 #include "estimator.h"
@@ -72,25 +71,26 @@
 #include "log.h"
 #include "param.h"
 #include "debug.h"
+#include "config.h"
 // #include "physicalConstants.h"
 #include "supervisor.h"
 
-#include "statsCnt.h"
-#include "rateSupervisor.h"
+// #include "statsCnt.h"
+// #include "rateSupervisor.h"
 
 // Measurement models
-#include "mm_distance.h"
-#include "mm_absolute_height.h"
-#include "mm_position.h"
-#include "mm_pose.h"
-#include "mm_tdoa.h"
-#include "mm_flow.h"
-#include "mm_tof.h"
-#include "mm_yaw_error.h"
-#include "mm_sweep_angles.h"
+// #include "mm_distance.h"
+// #include "mm_absolute_height.h"
+// #include "mm_position.h"
+// #include "mm_pose.h"
+// #include "mm_tdoa.h"
+// #include "mm_flow.h"
+// #include "mm_tof.h"
+// #include "mm_yaw_error.h"
+// #include "mm_sweep_angles.h"
 
-#include "mm_tdoa_robust.h"
-#include "mm_distance_robust.h"
+// #include "mm_tdoa_robust.h"
+// #include "mm_distance_robust.h"
 
 #define DEBUG_MODULE "ESTKALMAN"
 
@@ -105,9 +105,6 @@ STATIC_MEM_SEMAPHORE_ALLOC(runKalman);
 
 // Mutex to protect data that is shared between the task and
 // functions called by the stabilizer loop
-// static SemaphoreHandle_t dataMutex;
-// static StaticSemaphore_t dataMutexBuffer;
-
 STATIC_MEM_MUTEX_ALLOC(dataMutex);
 
 /**
@@ -174,6 +171,7 @@ static const bool useBaroUpdate = false;
 #endif
 
 static void kalmanTask();
+static void estimatorKalmanReset();
 static bool predictStateForward(uint32_t osTick, float dt);
 static bool updateQueuedMeasurements(const uint32_t tick);
 
@@ -183,6 +181,7 @@ STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(kalmanTask, 3 * configMINIMAL_STACK_
 
 static void kalmanTask() {
   systemWaitStart();
+
 	float dt;
   uint32_t lastPrediction = osKernelGetTickCount();
   uint32_t nextPrediction = osKernelGetTickCount();
@@ -195,7 +194,7 @@ static void kalmanTask() {
 
     // If the client triggers an estimator reset via parameter update
     if (coreData.resetEstimation) {
-      estimatorKalmanInit();
+      estimatorKalmanReset();
       paramSetInt(paramGetVarId("kalman", "resetEstimation"), 0);
     }
 
@@ -248,7 +247,7 @@ static void kalmanTask() {
     if (doneUpdate) {
       kalmanCoreFinalize(&coreData, osTick);
       // STATS_CNT_RATE_EVENT(&finalizeCounter);
-      if (!kalmanSupervisorIsStateWithinBounds(&coreData)) {
+      if (!supervisorKalmanIsStateWithinBounds(&coreData)) {
         coreData.resetEstimation = true;
 
         if (osTick > warningBlockTime) {
@@ -281,10 +280,8 @@ void estimatorKalmanUpdate(state_t *state, const uint32_t tick) {
 }
 
 static bool predictStateForward(uint32_t osTick, float dt) {
-  if (gyroAccumulatorCount == 0
-      || accAccumulatorCount == 0) {
+  if (gyroAccumulatorCount == 0 || accAccumulatorCount == 0)
     return false;
-  }
   // gyro is in deg/sec but the estimator requires rad/sec
   Axis3f gyroAverage;
   gyroAverage.x = radians(gyroAccumulator.x) / gyroAccumulatorCount;
@@ -321,50 +318,56 @@ static bool updateQueuedMeasurements(const uint32_t tick) {
   measurement_t m;
   while (estimatorDequeue(&m)) {
     switch (m.type) {
-      case MeasurementTypeTDOA:
-        if(robustTdoa){
-          // robust KF update with TDOA measurements
-          kalmanCoreRobustUpdateWithTDOA(&coreData, &m.data.tdoa);
-        }else{
-          // standard KF update
-          kalmanCoreUpdateWithTDOA(&coreData, &m.data.tdoa);
-        }
-        doneUpdate = true;
-        break;
-      case MeasurementTypePosition:
-        kalmanCoreUpdateWithPosition(&coreData, &m.data.position);
-        doneUpdate = true;
-        break;
-      case MeasurementTypePose:
-        kalmanCoreUpdateWithPose(&coreData, &m.data.pose);
-        doneUpdate = true;
-        break;
-      case MeasurementTypeDistance:
-        if (robustTwr){
-            // robust KF update with UWB TWR measurements
-            kalmanCoreRobustUpdateWithDistance(&coreData, &m.data.distance);
-        }else{
-            // standard KF update
-            kalmanCoreUpdateWithDistance(&coreData, &m.data.distance);
-        }
-        doneUpdate = true;
-        break;
-      case MeasurementTypeTOF:
-        kalmanCoreUpdateWithTof(&coreData, &m.data.tof);
-        doneUpdate = true;
-        break;
-      case MeasurementTypeAbsoluteHeight:
-        kalmanCoreUpdateWithAbsoluteHeight(&coreData, &m.data.height);
-        doneUpdate = true;
-        break;
-      case MeasurementTypeFlow:
-        kalmanCoreUpdateWithFlow(&coreData, &m.data.flow, &gyroLatest);
-        doneUpdate = true;
-        break;
-      case MeasurementTypeYawError:
-        kalmanCoreUpdateWithYawError(&coreData, &m.data.yawError);
-        doneUpdate = true;
-        break;
+      // case MeasurementTypeTDOA:
+      //   if (robustTdoa){
+      //     // robust KF update with TDOA measurements
+      //     kalmanCoreRobustUpdateWithTDOA(&coreData, &m.data.tdoa);
+      //   } else {
+      //     // standard KF update
+      //     kalmanCoreUpdateWithTDOA(&coreData, &m.data.tdoa);
+      //   }
+      //   doneUpdate = true;
+      //   break;
+      // case MeasurementTypePosition:
+      //   kalmanCoreUpdateWithPosition(&coreData, &m.data.position);
+      //   doneUpdate = true;
+      //   break;
+      // case MeasurementTypePose:
+      //   kalmanCoreUpdateWithPose(&coreData, &m.data.pose);
+      //   doneUpdate = true;
+      //   break;
+      // case MeasurementTypeDistance:
+      //   if (robustTwr){
+      //       // robust KF update with UWB TWR measurements
+      //       kalmanCoreRobustUpdateWithDistance(&coreData, &m.data.distance);
+      //   } else {
+      //       // standard KF update
+      //       kalmanCoreUpdateWithDistance(&coreData, &m.data.distance);
+      //   }
+      //   doneUpdate = true;
+      //   break;
+
+      // TODO: enable TOF and Flow
+      // case MeasurementTypeTOF:
+      //   kalmanCoreUpdateWithTof(&coreData, &m.data.tof);
+      //   doneUpdate = true;
+      //   break;
+
+      // case MeasurementTypeAbsoluteHeight:
+      //   kalmanCoreUpdateWithAbsoluteHeight(&coreData, &m.data.height);
+      //   doneUpdate = true;
+      //   break;
+
+      // case MeasurementTypeFlow:
+      //   kalmanCoreUpdateWithFlow(&coreData, &m.data.flow, &gyroLatest);
+      //   doneUpdate = true;
+      //   break;
+
+      // case MeasurementTypeYawError:
+      //   kalmanCoreUpdateWithYawError(&coreData, &m.data.yawError);
+      //   doneUpdate = true;
+      //   break;
+
       case MeasurementTypeGyroscope:
         gyroAccumulator.x += m.data.gyroscope.gyro.x;
         gyroAccumulator.y += m.data.gyroscope.gyro.y;
@@ -379,12 +382,13 @@ static bool updateQueuedMeasurements(const uint32_t tick) {
         accLatest = m.data.acceleration.acc;
         accAccumulatorCount++;
         break;
-      case MeasurementTypeBarometer:
-        if (useBaroUpdate) {
-          kalmanCoreUpdateWithBaro(&coreData, m.data.barometer.baro.asl, quadIsFlying);
-          doneUpdate = true;
-        }
-        break;
+        // TODO: add baro
+      // case MeasurementTypeBarometer:
+      //   if (useBaroUpdate) {
+      //     kalmanCoreUpdateWithBaro(&coreData, m.data.barometer.baro.asl, quadIsFlying);
+      //     doneUpdate = true;
+      //   }
+      //   break;
       default:
         break;
     }
@@ -394,34 +398,37 @@ static bool updateQueuedMeasurements(const uint32_t tick) {
 }
 
 // Called when this estimator is activated
-void estimatorKalmanInit(void) {
+void estimatorKalmanInit() {
 	if (isInit)
 		return;
-  accAccumulator = (Axis3f){.axis = {0}};
-  gyroAccumulator = (Axis3f){.axis = {0}};
-
-  accAccumulatorCount = 0;
-  gyroAccumulatorCount = 0;
-  kalmanCoreInit(&coreData);
-	
+  estimatorKalmanReset();
 	STATIC_SEMAPHORE_CREATE(runKalman, 1, 0);
 	STATIC_MUTEX_CREATE(dataMutex);
   STATIC_MEM_TASK_CREATE(kalmanTask, kalmanTask, KALMAN_TASK_NAME, NULL, KALMAN_TASK_PRI);
 	isInit = true;
 }
 
-bool estimatorKalmanTest(void) {
+void estimatorKalmanReset() {
+  accAccumulator = (Axis3f){ .axis = { 0 } };
+  gyroAccumulator = (Axis3f){ .axis = { 0 } };
+
+  accAccumulatorCount = 0;
+  gyroAccumulatorCount = 0;
+  kalmanCoreInit(&coreData);
+}
+
+bool estimatorKalmanTest() {
   return isInit;
 }
 
-void estimatorKalmanGetEstimatedPos(point_t* pos) {
+void estimatorKalmanGetEstimatedPos(point_t *pos) {
   pos->x = coreData.S[KC_STATE_X];
   pos->y = coreData.S[KC_STATE_Y];
   pos->z = coreData.S[KC_STATE_Z];
 }
 
-void estimatorKalmanGetEstimatedRot(float * rotationMatrix) {
-  memcpy(rotationMatrix, coreData.R, 9*sizeof(float));
+void estimatorKalmanGetEstimatedRot(float *rotationMatrix) {
+  memcpy(rotationMatrix, coreData.R, 9 * sizeof(float));
 }
 
 // TODO: check the list

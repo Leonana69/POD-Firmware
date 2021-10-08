@@ -29,10 +29,13 @@
 
 #include <stdbool.h>
 #include "stabilizer_types.h"
+#include "kalman_filter.h"
 
 void supervisorUpdate(const sensorData_t *data);
 bool supervisorCanFly();
 bool supervisorIsFlying();
 bool supervisorIsTumbled();
+
+bool supervisorKalmanIsStateWithinBounds(const kalmanCoreData_t *this);
 
 #endif //__SUPERVISOR_H__

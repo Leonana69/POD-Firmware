@@ -110,17 +110,15 @@ C_SOURCES += _gpio.c _usart.c _tim.c _i2c.c led.c eeprom.c syslink.c radiolink.c
 VPATH += Core/modules/Src
 C_SOURCES += worker.c queuemonitor.c system.c mem.c crtp.c console.c comm.c ledseq.c crtp_link.c log.c crtp_platform.c param.c \
 	sysload.c commander.c crtp_commander.c crtp_commander_rpyt.c crtp_commander_generic.c stabilizer.c controller.c controller_pid_attitude.c \
-	controller_pid.c controller_pid_position.c estimator.c supervisor.c
+	controller_pid.c controller_pid_position.c estimator.c supervisor.c estimator_kalman.c
 
-# FreeRTOS
-# VPATH += $(FREERTOS)
-# C_SOURCES += list.c tasks.c queue.c timers.c
-
-# VPATH += $(FREERTOS)/portable/MemMang
-# C_SOURCES += heap_4.c
-
-# C_SOURCES += $(PORT)/port.c
-
+# CMSIS DSP
+VPATH += Drivers/CMSIS/DSP/Source/FastMathFunctions
+C_SOURCES += arm_cos_f32.c arm_sin_f32.c
+VPATH += Drivers/CMSIS/DSP/Source/MatrixFunctions
+C_SOURCES += arm_mat_mult_f32.c arm_mat_trans_f32.c
+VPATH += Drivers/CMSIS/DSP/Source/CommonTables
+C_SOURCES += arm_common_tables.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -208,9 +206,9 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 # guojun's CFLAGS
 ######################################
 CFLAGS += -DDEBUG_UART3
-CFLAGS += -DSTM32F4XX
+CFLAGS += -DSTM32F4XX -DSTM32F405xx
 CFLAGS += -DSTM32F40_41xxx -DARM_MATH_CM4
-# CFLAGS += -D__FPU_PRESENT=1
+CFLAGS += -D__FPU_PRESENT=1
 
 #######################################
 # LDFLAGS

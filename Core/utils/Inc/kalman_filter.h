@@ -54,8 +54,7 @@
 #ifndef __KALMAN_FILTER_H__
 #define __KALMAN_FILTER_H__
 #include "stabilizer_types.h"
-#include "stm32f4xx.h"
-#include "arm_math.h"
+#include "cal.h"
 
 // Indexes to access the quad's state, stored as a column vector
 typedef enum {
@@ -93,7 +92,6 @@ typedef struct {
 
   // Indicates that the internal state is corrupt and should be reset
   bool resetEstimation;
-
   float baroReferenceHeight;
 } kalmanCoreData_t;
 

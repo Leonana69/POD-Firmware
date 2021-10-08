@@ -111,6 +111,31 @@ void supervisorUpdate(const sensorData_t *data) {
   canFly = canFlyCheck();
 }
 
+bool supervisorKalmanIsStateWithinBounds(const kalmanCoreData_t* this) {
+  // TODO: set as define
+  float maxPosition = 100; //meters
+  float maxVelocity = 10; //meters per second
+  for (int i = 0; i < 3; i++) {
+    if (maxPosition > 0.0f) {
+      if (this->S[KC_STATE_X + i] > maxPosition) {
+        return false;
+      } else if (this->S[KC_STATE_X + i] < -maxPosition) {
+        return false;
+      }
+    }
+
+    if (maxVelocity > 0.0f) {
+      if (this->S[KC_STATE_PX + i] > maxVelocity) {
+        return false;
+      } else if (this->S[KC_STATE_PX + i] < -maxVelocity) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 /**
  *  System loggable variables to check different system states.
  */

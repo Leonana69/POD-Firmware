@@ -50,7 +50,7 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
 
 7. Enable GPIO PD2, PC0, PC1, PC2, PC3
 
-
+8. Disable #define __FPU_PRESENT in Driver/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h
     <!-- Enable IWDG -->
     <!-- - IWDG counter clock prescaler: 32 -->
     <!-- - IWDG down-counter reload value: 188 -->

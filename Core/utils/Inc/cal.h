@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <math.h>
+#include "cfassert.h"
+#include "stm32fxxx.h"
+#include "arm_math.h"
 
 #define MIN(a, b) ((b) < (a) ? (b) : (a))
 #define MAX(a, b) ((b) > (a) ? (b) : (a))
@@ -25,7 +28,7 @@ float deadband(float value, const float threshold);
  * 
  */
 typedef struct {
-    uint32_t remainder;
+	uint32_t remainder;
 } crc32Context_t;
 
 /**
@@ -79,4 +82,50 @@ int16_t capValueInt16(float in);
 
 static inline float radians(float degrees) { return (M_PI / 180.0f) * degrees; }
 static inline float degrees(float radians) { return (180.0f / M_PI) * radians; }
+
+static inline void assert_aligned_4_bytes(const arm_matrix_instance_f32* matrix) {
+  const uint32_t address = (uint32_t)matrix->pData;
+  ASSERT((address & 0x3) == 0);
+}
+
+static inline void mat_trans(const arm_matrix_instance_f32 * pSrc, arm_matrix_instance_f32 * pDst) {
+  assert_aligned_4_bytes(pSrc);
+  assert_aligned_4_bytes(pDst);
+
+  ASSERT(ARM_MATH_SUCCESS == arm_mat_trans_f32(pSrc, pDst));
+}
+
+static inline void mat_inv(const arm_matrix_instance_f32 * pSrc, arm_matrix_instance_f32 * pDst) {
+  assert_aligned_4_bytes(pSrc);
+  assert_aligned_4_bytes(pDst);
+
+  ASSERT(ARM_MATH_SUCCESS == arm_mat_inverse_f32(pSrc, pDst));
+}
+
+static inline void mat_mult(const arm_matrix_instance_f32 * pSrcA, const arm_matrix_instance_f32 * pSrcB, arm_matrix_instance_f32 * pDst) {
+  assert_aligned_4_bytes(pSrcA);
+  assert_aligned_4_bytes(pSrcB);
+  assert_aligned_4_bytes(pDst);
+
+  ASSERT(ARM_MATH_SUCCESS == arm_mat_mult_f32(pSrcA, pSrcB, pDst));
+}
+
+static inline void mat_scale(const arm_matrix_instance_f32 *pSrcA, float32_t scale, arm_matrix_instance_f32 *pDst) {
+	ASSERT(ARM_MATH_SUCCESS == arm_mat_scale_f32(pSrcA, scale, pDst));
+}
+
+static inline void matrixcopy(int ROW, int COLUMN, float destmat[ROW][COLUMN], float srcmat[ROW][COLUMN]){
+	//TODO: check the dimension of the matrices
+	for (int i = 0; i < ROW; i++)
+		for(int j = 0; j < COLUMN; j++)
+			destmat[i][j] = srcmat[i][j];
+}
+
+static inline float arm_sqrt(float32_t in) {
+  float pOut = 0;
+  arm_status result = arm_sqrt_f32(in, &pOut);
+  ASSERT(ARM_MATH_SUCCESS == result);
+  return pOut;
+}
+
 #endif

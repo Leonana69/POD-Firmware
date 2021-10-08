@@ -24,8 +24,8 @@
  * stm32fxxx.h - Includes correct stm32 include file.
  */
 
-#ifndef _STM32FXXX_H_
-#define _STM32FXXX_H_
+#ifndef __STM32FXXX_H__
+#define __STM32FXXX_H__
 
 #if defined (STM32F40_41xxx)
   #include "stm32f4xx.h"
@@ -35,4 +35,4 @@
   #warning "Don't know which stm32fxxx header file to include"
 #endif
 
-#endif /* STM32FXXX_H_ */
+#endif /* __STM32FXXX_H__ */
