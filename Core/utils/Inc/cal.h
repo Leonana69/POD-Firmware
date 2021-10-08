@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <unistd.h>
+#include <math.h>
 
 #define MIN(a, b) ((b) < (a) ? (b) : (a))
 #define MAX(a, b) ((b) > (a) ? (b) : (a))
@@ -73,4 +74,9 @@ uint32_t crc32CalculateBuffer(const void* buffer, size_t size);
 uint32_t quaternionCompress(float const q[4]);
 void quaternionDecompress(uint32_t cq, float q[4]);
 float fConstrain(float val, float vMin, float vMax);
+float capAngle(float angle);
+int16_t capValueInt16(float in);
+
+static inline float radians(float degrees) { return (M_PI / 180.0f) * degrees; }
+static inline float degrees(float radians) { return (180.0f / M_PI) * radians; }
 #endif

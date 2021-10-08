@@ -244,3 +244,23 @@ void quaternionDecompress(uint32_t cq, float q[4]) {
 float fConstrain(float val, const float vMin, const float vMax) {
   return fminf(vMax, fmaxf(vMin, val));
 }
+
+float capAngle(float angle) {
+  float result = angle;
+
+  while (result > 180.0f)
+    result -= 360.0f;
+
+  while (result < -180.0f)
+    result += 360.0f;
+
+  return result;
+}
+
+int16_t capValueInt16(float in) {
+  if (in > INT16_MAX)
+    return INT16_MAX;
+  else if (in < INT16_MIN)
+    return INT16_MIN;
+  else return (int16_t)in;
+}

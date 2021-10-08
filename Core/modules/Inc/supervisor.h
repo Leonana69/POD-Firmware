@@ -1,13 +1,13 @@
 /*
- *    ||          ____  _ __                           
- * +------+      / __ )(_) /_______________ _____  ___ 
+ *    ||          ____  _ __
+ * +------+      / __ )(_) /_______________ _____  ___
  * | 0xBC |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
  * +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
  *  ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
  *
  * Crazyflie control firmware
  *
- * Copyright (C) 2011-2012 Bitcraze AB
+ * Copyright (C) 2021 Bitcraze AB
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,15 +21,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
- * sysload.h - System load monitor module header file
+ * supervisor.h - Keep track of system state
  */
 
-#ifndef __SYSLOAD_H__
-#define __SYSLOAD_H__
+#ifndef __SUPERVISOR_H__
+#define __SUPERVISOR_H__
 
 #include <stdbool.h>
+#include "stabilizer_types.h"
 
-void sysLoadInit();
-bool sysLoadTest();
+void supervisorUpdate(const sensorData_t *data);
+bool supervisorCanFly();
+bool supervisorIsFlying();
+bool supervisorIsTumbled();
 
-#endif
+#endif //__SUPERVISOR_H__

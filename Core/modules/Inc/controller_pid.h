@@ -1,13 +1,13 @@
-/*
- *    ||          ____  _ __                           
- * +------+      / __ )(_) /_______________ _____  ___ 
+/**
+ *    ||          ____  _ __
+ * +------+      / __ )(_) /_______________ _____  ___
  * | 0xBC |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
  * +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
  *  ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
  *
  * Crazyflie control firmware
  *
- * Copyright (C) 2011-2012 Bitcraze AB
+ * Copyright (C) 2011-2016 Bitcraze AB
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,15 +21,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
- * sysload.h - System load monitor module header file
+ * controller_pid.h - PID Controller Interface
  */
+#ifndef __CONTROLLER_PID_H__
+#define __CONTROLLER_PID_H__
 
-#ifndef __SYSLOAD_H__
-#define __SYSLOAD_H__
+#include "stabilizer_types.h"
 
-#include <stdbool.h>
+void controllerPidInit();
+bool controllerPidTest();
+void controllerPidUpdate(control_t *control, setpoint_t *setpoint,
+                                         const sensorData_t *sensors,
+                                         const state_t *state,
+                                         const uint32_t tick);
 
-void sysLoadInit();
-bool sysLoadTest();
-
-#endif
+#endif //__CONTROLLER_PID_H__

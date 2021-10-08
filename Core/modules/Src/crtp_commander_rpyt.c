@@ -31,7 +31,7 @@
 #include "crtp.h"
 #include "param.h"
 #include "cal.h"
-// #include "position_controller.h"
+#include "controller_pid_position.h"
 
 /**
  * CRTP commander rpyt packet format
@@ -124,11 +124,10 @@ void crtpCommanderRpytDecodeSetpoint(setpoint_t *setpoint, CRTPPacket *pk) {
     setpoint->thrust = fminf(rawThrust, MAX_THRUST);
 
   if (altHoldMode) {
-    if (!modeSet) {             //Reset filter and PID values on first initiation of assist mode to prevent sudden reactions.
+    if (!modeSet) {
+      //Reset filter and PID values on first initiation of assist mode to prevent sudden reactions.
       modeSet = true;
-			// TODO: enable position controller
-      // positionControllerResetAllPID();
-      // positionControllerResetAllfilters();
+      controllerPidPositionResetAll(true);
     }
     setpoint->thrust = 0;
     setpoint->mode.z = modeVelocity;

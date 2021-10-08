@@ -37,13 +37,27 @@
  */
 
 /** Attitude in euler angle form */
-typedef struct attitude_s {
-  uint32_t timestamp;  // Timestamp when the data was computed
 
-  float roll;
-  float pitch;
-  float yaw;
-} attitude_t;
+struct rpyt {
+	uint32_t timestamp;
+	union {
+		struct {
+			float roll;
+			float pitch;
+			float yaw;
+		};
+		struct {
+			float x;
+			float y;
+			float z;
+		};
+	};
+};
+
+typedef struct rpyt attitude_t;
+typedef struct rpyt rate_t;
+typedef struct rpyt acc_t;
+typedef struct rpyt position_t;
 
 /* vector */
 #define vec3d_size 3
@@ -52,7 +66,7 @@ typedef float mat3d[vec3d_size][vec3d_size];
 
 /* x,y,z vector */
 struct vec3_s {
-  uint32_t timestamp; // Timestamp when the data was computed
+  uint32_t timestamp;
 
   float x;
   float y;
@@ -62,7 +76,6 @@ struct vec3_s {
 typedef struct vec3_s vector_t;
 typedef struct vec3_s point_t;
 typedef struct vec3_s velocity_t;
-typedef struct vec3_s acc_t;
 
 /* Orientation as a quaternion */
 typedef struct quaternion_s {
@@ -255,23 +268,6 @@ typedef struct {
   float stdDev;
 } yawErrorMeasurement_t;
 
-/** Sweep angle measurement */
-// typedef struct {
-//   uint32_t timestamp;
-//   const vec3d* sensorPos;    // Sensor position in the CF reference frame
-//   const vec3d* rotorPos;     // Pos of rotor origin in global reference frame
-//   const mat3d* rotorRot;     // Rotor rotation matrix
-//   const mat3d* rotorRotInv;  // Inverted rotor rotation matrix
-//   uint8_t sensorId;
-//   uint8_t basestationId;
-//   uint8_t sweepId;
-//   float t;                   // t is the tilt angle of the light plane on the rotor
-//   float measuredSweepAngle;
-//   float stdDev;
-//   const lighthouseCalibrationSweep_t* calib;
-//   lighthouseCalibrationMeasurementModel_t calibrationMeasurementModel;
-// } sweepAngleMeasurement_t;
-
 /** gyroscope measurement */
 typedef struct {
   Axis3f gyro; // deg/s, for legacy reasons
@@ -296,9 +292,19 @@ typedef struct {
 #define RATE_50_HZ 50
 #define RATE_25_HZ 25
 
-#define RATE_MAIN_LOOP RATE_1000_HZ
-#define ATTITUDE_RATE RATE_500_HZ
-#define POSITION_RATE RATE_100_HZ
+#define DT_1000_HZ 0.001
+#define DT_500_HZ 0.002
+#define DT_250_HZ 0.004
+#define DT_100_HZ 0.01
+#define DT_50_HZ 0.02
+#define DT_25_HZ 0.04
+
+// TODO: move this to config.h
+#define RATE_MAIN_LOOP 			RATE_1000_HZ
+#define ATTITUDE_RATE 			RATE_500_HZ
+#define ATTITUDE_UPDATE_DT 	DT_500_HZ
+#define POSITION_RATE 			RATE_100_HZ
+#define POSITION_UPDATE_DT 	DT_100_HZ
 
 #define RATE_DO_EXECUTE(RATE_HZ, TICK) ((TICK % (RATE_MAIN_LOOP / RATE_HZ)) == 0)
 

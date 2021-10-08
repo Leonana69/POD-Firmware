@@ -30,79 +30,69 @@
 #include <stdbool.h>
 #include "filter.h"
 
-// TODO; move these to config.h
-#define PID_ROLL_RATE_KP  250.0
-#define PID_ROLL_RATE_KI  500.0
-#define PID_ROLL_RATE_KD  2.5
-#define PID_ROLL_RATE_INTEGRATION_LIMIT    33.3
+#define	PID_ROLL 	(1)
+#define	PID_PITCH (1 << 1)
+#define	PID_YAW 	(1 << 2)
 
-#define PID_PITCH_RATE_KP  250.0
-#define PID_PITCH_RATE_KI  500.0
-#define PID_PITCH_RATE_KD  2.5
-#define PID_PITCH_RATE_INTEGRATION_LIMIT   33.3
-
-#define PID_YAW_RATE_KP  120.0
-#define PID_YAW_RATE_KI  16.7
-#define PID_YAW_RATE_KD  0.0
-#define PID_YAW_RATE_INTEGRATION_LIMIT     166.7
-
-#define PID_ROLL_KP  6.0
-#define PID_ROLL_KI  3.0
-#define PID_ROLL_KD  0.0
-#define PID_ROLL_INTEGRATION_LIMIT    20.0
-
-#define PID_PITCH_KP  6.0
-#define PID_PITCH_KI  3.0
-#define PID_PITCH_KD  0.0
-#define PID_PITCH_INTEGRATION_LIMIT   20.0
-
-#define PID_YAW_KP  6.0
-#define PID_YAW_KI  1.0
-#define PID_YAW_KD  0.35
-#define PID_YAW_INTEGRATION_LIMIT     360.0
-
-
-#define DEFAULT_PID_INTEGRATION_LIMIT 5000.0
-#define DEFAULT_PID_OUTPUT_LIMIT      0.0
-
+#define	PID_X (1)
+#define	PID_Y	(1 << 1)
+#define	PID_Z (1 << 2)
 
 typedef struct {
-  float desired;      //< set point
 	float kp;           //< proportional gain
   float ki;           //< integral gain
   float kd;           //< derivative gain
-	float dt;           //< delta-time dt
+	float rate;					//< reciprocal of dt
 
+	float dt;           //< delta-time dt
+	float target;      //< set point
   float error;        //< error
   float prevError;    //< previous error
   float integ;        //< integral
   float deriv;        //< derivative
   
   float iLimit;       //< integral limit, absolute value. '0' means no limit.
-  float outputLimit;  //< total PID output limit, absolute value. '0' means no limit.
-  
-	float rdt;					//< reciprocal of dt
+  float oLimit;  			//< total PID output limit, absolute value. '0' means no limit.
+
   lpf2pData dFilter;  //< filter for D term
   bool enableDFilter; //< filter for D term enable flag
 } PidObject;
+
+typedef struct {
+	float kp;
+	float ki;
+	float kd;
+	float rate;
+
+	float iLimit;
+	float oLimit;
+
+	bool enableDFilter;
+	float cutoffFreq;
+} PidParam;
+
+typedef struct {
+	PidObject val;
+	PidObject rate;
+} CascadePidObject;
+
+typedef struct {
+	PidParam val;
+	PidParam rate;
+} CascadePidParam;
 
 /**
  * PID object initialization.
  *
  * @param[out] pid   A pointer to the pid object to initialize.
- * @param[in] desired  The initial set point.
  * @param[in] kp        The proportional gain
  * @param[in] ki        The integral gain
  * @param[in] kd        The derivative gain
- * @param[in] dt        Delta time since the last call
- * @param[in] samplingRate Frequency the update will be called
+ * @param[in] rate        Rate
  * @param[in] cutoffFreq   Frequency to set the low pass filter cutoff at
  * @param[in] enableDFilter Enable setting for the D lowpass filter
  */
- void pidInit(PidObject* pid, const float desired, const float kp,
-              const float ki, const float kd, const float dt,
-              const float samplingRate, const float cutoffFreq,
-              bool enableDFilter);
+ void pidInit(PidObject *pid, PidParam *param);
 
 /**
  * Set the integral limit for this PID in deg.
@@ -129,7 +119,7 @@ void pidReset(PidObject* pid);
  *                        Set to False if pidSetError() has been used.
  * @return PID algorithm output
  */
-float pidUpdate(PidObject* pid, const float measured, const bool updateError);
+float pidUpdate(PidObject* pid, const float measured, const float target, const bool updateError);
 
 /**
  * Set a new set point for the PID to track.
@@ -137,19 +127,16 @@ float pidUpdate(PidObject* pid, const float measured, const bool updateError);
  * @param[in] pid   A pointer to the pid object.
  * @param[in] angle The new set point
  */
-void pidSetDesired(PidObject* pid, const float desired);
+void pidSetTarget(PidObject* pid, const float target);
 
 /**
  * Set a new set point for the PID to track.
  * @return The set point
  */
-float pidGetDesired(PidObject* pid);
+float pidGetTarget(PidObject* pid);
 
-/**
- * Find out if PID is active
- * @return TRUE if active, FALSE otherwise
- */
-bool pidIsActive(PidObject* pid);
+// TODO: add comments
+void pidSetError(PidObject* pid, const float error);
 
 /**
  * Reset the Dfilter and set cutoff frequency

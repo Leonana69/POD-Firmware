@@ -25,7 +25,7 @@ void _UART_Init(void) {
 	// not busy in the beginning
 	STATIC_SEMAPHORE_CREATE(nrfUartBusyS, 1, 1);
 
-	syslinkPacketDelivery = STATIC_MEM_QUEUE_CREATE(syslinkPacketDelivery);
+	STATIC_MEM_QUEUE_CREATE(syslinkPacketDelivery);
   DEBUG_QUEUE_MONITOR_REGISTER(syslinkPacketDelivery);
 	// TODO: check this
 	// HAL_DMA_RegisterCallback(&nrfUartTxDmaHandle, HAL_DMA_XFER_HALFCPLT_CB_ID, nrfUartDmaIsr);

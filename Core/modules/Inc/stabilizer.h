@@ -33,13 +33,11 @@
 
 #define EMERGENCY_STOP_TIMEOUT_DISABLED (-1)
 
-typedef int StateEstimatorType;
-typedef int ControllerType;
 /**
  * Initialize the stabilizer subsystem and launch the stabilizer loop task.
  * The stabilizer loop task will wait on systemWaitStart() before running.
  */
-void stabilizerInit(StateEstimatorType estimator);
+void stabilizerInit();
 
 /**
  * Test the stabilizer subsystem. Calls test for all the stabilizer related

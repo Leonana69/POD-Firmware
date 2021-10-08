@@ -27,9 +27,6 @@
 
 #include <math.h>
 
-// #include "FreeRTOS.h"
-// #include "task.h"
-
 #include "system.h"
 #include "log.h"
 #include "param.h"
@@ -44,14 +41,14 @@
 // #include "sensors.h"
 #include "commander.h"
 // #include "crtp_localization_service.h"
-// #include "controller.h"
+#include "controller.h"
 // #include "power_distribution.h"
 // TODO: enable collision
 // #include "collision_avoidance.h"
 // #include "health.h"
 // #include "supervisor.h"
 
-// #include "estimator.h"
+#include "estimator.h"
 // #include "usddeck.h"
 // #include "statsCnt.h"
 #include "static_mem.h"
@@ -69,8 +66,8 @@ static sensorData_t sensorData;
 static state_t state;
 static control_t control;
 
-static StateEstimatorType estimatorType;
-static ControllerType controllerType;
+static int estimatorType;
+static int controllerType;
 
 // static STATS_CNT_RATE_DEFINE(stabilizerRate, 500);
 // static rateSupervisor_t rateSupervisorContext;
@@ -117,7 +114,7 @@ STATIC_MEM_TASK_ALLOC(stabilizerTask, STABILIZER_TASK_STACKSIZE);
 static void stabilizerTask();
 
 static void calcSensorToOutputLatency(const sensorData_t *sensorData) {
-  uint64_t outTimestamp = usecTimerStamp();
+  uint64_t outTimestamp = osKernelGetTickCount() * 1000 / osKernelGetTickFreq();
   inToOutLatency = outTimestamp - sensorData->interruptTimestamp;
 }
 
@@ -139,7 +136,8 @@ static void compressState() {
     state.attitudeQuaternion.x,
     state.attitudeQuaternion.y,
     state.attitudeQuaternion.z,
-    state.attitudeQuaternion.w};
+    state.attitudeQuaternion.w
+	};
   stateCompressed.quat = quaternionCompress(q);
 
   float const deg2millirad = ((float)M_PI * 1000.0f) / 180.0f;
@@ -162,13 +160,13 @@ static void compressSetpoint() {
   setpointCompressed.az = setpoint.acceleration.z * 1000.0f;
 }
 
-void stabilizerInit(StateEstimatorType estimator) {
+void stabilizerInit() {
   if (isInit)
     return;
 
   // sensorsInit();
-  // stateEstimatorInit(estimator);
-  // controllerInit(ControllerTypeAny);
+  estimatorInit();
+  controllerInit();
   // powerDistributionInit();
   // collisionAvoidanceInit();
   // estimatorType = getStateEstimator();
@@ -183,7 +181,7 @@ bool stabilizerTest(void) {
 
   // pass &= sensorsTest();
   // pass &= stateEstimatorTest();
-  // pass &= controllerTest();
+  pass &= controllerTest();
   // pass &= powerDistributionTest();
   // pass &= collisionAvoidanceTest();
 
@@ -248,7 +246,7 @@ static void stabilizerTask() {
 
     //   collisionAvoidanceUpdateSetpoint(&setpoint, &sensorData, &state, tick);
 
-    //   controller(&control, &setpoint, &sensorData, &state, tick);
+      // controllerUpdate(&control, &setpoint, &sensorData, &state, tick);
 
     //   checkEmergencyStopTimeout();
 

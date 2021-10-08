@@ -33,40 +33,38 @@
 #include "pid.h"
 #include "cal.h"
 
-void pidInit(PidObject* pid, const float desired, const float kp,
-             const float ki, const float kd, const float dt,
-             const float samplingRate, const float cutoffFreq,
-             bool enableDFilter) {
+void pidInit(PidObject *pid, PidParam *param) {
   pid->error = 0;
   pid->prevError = 0;
   pid->integ = 0;
   pid->deriv = 0;
-  pid->desired = desired;
-  pid->kp = kp;
-  pid->ki = ki;
-  pid->kd = kd;
-  pid->iLimit = DEFAULT_PID_INTEGRATION_LIMIT;
-  pid->outputLimit = DEFAULT_PID_OUTPUT_LIMIT;
-  pid->dt = dt;
-	pid->rdt = 1.0 / dt;
-  pid->enableDFilter = enableDFilter;
+  pid->target = 0;
+
+  pid->kp = param->kp;
+  pid->ki = param->ki;
+  pid->kd = param->kd;
+  pid->iLimit = param->iLimit;
+  pid->oLimit = param->oLimit;
+  pid->dt = 1.0 / (float) param->rate;
+	pid->rate = param->rate;
+  pid->enableDFilter = param->enableDFilter;
   if (pid->enableDFilter)
-    lpf2pInit(&pid->dFilter, samplingRate, cutoffFreq);
+    lpf2pInit(&pid->dFilter, param->rate, param->cutoffFreq);
 }
 
-float pidUpdate(PidObject* pid, const float measured, const bool updateError) {
+float pidUpdate(PidObject* pid, const float measured, const float target, const bool updateError) {
     float output = 0.0f;
 
     if (updateError)
-        pid->error = pid->desired - measured;
+        pid->error = pid->target - measured;
 
     output += pid->kp * pid->error;
 
-    float deriv = (pid->error - pid->prevError) * pid->rdt;
+    float deriv = (pid->error - pid->prevError) * pid->rate;
     #ifdef PID_FILTER_ALL
       pid->deriv = deriv;
     #else
-      if (pid->enableDFilter){
+      if (pid->enableDFilter) {
         pid->deriv = lpf2pApply(&pid->dFilter, deriv);
       } else {
         pid->deriv = deriv;
@@ -80,7 +78,7 @@ float pidUpdate(PidObject* pid, const float measured, const bool updateError) {
 
     pid->integ += pid->error * pid->dt;
 
-    // Constrain the integral (unless the iLimit is zero)
+    // Constrain the integral (unless if the iLimit is zero)
     if (pid->iLimit != 0)
     	pid->integ = fConstrain(pid->integ, -pid->iLimit, pid->iLimit);
 
@@ -97,11 +95,11 @@ float pidUpdate(PidObject* pid, const float measured, const bool updateError) {
         output = 0;
      #endif
 
-    // Constrain the total PID output (unless the outputLimit is zero)
-    if (pid->outputLimit != 0)
-      output = fConstrain(output, -pid->outputLimit, pid->outputLimit);
+		pid->prevError = pid->error;
+    // Constrain the total PID output (unless if the oLimit is zero)
+    if (pid->oLimit != 0)
+      output = fConstrain(output, -pid->oLimit, pid->oLimit);
 
-    pid->prevError = pid->error;
     return output;
 }
 
@@ -117,25 +115,20 @@ void pidReset(PidObject* pid) {
   pid->deriv = 0;
 }
 
-void pidSetDesired(PidObject* pid, const float desired) {
-  pid->desired = desired;
+void pidSetTarget(PidObject* pid, const float target) {
+  pid->target = target;
 }
 
-float pidGetDesired(PidObject* pid) {
-  return pid->desired;
+float pidGetTarget(PidObject* pid) {
+  return pid->target;
 }
 
-bool pidIsActive(PidObject* pid) {
-  bool isActive = true;
-
-  if (pid->kp < 0.0001f && pid->ki < 0.0001f && pid->kd < 0.0001f)
-    isActive = false;
-
-  return isActive;
+void pidSetError(PidObject* pid, const float error) {
+  pid->error = error;
 }
 
-void filterReset(PidObject* pid, const float samplingRate, const float cutoffFreq, bool enableDFilter) {
+void filterReset(PidObject* pid, const float rate, const float cutoffFreq, bool enableDFilter) {
   pid->enableDFilter = enableDFilter;
   if (pid->enableDFilter)
-    lpf2pInit(&pid->dFilter, samplingRate, cutoffFreq);
+    lpf2pInit(&pid->dFilter, rate, cutoffFreq);
 }

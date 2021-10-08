@@ -4,10 +4,6 @@
 #include "eprintf.h"
 #include "console.h"
 
-#ifndef DEBUG_MODULE
-#define DEBUG_MODULE
-#endif
-
 #ifdef DEBUG_MODULE
 #define DEBUG_FMT(fmt) DEBUG_MODULE ": " fmt
 #endif

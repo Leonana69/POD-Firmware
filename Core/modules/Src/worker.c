@@ -46,7 +46,7 @@ void workerInit() {
   if (isInit)
     return;
 
-  workerQueue = STATIC_MEM_QUEUE_CREATE(workerQueue);
+  STATIC_MEM_QUEUE_CREATE(workerQueue);
   DEBUG_QUEUE_MONITOR_REGISTER(workerQueue);
   isInit = true;
 }

@@ -416,8 +416,6 @@ static int logCreateBlock(unsigned char id, struct ops_setting * settings, int l
 
   logBlocks[i].id = id;
   logBlocks[i].timer = osTimerNew(logBlockTimed, osTimerPeriodic, &logBlocks[i].id, &timAttr);
-  // logBlocks[i].timer = xTimerCreateStatic("logTimer", M2T(1000), pdTRUE,
-  //   &logBlocks[i], logBlockTimed, &logBlocks[i].timerBuffer);
   logBlocks[i].ops = NULL;
 
   if (logBlocks[i].timer == NULL) {
@@ -642,8 +640,6 @@ static int logStartBlock(int id, unsigned int period) {\
 
   if (period > 0) {
     osTimerStart(logBlocks[i].timer, period);
-    // xTimerChangePeriod(logBlocks[i].timer, M2T(period), 100);
-    // xTimerStart(logBlocks[i].timer, 100);
   } else {
     // single-shoot run
     workerSchedule(logRunBlock, &logBlocks[i]);

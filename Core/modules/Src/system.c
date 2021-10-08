@@ -53,7 +53,7 @@
 // #include "uart1.h"
 // #include "uart2.h"
 #include "comm.h"
-// #include "stabilizer.h"
+#include "stabilizer.h"
 #include "commander.h"
 #include "console.h"
 // #include "usblink.h"
@@ -184,7 +184,7 @@ void systemTask(void *arg) {
 
   // Init the high-levels modules
   systemInit();
-
+  stabilizerInit();
   // StateEstimatorType estimator = anyEstimator;
   // estimatorKalmanTaskInit();
   // deckInit();

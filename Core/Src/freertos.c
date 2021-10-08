@@ -155,7 +155,7 @@ static int p = 0;
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-  // syslinkPacketDelivery = STATIC_MEM_QUEUE_CREATE(syslinkPacketDelivery);
+  // STATIC_MEM_QUEUE_CREATE(syslinkPacketDelivery);
   // uint8_t t = 5;
   // osMessageQueuePut(syslinkPacketDelivery, &t, 0, 0);
   /* Infinite loop */

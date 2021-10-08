@@ -38,8 +38,7 @@
 // TODO: figure out if we need this
 void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
                                     StackType_t **ppxIdleTaskStackBuffer,
-                                    uint32_t *pulIdleTaskStackSize )
-{
+                                    uint32_t *pulIdleTaskStackSize ) {
   NO_DMA_CCM_SAFE_ZERO_INIT static StaticTask_t xIdleTaskTCB;
   NO_DMA_CCM_SAFE_ZERO_INIT static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
 
@@ -56,8 +55,7 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
  */
 void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer,
                                      StackType_t **ppxTimerTaskStackBuffer,
-                                     uint32_t *pulTimerTaskStackSize )
-{
+                                     uint32_t *pulTimerTaskStackSize ) {
   NO_DMA_CCM_SAFE_ZERO_INIT static StaticTask_t xTimerTaskTCB;
   NO_DMA_CCM_SAFE_ZERO_INIT static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
 

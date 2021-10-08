@@ -100,7 +100,7 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c
 ######################################
 # utils
 VPATH += Core/utils/Src
-C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c filter.c pid.c
+C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c filter.c pid.c kalman_filter.c
 
 # drivers
 VPATH += Core/drivers/Src
@@ -109,7 +109,8 @@ C_SOURCES += _gpio.c _usart.c _tim.c _i2c.c led.c eeprom.c syslink.c radiolink.c
 # modules
 VPATH += Core/modules/Src
 C_SOURCES += worker.c queuemonitor.c system.c mem.c crtp.c console.c comm.c ledseq.c crtp_link.c log.c crtp_platform.c param.c \
-	sysload.c commander.c crtp_commander.c crtp_commander_rpyt.c crtp_commander_generic.c stabilizer.c controller.c
+	sysload.c commander.c crtp_commander.c crtp_commander_rpyt.c crtp_commander_generic.c stabilizer.c controller.c controller_pid_attitude.c \
+	controller_pid.c controller_pid_position.c estimator.c supervisor.c
 
 # FreeRTOS
 # VPATH += $(FREERTOS)
@@ -184,6 +185,7 @@ C_INCLUDES =  \
 -ICore/drivers/Inc \
 -ICore/utils/Inc \
 -ICore/modules/Inc \
+-IDrivers/CMSIS/DSP/Include \
 -IMiddlewares/Third_Party/FreeRTOS/Source/include \
 -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
@@ -207,7 +209,8 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 ######################################
 CFLAGS += -DDEBUG_UART3
 CFLAGS += -DSTM32F4XX
-CFLAGS += -DSTM32F40_41xxx
+CFLAGS += -DSTM32F40_41xxx -DARM_MATH_CM4
+# CFLAGS += -D__FPU_PRESENT=1
 
 #######################################
 # LDFLAGS

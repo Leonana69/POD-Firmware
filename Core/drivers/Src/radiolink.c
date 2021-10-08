@@ -77,9 +77,9 @@ void radiolinkInit(void) {
   if (isInit)
     return;
 
-  txQueue = STATIC_MEM_QUEUE_CREATE(txQueue);
+  STATIC_MEM_QUEUE_CREATE(txQueue);
   DEBUG_QUEUE_MONITOR_REGISTER(txQueue);
-  crtpPacketDelivery = STATIC_MEM_QUEUE_CREATE(crtpPacketDelivery);
+  STATIC_MEM_QUEUE_CREATE(crtpPacketDelivery);
   DEBUG_QUEUE_MONITOR_REGISTER(crtpPacketDelivery);
 
   ASSERT(crtpPacketDelivery);

@@ -121,7 +121,7 @@
 // CMSIS RTOS realization
 osMessageQueueAttr_t* getOsMessageQueueAttr_t(char* name, void* cb_mem, uint32_t cb_size, void* mq_mem, uint32_t mq_size);
 #define STATIC_MEM_QUEUE_CREATE(NAME) \
-  osMessageQueueNew(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, \
+  NAME = osMessageQueueNew(osSys_ ## NAME ## Length, osSys_ ## NAME ## ItemSize, \
     getOsMessageQueueAttr_t(#NAME, \
     &osSys_ ## NAME ## Mgm, \
     sizeof(osSys_ ## NAME ## Mgm), \
