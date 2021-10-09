@@ -84,9 +84,11 @@ typedef struct {
   float q[4];
 
   // The quad's attitude as a rotation matrix (used by the prediction, updated by the finalization)
+  // body: x -> global: X
+  // Rx = X
   float R[3][3];
 
-  // The covariance matrix
+  // The covariance matrix, estimate uncertainty
   __attribute__((aligned(4))) float P[KC_STATE_DIM][KC_STATE_DIM];
   arm_matrix_instance_f32 Pm;
 
@@ -122,6 +124,7 @@ void kalmanCoreDecoupleXY(kalmanCoreData_t* this);
 
 void kalmanCoreScalarUpdate(kalmanCoreData_t* this, arm_matrix_instance_f32 *Hm, float error, float stdMeasNoise);
 
-void kalmanCoreUpdateWithPKE(kalmanCoreData_t* this, arm_matrix_instance_f32 *Hm, arm_matrix_instance_f32 *Km, arm_matrix_instance_f32 *P_w_m, float error);
+// TODO: remove this
+// void kalmanCoreUpdateWithPKE(kalmanCoreData_t* this, arm_matrix_instance_f32 *Hm, arm_matrix_instance_f32 *Km, arm_matrix_instance_f32 *P_w_m, float error);
 
 #endif //__KALMAN_FILTER_H__

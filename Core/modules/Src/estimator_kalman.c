@@ -56,7 +56,10 @@
  * 2021.03.15, Wolfgang Hoenig: Refactored queue handling
  */
 
+#include "estimator.h"
+#include "estimator_kalman.h"
 #include "kalman_filter.h"
+#include "kalman_filter_update.h"
 
 // #include "FreeRTOS.h"
 // #include "queue.h"
@@ -65,8 +68,6 @@
 // #include "sensors.h"
 #include "static_mem.h"
 
-#include "estimator.h"
-#include "estimator_kalman.h"
 #include "system.h"
 #include "log.h"
 #include "param.h"
@@ -183,6 +184,7 @@ static void kalmanTask() {
   systemWaitStart();
 
 	float dt;
+  bool doneUpdate;
   uint32_t lastPrediction = osKernelGetTickCount();
   uint32_t nextPrediction = osKernelGetTickCount();
   uint32_t lastPNUpdate = osKernelGetTickCount();
@@ -199,8 +201,7 @@ static void kalmanTask() {
     }
 
     // Tracks whether an update to the state has been made, and the state therefore requires finalization
-    bool doneUpdate = false;
-
+    doneUpdate = false;
     uint32_t osTick = osKernelGetTickCount(); // would be nice if this had a precision higher than 1ms...
 
   #ifdef KALMAN_DECOUPLE_XY
@@ -216,8 +217,7 @@ static void kalmanTask() {
 				// TODO: add this
         // STATS_CNT_RATE_EVENT(&predictionCounter);
       }
-
-      nextPrediction = osTick + 1.0f / PREDICT_RATE * osKernelGetTickFreq();
+      nextPrediction = osTick + osKernelGetTickFreq() / PREDICT_RATE;
 
       // if (!rateSupervisorValidate(&rateSupervisorContext, T2M(osTick))) {
       //   DEBUG_PRINT("WARNING: Kalman prediction rate low (%lu)\n", rateSupervisorLatestCount(&rateSupervisorContext));
@@ -302,7 +302,6 @@ static bool predictStateForward(uint32_t osTick, float dt) {
 
   quadIsFlying = supervisorIsFlying();
   kalmanCorePredict(&coreData, &accAverage, &gyroAverage, dt, quadIsFlying);
-
   return true;
 }
 
@@ -347,17 +346,17 @@ static bool updateQueuedMeasurements(const uint32_t tick) {
       //   doneUpdate = true;
       //   break;
 
-      // TODO: enable TOF and Flow
-      // case MeasurementTypeTOF:
-      //   kalmanCoreUpdateWithTof(&coreData, &m.data.tof);
-      //   doneUpdate = true;
-      //   break;
+      case MeasurementTypeTOF:
+        kalmanCoreUpdateWithTof(&coreData, &m.data.tof);
+        doneUpdate = true;
+        break;
 
       // case MeasurementTypeAbsoluteHeight:
       //   kalmanCoreUpdateWithAbsoluteHeight(&coreData, &m.data.height);
       //   doneUpdate = true;
       //   break;
 
+      // TODO: enable Flow
       // case MeasurementTypeFlow:
       //   kalmanCoreUpdateWithFlow(&coreData, &m.data.flow, &gyroLatest);
       //   doneUpdate = true;

@@ -42,13 +42,13 @@
 #include "commander.h"
 // #include "crtp_localization_service.h"
 #include "controller.h"
+#include "estimator.h"
 // #include "power_distribution.h"
 // TODO: enable collision
 // #include "collision_avoidance.h"
 // #include "health.h"
 // #include "supervisor.h"
 
-#include "estimator.h"
 // #include "usddeck.h"
 // #include "statsCnt.h"
 #include "static_mem.h"
@@ -180,7 +180,7 @@ bool stabilizerTest(void) {
   bool pass = true;
 
   // pass &= sensorsTest();
-  // pass &= stateEstimatorTest();
+  pass &= estimatorTest();
   pass &= controllerTest();
   // pass &= powerDistributionTest();
   // pass &= collisionAvoidanceTest();
