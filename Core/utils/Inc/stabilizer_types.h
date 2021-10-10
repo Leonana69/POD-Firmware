@@ -30,8 +30,7 @@
 #include <stdbool.h>
 #include "imu_types.h"
 
-#define GAS 9.81f // Gravitational acceleration constant
-
+#define GRAVITY_EARTH  (9.80665f)
 /* Data structure used by the stabilizer subsystem.
  * All have a timestamp to be set when the data is calculated.
  */

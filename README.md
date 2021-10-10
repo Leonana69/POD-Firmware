@@ -51,6 +51,11 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
 7. Enable GPIO PD2, PC0, PC1, PC2, PC3
 
 8. Disable #define __FPU_PRESENT in Driver/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h
+
+9. Enable PC14 (GPIO_EXTI14)
+    - GPIO Mode: External Interrupt Mode with Rising edge trigger detection
+    - GPIO Pull-up/Pull-down: No
+    - NVIC: Enable EXTI line4 interrupt: 5, 0
     <!-- Enable IWDG -->
     <!-- - IWDG counter clock prescaler: 32 -->
     <!-- - IWDG down-counter reload value: 188 -->

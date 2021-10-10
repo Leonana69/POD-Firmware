@@ -290,9 +290,9 @@ static bool predictStateForward(uint32_t osTick, float dt) {
 
   // accelerometer is in Gs but the estimator requires ms^-2
   Axis3f accAverage;
-  accAverage.x = accAccumulator.x * GAS / accAccumulatorCount;
-  accAverage.y = accAccumulator.y * GAS / accAccumulatorCount;
-  accAverage.z = accAccumulator.z * GAS / accAccumulatorCount;
+  accAverage.x = accAccumulator.x * GRAVITY_EARTH / accAccumulatorCount;
+  accAverage.y = accAccumulator.y * GRAVITY_EARTH / accAccumulatorCount;
+  accAverage.z = accAccumulator.z * GRAVITY_EARTH / accAccumulatorCount;
 
   // reset for next call
   accAccumulator = (Axis3f){ .axis = { 0 } };

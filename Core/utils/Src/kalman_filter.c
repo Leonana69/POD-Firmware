@@ -427,15 +427,15 @@ void kalmanCorePredict(kalmanCoreData_t* this, Axis3f *acc, Axis3f *gyro, float 
   // body-frame velocity from attitude error
   A[KC_STATE_PX][KC_STATE_D0] = 0;
   // delta_V_PY = -g_PZ * sin(delta_roll) * dt = -g_PZ * delta_roll * dt
-  A[KC_STATE_PY][KC_STATE_D0] = -GAS * this->R[2][2] * dt;
-  A[KC_STATE_PZ][KC_STATE_D0] = GAS * this->R[2][1] * dt;
+  A[KC_STATE_PY][KC_STATE_D0] = -GRAVITY_EARTH * this->R[2][2] * dt;
+  A[KC_STATE_PZ][KC_STATE_D0] = GRAVITY_EARTH * this->R[2][1] * dt;
 
-  A[KC_STATE_PX][KC_STATE_D1] = GAS * this->R[2][2] * dt;
+  A[KC_STATE_PX][KC_STATE_D1] = GRAVITY_EARTH * this->R[2][2] * dt;
   A[KC_STATE_PY][KC_STATE_D1] = 0;
-  A[KC_STATE_PZ][KC_STATE_D1] = -GAS * this->R[2][0] * dt;
+  A[KC_STATE_PZ][KC_STATE_D1] = -GRAVITY_EARTH * this->R[2][0] * dt;
 
-  A[KC_STATE_PX][KC_STATE_D2] = -GAS * this->R[2][1] * dt;
-  A[KC_STATE_PY][KC_STATE_D2] = GAS * this->R[2][0] * dt;
+  A[KC_STATE_PX][KC_STATE_D2] = -GRAVITY_EARTH * this->R[2][1] * dt;
+  A[KC_STATE_PY][KC_STATE_D2] = GRAVITY_EARTH * this->R[2][0] * dt;
   A[KC_STATE_PZ][KC_STATE_D2] = 0;
 
   // attitude error from attitude error
@@ -498,7 +498,7 @@ void kalmanCorePredict(kalmanCoreData_t* this, Axis3f *acc, Axis3f *gyro, float 
     // position update
     this->S[KC_STATE_X] += this->R[0][0] * dx + this->R[0][1] * dy + this->R[0][2] * dz;
     this->S[KC_STATE_Y] += this->R[1][0] * dx + this->R[1][1] * dy + this->R[1][2] * dz;
-    this->S[KC_STATE_Z] += this->R[2][0] * dx + this->R[2][1] * dy + this->R[2][2] * dz - GAS * dt2_2;
+    this->S[KC_STATE_Z] += this->R[2][0] * dx + this->R[2][1] * dy + this->R[2][2] * dz - GRAVITY_EARTH * dt2_2;
 
     // keep previous time step's state for the update
     tmpSPX = this->S[KC_STATE_PX];
@@ -506,9 +506,9 @@ void kalmanCorePredict(kalmanCoreData_t* this, Axis3f *acc, Axis3f *gyro, float 
     tmpSPZ = this->S[KC_STATE_PZ];
 
     // body-velocity update: accelerometers - gyros cross velocity - gravity in body frame
-    this->S[KC_STATE_PX] += dt * (gyro->z * tmpSPY - gyro->y * tmpSPZ - GAS * this->R[2][0]);
-    this->S[KC_STATE_PY] += dt * (-gyro->z * tmpSPX + gyro->x * tmpSPZ - GAS * this->R[2][1]);
-    this->S[KC_STATE_PZ] += dt * (acc->z + gyro->y * tmpSPX - gyro->x * tmpSPY - GAS * this->R[2][2]);
+    this->S[KC_STATE_PX] += dt * (gyro->z * tmpSPY - gyro->y * tmpSPZ - GRAVITY_EARTH * this->R[2][0]);
+    this->S[KC_STATE_PY] += dt * (-gyro->z * tmpSPX + gyro->x * tmpSPZ - GRAVITY_EARTH * this->R[2][1]);
+    this->S[KC_STATE_PZ] += dt * (acc->z + gyro->y * tmpSPX - gyro->x * tmpSPY - GRAVITY_EARTH * this->R[2][2]);
   } else {
     // Acceleration can be in any direction, as measured by the accelerometer. This occurs, eg. in freefall or while being carried.
     // position updates in the body frame (will be rotated to inertial frame)
@@ -519,7 +519,7 @@ void kalmanCorePredict(kalmanCoreData_t* this, Axis3f *acc, Axis3f *gyro, float 
     // position update
     this->S[KC_STATE_X] += this->R[0][0] * dx + this->R[0][1] * dy + this->R[0][2] * dz;
     this->S[KC_STATE_Y] += this->R[1][0] * dx + this->R[1][1] * dy + this->R[1][2] * dz;
-    this->S[KC_STATE_Z] += this->R[2][0] * dx + this->R[2][1] * dy + this->R[2][2] * dz - GAS * dt2_2;
+    this->S[KC_STATE_Z] += this->R[2][0] * dx + this->R[2][1] * dy + this->R[2][2] * dz - GRAVITY_EARTH * dt2_2;
 
     // keep previous time step's state for the update
     tmpSPX = this->S[KC_STATE_PX];
@@ -527,9 +527,9 @@ void kalmanCorePredict(kalmanCoreData_t* this, Axis3f *acc, Axis3f *gyro, float 
     tmpSPZ = this->S[KC_STATE_PZ];
 
     // body-velocity update: accelerometers - gyros cross velocity - gravity in body frame
-    this->S[KC_STATE_PX] += dt * (acc->x + gyro->z * tmpSPY - gyro->y * tmpSPZ - GAS * this->R[2][0]);
-    this->S[KC_STATE_PY] += dt * (acc->y - gyro->z * tmpSPX + gyro->x * tmpSPZ - GAS * this->R[2][1]);
-    this->S[KC_STATE_PZ] += dt * (acc->z + gyro->y * tmpSPX - gyro->x * tmpSPY - GAS * this->R[2][2]);
+    this->S[KC_STATE_PX] += dt * (acc->x + gyro->z * tmpSPY - gyro->y * tmpSPZ - GRAVITY_EARTH * this->R[2][0]);
+    this->S[KC_STATE_PY] += dt * (acc->y - gyro->z * tmpSPX + gyro->x * tmpSPZ - GRAVITY_EARTH * this->R[2][1]);
+    this->S[KC_STATE_PZ] += dt * (acc->z + gyro->y * tmpSPX - gyro->x * tmpSPY - GRAVITY_EARTH * this->R[2][2]);
   }
 
   // attitude update (rotate by gyroscope), we do this in quaternions
