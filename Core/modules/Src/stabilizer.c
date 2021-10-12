@@ -38,7 +38,7 @@
 
 #include "stabilizer.h"
 
-// #include "sensors.h"
+#include "sensors.h"
 #include "commander.h"
 // #include "crtp_localization_service.h"
 #include "controller.h"
@@ -164,24 +164,24 @@ void stabilizerInit() {
   if (isInit)
     return;
 
-  // sensorsInit();
-  estimatorInit();
-  controllerInit();
+  sensorsInit();
+  // estimatorInit();
+  // controllerInit();
   // powerDistributionInit();
   // collisionAvoidanceInit();
   // estimatorType = getStateEstimator();
   // controllerType = getControllerType();
 
-  STATIC_MEM_TASK_CREATE(stabilizerTask, stabilizerTask, STABILIZER_TASK_NAME, NULL, STABILIZER_TASK_PRI);
+  // STATIC_MEM_TASK_CREATE(stabilizerTask, stabilizerTask, STABILIZER_TASK_NAME, NULL, STABILIZER_TASK_PRI);
   isInit = true;
 }
 
 bool stabilizerTest(void) {
   bool pass = true;
 
-  // pass &= sensorsTest();
-  pass &= estimatorTest();
-  pass &= controllerTest();
+  pass &= sensorsTest();
+  // pass &= estimatorTest();
+  // pass &= controllerTest();
   // pass &= powerDistributionTest();
   // pass &= collisionAvoidanceTest();
 
@@ -399,9 +399,9 @@ LOG_GROUP_STOP(ctrltargetZ)
  * group `imu_sensors`.
  */
 LOG_GROUP_START(acc)
-LOG_ADD_CORE(LOG_FLOAT, x, &sensorData.acc.x)
-LOG_ADD_CORE(LOG_FLOAT, y, &sensorData.acc.y)
-LOG_ADD_CORE(LOG_FLOAT, z, &sensorData.acc.z)
+LOG_ADD_CORE(LOG_FLOAT, x, &sensorData.accel.x)
+LOG_ADD_CORE(LOG_FLOAT, y, &sensorData.accel.y)
+LOG_ADD_CORE(LOG_FLOAT, z, &sensorData.accel.z)
 LOG_GROUP_STOP(acc)
 
 /**

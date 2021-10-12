@@ -90,7 +90,7 @@ static bool isTumbledCheck(const sensorData_t *data) {
   // We need a SUPERVISOR_HYSTERESIS_THRESHOLD amount of readings that indicate
   // that we are tumbled before we act on it. This is to reduce false positives.
   //
-  if (data->acc.z <= tolerance) {
+  if (data->accel.z <= tolerance) {
     hysteresis++;
     if (hysteresis > SUPERVISOR_HYSTERESIS_THRESHOLD)
       return true;

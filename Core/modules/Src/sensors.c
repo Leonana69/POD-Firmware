@@ -47,8 +47,7 @@ typedef struct {
   void (*init)(SensorsInterfaceType);
   bool (*test)(void);
   bool (*areCalibrated)(void);
-  bool (*manufacturingTest)(void);
-  void (*acquire)(sensorData_t *sensors, const uint32_t tick);
+  void (*acquire)(sensorData_t *sensors);
   void (*waitDataReady)(void);
   bool (*readGyro)(Axis3f *gyro);
   bool (*readAcc)(Axis3f *acc);
@@ -58,23 +57,16 @@ typedef struct {
 	const char *name;
 } Sensors;
 
-// ignore unused func
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-static void nullFunction(void) {}
-#pragma GCC diagnostic pop
-
 static const Sensors sensorsFunctions[SENSORS_COUNT] = {
 #ifdef SENSOR_INCLUDED_BMI088_BMP388
   {
     .init = sensorsBmi088Bmp388Init,
     .test = sensorsBmi088Bmp388Test,
     .areCalibrated = sensorsBmi088Bmp388AreCalibrated,
-    .manufacturingTest = sensorsBmi088Bmp388ManufacturingTest,
     .acquire = sensorsBmi088Bmp388Acquire,
     .waitDataReady = sensorsBmi088Bmp388WaitDataReady,
     .readGyro = sensorsBmi088Bmp388ReadGyro,
-    .readAcc = sensorsBmi088Bmp388ReadAcc,
+    .readAcc = sensorsBmi088Bmp388ReadAccel,
     .readBaro = sensorsBmi088Bmp388ReadBaro,
     .setAccMode = sensorsBmi088Bmp388SetAccMode,
     .dataAvailableCallback = sensorsBmi088Bmp388DataAvailableCallback,
@@ -84,27 +76,24 @@ static const Sensors sensorsFunctions[SENSORS_COUNT] = {
 };
 
 void sensorsInit() {
+  // TODO: remove uart
+  DEBUG_PRINT("Using %s (%d) sensors\n", sensorsGetName(), currentSensors);
   sensorsFunctions[currentSensors].init(SENSORS_INTERFACE);
-	DEBUG_PRINT("Using %s (%d) sensors\n", sensorsGetName(), currentSensors);
 }
 
-bool sensorsTest(void) {
+bool sensorsTest() {
   return sensorsFunctions[currentSensors].test();
 }
 
-bool sensorsAreCalibrated(void) {
+bool sensorsAreCalibrated() {
   return sensorsFunctions[currentSensors].areCalibrated();
 }
 
-bool sensorsManufacturingTest(void){
-  return sensorsFunctions[currentSensors].manufacturingTest;
+void sensorsAcquire(sensorData_t *sensors) {
+  sensorsFunctions[currentSensors].acquire(sensors);
 }
 
-void sensorsAcquire(sensorData_t *sensors, const uint32_t tick) {
-  sensorsFunctions[currentSensors].acquire(sensors, tick);
-}
-
-void sensorsWaitDataReady(void) {
+void sensorsWaitDataReady() {
   sensorsFunctions[currentSensors].waitDataReady();
 }
 
@@ -132,6 +121,7 @@ const char* sensorsGetName() {
   return sensorsFunctions[currentSensors].name;
 }
 
-void __attribute__((used)) EXTI14_Callback(void) {
+void sensorsAvailableCallback() {
   sensorsFunctions[currentSensors].dataAvailableCallback();
 }
+

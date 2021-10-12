@@ -37,21 +37,16 @@ typedef enum {
 } SensorsType;
 
 typedef enum {
-	INTERFACE_I2C,
-	INTERFACE_SPI,
+	SENSOR_INTF_I2C,
+	SENSOR_INTF_SPI,
 } SensorsInterfaceType;
 
 void sensorsInit();
 bool sensorsTest();
 bool sensorsAreCalibrated();
 
-/**
- * More extensive test of the sensors
- */
-bool sensorsManufacturingTest();
-
 // For legacy control
-void sensorsAcquire(sensorData_t *sensors, const uint32_t tick);
+void sensorsAcquire(sensorData_t *sensors);
 
 /**
  * This function should block and unlock at 1KhZ
@@ -70,5 +65,6 @@ const char* sensorsGetName();
  * Set acc mode, one of accModes enum
  */
 void sensorsSetAccMode(accModes accMode);
+void sensorsAvailableCallback();
 
 #endif //__SENSORS_H__

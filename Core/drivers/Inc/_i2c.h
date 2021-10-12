@@ -8,10 +8,19 @@
 #include "cmsis_os2.h"
 #include "FreeRTOS.h"
 
+
 typedef struct {
-    I2C_HandleTypeDef hi2c;
-    osMutexId_t i2cBusMutex;
-    StaticSemaphore_t i2cBusMutexBuffer;
+	I2C_HandleTypeDef hi2c;
+	union {
+		struct {
+			osMutexId_t i2cBusMutex;
+			StaticSemaphore_t i2cBusMutexBuffer;
+		};
+		struct {
+			osSemaphoreId_t i2cBusSemaphore;
+			StaticSemaphore_t i2cBusSemaphoreBuffer;
+		};
+	};
 } I2CDrv;
 
 extern I2CDrv eepromI2C;
@@ -23,4 +32,9 @@ HAL_StatusTypeDef I2CWrite16(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, ui
 
 HAL_StatusTypeDef I2CRead8(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
 HAL_StatusTypeDef I2CWrite8(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
+
+int8_t i2cSensorsRead(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr);
+int8_t i2cSensorsWrite(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr);
+
+void sensorsI2cDmaIsr();
 #endif

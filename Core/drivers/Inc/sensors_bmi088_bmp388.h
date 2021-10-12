@@ -31,11 +31,10 @@
 void sensorsBmi088Bmp388Init(SensorsInterfaceType interface);
 bool sensorsBmi088Bmp388Test(void);
 bool sensorsBmi088Bmp388AreCalibrated(void);
-bool sensorsBmi088Bmp388ManufacturingTest(void);
 void sensorsBmi088Bmp388Acquire(sensorData_t *sensors);
 void sensorsBmi088Bmp388WaitDataReady(void);
 bool sensorsBmi088Bmp388ReadGyro(Axis3f *gyro);
-bool sensorsBmi088Bmp388ReadAcc(Axis3f *accel);
+bool sensorsBmi088Bmp388ReadAccel(Axis3f *accel);
 bool sensorsBmi088Bmp388ReadBaro(baro_t *baro);
 void sensorsBmi088Bmp388SetAccMode(accModes accMode);
 void sensorsBmi088Bmp388DataAvailableCallback(void);

@@ -162,7 +162,7 @@ typedef struct zDistance_s {
 } zDistance_t;
 
 typedef struct sensorData_s {
-  Axis3f acc;               // Gs
+  Axis3f accel;               // Gs
   Axis3f gyro;              // deg/s
   Axis3f mag;               // gauss
   baro_t baro;
@@ -274,7 +274,7 @@ typedef struct {
 
 /** accelerometer measurement */
 typedef struct {
-  Axis3f acc; // Gs, for legacy reasons
+  Axis3f accel; // Gs, for legacy reasons
 } accelerationMeasurement_t;
 
 /** barometer measurement */

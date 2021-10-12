@@ -32,7 +32,6 @@
 
 #include "config.h"
 #include "debug.h"
-// #include "i2cdev.h"
 #include "configblock.h"
 #include "eeprom.h"
 #include "cal.h"

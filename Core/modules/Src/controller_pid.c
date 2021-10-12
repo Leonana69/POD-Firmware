@@ -119,7 +119,7 @@ void controllerPidUpdate(control_t *control, setpoint_t *setpoint,
 	r_roll = radians(sensors->gyro.x);
 	r_pitch = -radians(sensors->gyro.y);
 	r_yaw = radians(sensors->gyro.z);
-	accelz = sensors->acc.z;
+	accelz = sensors->accel.z;
 }
 
 /**

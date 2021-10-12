@@ -375,19 +375,18 @@ static bool updateQueuedMeasurements(const uint32_t tick) {
         gyroAccumulatorCount++;
         break;
       case MeasurementTypeAcceleration:
-        accAccumulator.x += m.data.acceleration.acc.x;
-        accAccumulator.y += m.data.acceleration.acc.y;
-        accAccumulator.z += m.data.acceleration.acc.z;
-        accLatest = m.data.acceleration.acc;
+        accAccumulator.x += m.data.acceleration.accel.x;
+        accAccumulator.y += m.data.acceleration.accel.y;
+        accAccumulator.z += m.data.acceleration.accel.z;
+        accLatest = m.data.acceleration.accel;
         accAccumulatorCount++;
         break;
-        // TODO: add baro
-      // case MeasurementTypeBarometer:
-      //   if (useBaroUpdate) {
-      //     kalmanCoreUpdateWithBaro(&coreData, m.data.barometer.baro.asl, quadIsFlying);
-      //     doneUpdate = true;
-      //   }
-      //   break;
+      case MeasurementTypeBarometer:
+        if (useBaroUpdate) {
+          kalmanCoreUpdateWithBaro(&coreData, m.data.barometer.baro.asl, quadIsFlying);
+          doneUpdate = true;
+        }
+        break;
       default:
         break;
     }

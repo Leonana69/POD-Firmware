@@ -54,7 +54,7 @@
 #define CONTROLLER_TYPE CONTROLLER_PID
 #define ESTIMATOR_TYPE  ESTIMATOR_KALMAN
 #define SENSORS_TYPE SENSORS_BMI088_BMP388
-#define SENSORS_INTERFACE INTERFACE_I2C
+#define SENSORS_INTERFACE SENSOR_INTF_I2C
 
 //The radio channel. From 0 to 125
 #define RADIO_CHANNEL 80
@@ -78,7 +78,7 @@
 
 // ****** I2C ******
 #define eepromI2CHandle hi2c1
-#define sensorI2CHandle hi2c3
+#define sensorsI2CHandle hi2c3
 
 // ****** DMA ******
 #define nrfUartTxDmaHandle hdma_usart6_tx

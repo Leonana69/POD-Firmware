@@ -112,6 +112,7 @@ void systemInit(void) {
   STATIC_MUTEX_CREATE(canStartMutex);
   osSemaphoreAcquire(canStartMutex, osDelayMax);
 
+  usecTimerInit();
   ledInit();
   ledSet(CHG_LED, 1);
 #ifdef DEBUG_QUEUE_MONITOR
@@ -156,10 +157,6 @@ void systemInit(void) {
   // debugInit();
   // adcInit();
 
-#ifdef APP_ENABLED
-  appInit();
-#endif
-
   isInit = true;
 }
 
@@ -179,9 +176,6 @@ bool systemTest() {
 
 void systemTask(void *arg) {
   bool pass = true;
-  // TODO: check if this is essential
-  usecTimerInit();
-
   // Init the high-levels modules
   systemInit();
   stabilizerInit();

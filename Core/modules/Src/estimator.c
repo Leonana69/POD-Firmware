@@ -67,7 +67,8 @@ static Estimator estimatorFunctions[] = {
 
 void estimatorInit() {
 	estimatorFunctions[currentEstimator].init();
-	DEBUG_PRINT("Using %s (%d) estimator\n", estimatorGetName(), currentEstimator);
+  // TODO: remove uart
+	DEBUG_PRINT_UART("Using %s (%d) estimator\n", estimatorGetName(), currentEstimator);
 
   STATIC_MEM_QUEUE_CREATE(measurementsQueue);
 }

@@ -12,8 +12,8 @@
 
 #include "led.h"
 
-STATIC_MEM_SEMAPHORE_ALLOC(nrfUartWaitS);
-STATIC_MEM_SEMAPHORE_ALLOC(nrfUartBusyS);
+STATIC_MEM_SEMAPHORE_ALLOC(nrfUartWaitSemaphore);
+STATIC_MEM_MUTEX_ALLOC(nrfUartBusMutex);
 STATIC_MEM_QUEUE_ALLOC(syslinkPacketDelivery, 8, sizeof(SyslinkPacket));
 
 static uint8_t nrfUartTxDmaBuffer[64];
@@ -21,12 +21,11 @@ static uint8_t nrfUartTxDmaBuffer[64];
 extern DMA_HandleTypeDef nrfUartTxDmaHandle;
 
 void _UART_Init(void) {
-	STATIC_SEMAPHORE_CREATE(nrfUartWaitS, 1, 0);
-	// not busy in the beginning
-	STATIC_SEMAPHORE_CREATE(nrfUartBusyS, 1, 1);
+	STATIC_SEMAPHORE_CREATE(nrfUartWaitSemaphore, 1, 0);
+	STATIC_MUTEX_CREATE(nrfUartBusMutex);
 
 	STATIC_MEM_QUEUE_CREATE(syslinkPacketDelivery);
-  DEBUG_QUEUE_MONITOR_REGISTER(syslinkPacketDelivery);
+	DEBUG_QUEUE_MONITOR_REGISTER(syslinkPacketDelivery);
 	// TODO: check this
 	// HAL_DMA_RegisterCallback(&nrfUartTxDmaHandle, HAL_DMA_XFER_HALFCPLT_CB_ID, nrfUartDmaIsr);
 	__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_RXNE);
@@ -53,7 +52,7 @@ void nrfUartSendData(uint32_t size, uint8_t *data) {
 // 	nrfUartSendData(1, &data[0]);
 // 	__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_TXE);
 // 	// USART_ITConfig(UARTSLK_TYPE, USART_IT_TXE, ENABLE);
-// 	osSemaphoreAcquire(nrfUartWaitS, osWaitForever);
+// 	osSemaphoreAcquire(nrfUartWaitSemaphore, osWaitForever);
 // 	outDataIsr = 0;
 // 	osSemaphoreRelease(nrfUartBusyS);
 // }
@@ -64,12 +63,12 @@ int nrfUartPutchar(int ch) {
 }
 
 void nrfUartSendDataDmaBlocking(uint32_t size, uint8_t *data) {      
-	osSemaphoreAcquire(nrfUartBusyS, osWaitForever);
+	osMutexAcquire(nrfUartBusMutex, osWaitForever);
 	while (HAL_DMA_GetState(&nrfUartTxDmaHandle) != HAL_DMA_STATE_READY);
 	memcpy(nrfUartTxDmaBuffer, data, size);
 	HAL_UART_Transmit_DMA(&nrfUart, nrfUartTxDmaBuffer, size);
-	osSemaphoreAcquire(nrfUartWaitS, osWaitForever);
-	osSemaphoreRelease(nrfUartBusyS);
+	osSemaphoreAcquire(nrfUartWaitSemaphore, osWaitForever);
+	osMutexRelease(nrfUartBusMutex);
 }
 
 void nrfUartGetPacketBlocking(SyslinkPacket* packet) {
@@ -87,7 +86,7 @@ void nrfUartDmaIsr() {
 	// DMA2_Stream7_IRQHandler will be called twice for each transmission: halpcplt and cplt
 	static uint8_t callbackCnt = 0;
 	if (callbackCnt++) {
-		osSemaphoreRelease(nrfUartWaitS);
+		osSemaphoreRelease(nrfUartWaitSemaphore);
 		callbackCnt = 0;
 	}
 }
@@ -215,7 +214,7 @@ void nrfUartIsr() {
   	//   } else {
 
   	//     __HAL_UART_DISABLE_IT(&nrfUart, UART_IT_TXE);
-  	//   	osSemaphoreRelease(nrfUartWaitS);
+  	//   	osSemaphoreRelease(nrfUartWaitSemaphore);
   	//   }
 	// }
 }
