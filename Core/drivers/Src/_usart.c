@@ -28,7 +28,6 @@ void _UART_Init(void) {
 	DEBUG_QUEUE_MONITOR_REGISTER(syslinkPacketDelivery);
 	// TODO: check this
 	// HAL_DMA_RegisterCallback(&nrfUartTxDmaHandle, HAL_DMA_XFER_HALFCPLT_CB_ID, nrfUartDmaIsr);
-	__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_RXNE);
 }
 
 int debugUartPutchar(int c) {

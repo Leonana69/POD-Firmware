@@ -26,7 +26,7 @@ static Controller controllerFunctions[] = {
 void controllerInit() {
   controllerFunctions[currentController].init();
   // TODO: remove uart
-  DEBUG_PRINT_UART("Using %s (%d) controller\n", controllerGetName(), currentController);
+  DEBUG_PRINT_UART("Using %s (%d) controller.\n", controllerGetName(), currentController);
 }
 
 ControllerType controllerGetType() {

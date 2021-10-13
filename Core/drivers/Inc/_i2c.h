@@ -10,7 +10,7 @@
 
 
 typedef struct {
-	I2C_HandleTypeDef hi2c;
+	I2C_HandleTypeDef* hi2c;
 	union {
 		struct {
 			osMutexId_t i2cBusMutex;

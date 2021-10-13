@@ -165,8 +165,8 @@ void stabilizerInit() {
     return;
 
   sensorsInit();
-  // estimatorInit();
-  // controllerInit();
+  estimatorInit();
+  controllerInit();
   // powerDistributionInit();
   // collisionAvoidanceInit();
   // estimatorType = getStateEstimator();
@@ -180,8 +180,8 @@ bool stabilizerTest(void) {
   bool pass = true;
 
   pass &= sensorsTest();
-  // pass &= estimatorTest();
-  // pass &= controllerTest();
+  pass &= estimatorTest();
+  pass &= controllerTest();
   // pass &= powerDistributionTest();
   // pass &= collisionAvoidanceTest();
 

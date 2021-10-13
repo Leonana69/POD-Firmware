@@ -67,6 +67,11 @@ const osMessageQueueAttr_t myQueue01_attributes = {
   .mq_mem = &myQueue01Buffer,
   .mq_size = sizeof(myQueue01Buffer)
 };
+/* Definitions for myBinarySem01 */
+osSemaphoreId_t myBinarySem01Handle;
+const osSemaphoreAttr_t myBinarySem01_attributes = {
+  .name = "myBinarySem01"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -109,8 +114,13 @@ void MX_FREERTOS_Init(void) {
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* creation of myBinarySem01 */
+  myBinarySem01Handle = osSemaphoreNew(1, 1, &myBinarySem01_attributes);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
+  osSemaphoreAcquire(myBinarySem01Handle, osWaitForever);
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -155,9 +165,6 @@ static int p = 0;
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-  // STATIC_MEM_QUEUE_CREATE(syslinkPacketDelivery);
-  // uint8_t t = 5;
-  // osMessageQueuePut(syslinkPacketDelivery, &t, 0, 0);
   /* Infinite loop */
   for(;;)
   {

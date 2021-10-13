@@ -73,6 +73,8 @@
 
 #include <string.h>
 
+#include "sensors_bmi088_bmp388.h"
+
 #ifndef START_DISARMED
 #define ARM_INIT true
 #else
@@ -173,12 +175,12 @@ bool systemTest() {
 }
 
 /* Private functions implementation */
-
 void systemTask(void *arg) {
   bool pass = true;
   // Init the high-levels modules
   systemInit();
   stabilizerInit();
+
   // StateEstimatorType estimator = anyEstimator;
   // estimatorKalmanTaskInit();
   // deckInit();

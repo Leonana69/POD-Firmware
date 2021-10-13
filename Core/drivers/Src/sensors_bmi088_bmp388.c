@@ -283,7 +283,7 @@ void sensorsBmi088Bmp388WaitDataReady() {
 static void sensorsDeviceInit(void) {
   int8_t rslt;
 	/*! wait for sensor to start */
-	osDelay(500);
+	osDelay(100);
 
 	/*! BMI088 */
 	bmi08xDev.intf_ptr_accel = &accelIntfAddr;
@@ -293,17 +293,15 @@ static void sensorsDeviceInit(void) {
 	bmi08xDev.variant = BMI088_VARIANT;
 	if (currentInterface == SENSOR_INTF_I2C) {
 		bmi08xDev.intf = BMI08X_I2C_INTF;
-		bmi08xDev.read = &i2cSensorsRead;
+    bmi08xDev.read = &i2cSensorsRead;
 		bmi08xDev.write = &i2cSensorsWrite;
 	} else {
 		bmi08xDev.intf = BMI08X_SPI_INTF;
 		// TODO: spi read write
 	}
+
 	rslt = bmi08a_init(&bmi08xDev);
-  DEBUG_PRINT_UART("SDI: 2\n");
 	rslt |= bmi08g_init(&bmi08xDev);
-  DEBUG_PRINT_UART("SDI: 3\n");
-	// TODO: remove uart
 	if (rslt != BMI08X_OK)
 		DEBUG_PRINT_UART("BMI088 Init [FAILED].\n");
 	else {
