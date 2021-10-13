@@ -30,7 +30,6 @@
 #include "usec_timer.h"
 #define PROTOCOL_VERSION 4
 #ifdef STM32F4XX
-  #define QUAD_FORMATION_X
 
   #define CONFIG_BLOCK_ADDRESS    (2048 * (64 - 1))
   #define MCU_ID_ADDRESS          0x1FFF7A10
@@ -50,6 +49,8 @@
 
 #define MIN_THRUST  1000
 #define MAX_THRUST  60000
+#define MOTORS_IDLE_THRUST 0
+#define POD_MASS (0.036f)
 
 #define CONTROLLER_TYPE CONTROLLER_PID
 #define ESTIMATOR_TYPE  ESTIMATOR_KALMAN
@@ -75,6 +76,15 @@
 
 // ****** TIM ******
 #define usecTim         htim7
+
+#define MOTOR1TIM       htim2
+#define MOTOR1CHANNEL   TIM_CHANNEL_2
+#define MOTOR2TIM       htim2
+#define MOTOR2CHANNEL   TIM_CHANNEL_4
+#define MOTOR3TIM       htim2
+#define MOTOR3CHANNEL   TIM_CHANNEL_1
+#define MOTOR4TIM       htim4
+#define MOTOR4CHANNEL   TIM_CHANNEL_4
 
 // ****** I2C ******
 #define eepromI2CHandle hi2c1

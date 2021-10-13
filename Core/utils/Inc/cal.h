@@ -16,7 +16,6 @@ uint8_t calculate_cksum(void* data, size_t len);
 uint16_t single2half(float number);
 float half2single(uint16_t number);
 
-uint16_t limitUint16(int32_t value);
 float constrain(float value, const float minVal, const float maxVal);
 float deadband(float value, const float threshold);
 
@@ -78,7 +77,8 @@ uint32_t quaternionCompress(float const q[4]);
 void quaternionDecompress(uint32_t cq, float q[4]);
 float fConstrain(float val, float vMin, float vMax);
 float capAngle(float angle);
-int16_t capValueInt16(float in);
+int16_t capValueInt16(float value);
+uint16_t capValueUint16(int32_t value);
 
 static inline float radians(float degrees) { return (M_PI / 180.0f) * degrees; }
 static inline float degrees(float radians) { return (180.0f / M_PI) * radians; }

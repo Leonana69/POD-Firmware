@@ -60,6 +60,14 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
     <!-- - IWDG counter clock prescaler: 32 -->
     <!-- - IWDG down-counter reload value: 188 -->
 
+10. Motor GPIO
+    - Enable TIM2
+        - Channel1: PWM Generation CH1 on PA15
+        - Channel2: PWM Generation CH2 on PA1
+        - Channel4: PWM Generation CH4 on PB11
+    - Enable TIM4
+        - Channel4: PWM Generation CH4 on PB9
+
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld

@@ -46,15 +46,6 @@ float half2single(uint16_t number) {
     return *(float *)&fp32;
 }
 
-uint16_t limitUint16(int32_t value) {
-  if (value > UINT16_MAX)
-    value = UINT16_MAX;
-  else if (value < 0)
-    value = 0;
-
-  return (uint16_t)value;
-}
-
 float constrain(float value, const float minVal, const float maxVal) {
   return fminf(maxVal, fmaxf(minVal, value));
 }
@@ -257,10 +248,18 @@ float capAngle(float angle) {
   return result;
 }
 
-int16_t capValueInt16(float in) {
-  if (in > INT16_MAX)
+int16_t capValueInt16(float value) {
+  if (value > INT16_MAX)
     return INT16_MAX;
-  else if (in < INT16_MIN)
+  else if (value < INT16_MIN)
     return INT16_MIN;
-  else return (int16_t)in;
+  else return (int16_t)value;
+}
+
+uint16_t capValueUint16(int32_t value) {
+  if (value > UINT16_MAX)
+    value = UINT16_MAX;
+  else if (value < 0)
+    value = 0;
+  return (uint16_t)value;
 }

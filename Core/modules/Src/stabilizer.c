@@ -31,8 +31,7 @@
 #include "log.h"
 #include "param.h"
 #include "debug.h"
-// TODO: fix motor
-// #include "motors.h"
+#include "motors.h"
 #include "pm.h"
 #include "cal.h"
 
@@ -43,7 +42,7 @@
 // #include "crtp_localization_service.h"
 #include "controller.h"
 #include "estimator.h"
-// #include "power_distribution.h"
+#include "power_distribution.h"
 // TODO: enable collision
 // #include "collision_avoidance.h"
 // #include "health.h"
@@ -65,9 +64,6 @@ static setpoint_t setpoint;
 static sensorData_t sensorData;
 static state_t state;
 static control_t control;
-
-static int estimatorType;
-static int controllerType;
 
 // static STATS_CNT_RATE_DEFINE(stabilizerRate, 500);
 // static rateSupervisor_t rateSupervisorContext;
@@ -167,10 +163,10 @@ void stabilizerInit() {
   sensorsInit();
   estimatorInit();
   controllerInit();
-  // powerDistributionInit();
+  powerDistributionInit();
+
+  motorsSetRatio(1, 5000);
   // collisionAvoidanceInit();
-  // estimatorType = getStateEstimator();
-  // controllerType = getControllerType();
 
   // STATIC_MEM_TASK_CREATE(stabilizerTask, stabilizerTask, STABILIZER_TASK_NAME, NULL, STABILIZER_TASK_PRI);
   isInit = true;
@@ -182,7 +178,7 @@ bool stabilizerTest(void) {
   pass &= sensorsTest();
   pass &= estimatorTest();
   pass &= controllerTest();
-  // pass &= powerDistributionTest();
+  pass &= powerDistributionTest();
   // pass &= collisionAvoidanceTest();
 
   return pass;
@@ -227,16 +223,6 @@ static void stabilizerTask() {
     // if (healthShallWeRunTest()) {
     //   healthRunTests(&sensorData);
     // } else {
-    //   // allow to update estimator dynamically
-    //   if (getStateEstimator() != estimatorType) {
-    //     stateEstimatorSwitchTo(estimatorType);
-    //     estimatorType = getStateEstimator();
-    //   }
-    //   // allow to update controller dynamically
-    //   if (getControllerType() != controllerType) {
-    //     controllerInit(controllerType);
-    //     controllerType = getControllerType();
-    //   }
 
     //   stateEstimator(&state, tick);
     //   compressState();
@@ -300,18 +286,9 @@ void stabilizerSetEmergencyStopTimeout(int timeout) {
 }
 
 /**
- * Parameters to set the estimator and controller type
- * for the stabilizer module, or to do an emergency stop
+ * Parameters to do an emergency stop
  */
 PARAM_GROUP_START(stabilizer)
-/**
- * @brief Estimator type Any(0), complementary(1), kalman(2) (Default: 1)
- */
-PARAM_ADD_CORE(PARAM_UINT8, estimator, &estimatorType)
-/**
- * @brief Controller type Any(0), PID(1), Mellinger(2), INDI(3) (Default: 1)
- */
-PARAM_ADD_CORE(PARAM_UINT8, controller, &controllerType)
 /**
  * @brief If set to nonzero will turn off power
  */
