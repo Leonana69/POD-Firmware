@@ -29,12 +29,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "debug.h"
-#include "config.h"
-
-#include "static_mem.h"
-#include "led.h"
-#include "system.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -111,7 +105,6 @@ int main(void)
 
   /* Init scheduler */
   osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
-  systemLaunch();
   MX_FREERTOS_Init();
   /* Start scheduler */
   osKernelStart();

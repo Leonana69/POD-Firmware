@@ -48,9 +48,10 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
     - GPIO Pull-up/Pull-down: Pull-up
     - NVIC: Enable EXTI line4 interrupt: 5, 0
 
-7. Enable GPIO PD2, PC0, PC1, PC2, PC3
+7. LED GPIOs
+    - PD2, PC0, PC1, PC2, PC3
 
-8. Disable #define __FPU_PRESENT in Driver/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h
+8. 
 
 9. Enable PC14 (GPIO_EXTI14)
     - GPIO Mode: External Interrupt Mode with Rising edge trigger detection
@@ -60,7 +61,7 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
     <!-- - IWDG counter clock prescaler: 32 -->
     <!-- - IWDG down-counter reload value: 188 -->
 
-10. Motor GPIO
+10. Motor GPIOs
     - Enable TIM2: Prescaler(0), Mode(Up), Period(255), No Division, Auto-reload(Enable), Trig M/S Mode(Disable), Trig Event Selection(Reset)
         - Channel1: PWM Generation CH1 on PA15
             - Mode: PWM mode 1
@@ -74,6 +75,8 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
         - Channel4: PWM Generation CH4 on PB9
     - The HAL_TIM_PWM_START needs to be called to enable the output.
 
+11. Comment the #define __FPU_PRESENT in Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h
+    - This line will cause redefinition of __FPU_PRESENT, I guess it's a mismatch between CMSIS and STM32CubeMX.
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld
