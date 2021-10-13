@@ -76,7 +76,7 @@
 
 // ****** TIM ******
 #define usecTim         htim7
-
+#define MOTORS_TIM_BITS 8
 #define MOTOR1TIM       htim2
 #define MOTOR1CHANNEL   TIM_CHANNEL_2
 #define MOTOR2TIM       htim2

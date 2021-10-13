@@ -165,7 +165,7 @@ void stabilizerInit() {
   controllerInit();
   powerDistributionInit();
 
-  motorsSetRatio(1, 5000);
+  motorsSetRatio(1, 3000);
   // collisionAvoidanceInit();
 
   // STATIC_MEM_TASK_CREATE(stabilizerTask, stabilizerTask, STABILIZER_TASK_NAME, NULL, STABILIZER_TASK_PRI);

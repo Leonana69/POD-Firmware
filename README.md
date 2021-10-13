@@ -61,12 +61,18 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
     <!-- - IWDG down-counter reload value: 188 -->
 
 10. Motor GPIO
-    - Enable TIM2
+    - Enable TIM2: Prescaler(0), Mode(Up), Period(255), No Division, Auto-reload(Enable), Trig M/S Mode(Disable), Trig Event Selection(Reset)
         - Channel1: PWM Generation CH1 on PA15
+            - Mode: PWM mode 1
+            - Pulse: 0
+            - Output compare preload: Enable
+            - Fast Mode: Disable
+            - CH: High
         - Channel2: PWM Generation CH2 on PA1
         - Channel4: PWM Generation CH4 on PB11
-    - Enable TIM4
+    - Enable TIM4: Prescaler(0), Mode(Up), Period(255), No Division, Auto-reload(Enable), Trig M/S Mode(Disable), Trig Event Selection(Reset)
         - Channel4: PWM Generation CH4 on PB9
+    - The HAL_TIM_PWM_START needs to be called to enable the output.
 
 ## Modifications to Auto-generated Files
 
