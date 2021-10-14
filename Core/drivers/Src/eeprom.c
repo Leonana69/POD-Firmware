@@ -78,28 +78,22 @@ bool eepromTest(void) {
 
 bool eepromTestConnection(void) {
   uint8_t tmp;
-  HAL_StatusTypeDef status;
 
   if (!isInit)
     return false;
 
-  status = I2CRead16(I2Cx, devAddr, 0, 1, &tmp);
-  return status == HAL_OK;
+  return I2CRead16(I2Cx, devAddr, 0, 1, &tmp);
 }
 
 bool eepromReadBuffer(uint8_t* buffer, uint16_t readAddr, uint16_t len) {
-  HAL_StatusTypeDef status;
-
   if ((uint32_t)readAddr + len > EEPROM_SIZE)
     return false;
 
-  status = I2CRead16(I2Cx, devAddr, readAddr, len, buffer);
-
-  return status == HAL_OK;
+  return I2CRead16(I2Cx, devAddr, readAddr, len, buffer);
 }
 
 bool eepromWriteBuffer(const uint8_t* buffer, uint16_t writeAddr, uint16_t len) {
-  HAL_StatusTypeDef status = HAL_ERROR;;
+  bool status = false;
 
   unsigned char pageBuffer[32];
   int bufferIndex = 0;
@@ -122,26 +116,26 @@ bool eepromWriteBuffer(const uint8_t* buffer, uint16_t writeAddr, uint16_t len) 
     // Writing page
     for (int retry = 0; retry < 10; retry++) {
       status = I2CWrite16(I2Cx, devAddr, pageAddress, pageIndex, pageBuffer);
-      if (status == HAL_OK)
+      if (status)
         break;
 			osDelay(6);
     }
-    if (status != HAL_OK)
+    if (!status)
       return false;
 
     // Waiting for page to be written
     for (int retry = 0; retry < 30; retry++) {
       uint8_t dummy;
 			status = I2CWrite16(I2Cx, devAddr, 0xFFFF, 1, &dummy);
-      if (status == HAL_OK)
+      if (status)
         break;
 			osDelay(1);
     }
-    if (status != HAL_OK)
+    if (!status)
       return false;
   }
 
-  return status == HAL_OK;
+  return status;
 }
 
 bool eepromWritePage(uint8_t* buffer, uint16_t writeAddr) {
