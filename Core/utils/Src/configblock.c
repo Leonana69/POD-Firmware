@@ -81,9 +81,9 @@ static bool cb_ok = false;
 static bool configblockCheckChecksum(configblock_t *configblock);
 static bool configblockWrite(configblock_t *configblock);
 
-int configblockInit(void) {
+void configblockInit(void) {
   if (isInit)
-    return 0;
+    return;
 
   eepromInit();
 
@@ -99,7 +99,7 @@ int configblockInit(void) {
     }
   } else {
     DEBUG_PRINT("EEPROM Connection [FAIL]\n");
-    return -1;
+    return;
   }
 
   if (cb_ok == false) {
@@ -111,12 +111,11 @@ int configblockInit(void) {
       cb_ok = true;
     else {
       DEBUG_PRINT("Write failed!\n");
-      return -1;
+      return;
     }
   }
 
   isInit = true;
-  return 0;
 }
 
 bool configblockTest(void) {

@@ -30,7 +30,7 @@
 #ifndef __CONFIGBLOCK_H__
 #define __CONFIGBLOCK_H__
 
-int configblockInit(void);
+void configblockInit(void);
 bool configblockTest(void);
 
 /* Static accessors */
