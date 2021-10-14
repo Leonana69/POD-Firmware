@@ -91,11 +91,6 @@ static void syslinkRouteIncommingPacket(SyslinkPacket *slp) {
   uint8_t groupType;
   groupType = slp->type & SYSLINK_GROUP_MASK;
 
-  // TODO: remove debug
-  // CRTPPacket* cp = (CRTPPacket *)&slp->length;
-  // if (slp->type != 4 && slp->type != 19 && cp->port != 15)
-  // DEBUG_PRINT_UART("r %d %d %d %d\n", slp->type, cp->port, cp->channel, cp->size - 1);
-
   switch (groupType) {
     case SYSLINK_RADIO_GROUP:
       radiolinkSyslinkDispatch(slp);
@@ -143,11 +138,8 @@ bool syslinkTest() {
 int syslinkSendPacket(SyslinkPacket *slp) {
   int dataSize;
   uint8_t cksum[2] = {0};
-	osSemaphoreAcquire(syslinkAccess, osDelayMax);
+	osSemaphoreAcquire(syslinkAccess, osWaitForever);
   ASSERT(slp->length <= SYSLINK_MTU);
-  // TODO: remove debug
-  // CRTPPacket* cp = (CRTPPacket *)&slp->length;
-  // DEBUG_PRINT_UART("\tt %d %d %d\n", cp->port, cp->channel, cp->size - 1);
 
   sendBuffer[0] = SYSLINK_START_BYTE1;
   sendBuffer[1] = SYSLINK_START_BYTE2;
@@ -156,7 +148,7 @@ int syslinkSendPacket(SyslinkPacket *slp) {
 
   memcpy(&sendBuffer[4], slp->data, slp->length);
   dataSize = slp->length + 6;
-  // Calculate checksum delux
+  /*! Calculate the checksum */
   for (int i = 2; i < dataSize - 2; i++) {
     cksum[0] += sendBuffer[i];
     cksum[1] += cksum[0];

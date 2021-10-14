@@ -88,7 +88,7 @@ int consolePutchar(int ch) {
 
   if (isInInterrupt)
     return consolePutcharFromISR(ch);
-  if (osSemaphoreAcquire(synch, osDelayMax) == osOK) {
+  if (osSemaphoreAcquire(synch, osWaitForever) == osOK) {
     // Try to send if we already have a pending message
     if (messageSendingIsPending)
       consoleSendMessage();
@@ -134,7 +134,7 @@ int consolePuts(char *str) {
 }
 
 void consoleFlush(void) {
-  if (osSemaphoreAcquire(synch, osDelayMax) == osOK) {
+  if (osSemaphoreAcquire(synch, osWaitForever) == osOK) {
     consoleSendMessage();
     osSemaphoreRelease(synch);
   }

@@ -36,7 +36,7 @@ void sensorsBmi088Bmp388WaitDataReady(void);
 bool sensorsBmi088Bmp388ReadGyro(Axis3f *gyro);
 bool sensorsBmi088Bmp388ReadAccel(Axis3f *accel);
 bool sensorsBmi088Bmp388ReadBaro(baro_t *baro);
-void sensorsBmi088Bmp388SetAccMode(accModes accMode);
+void sensorsBmi088Bmp388SetAccelMode(AccelModes mode);
 void sensorsBmi088Bmp388DataAvailableCallback(void);
 
 #endif // __SENSORS_BMI088_BMP388_H__

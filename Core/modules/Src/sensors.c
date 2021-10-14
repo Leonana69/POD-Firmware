@@ -50,9 +50,9 @@ typedef struct {
   void (*acquire)(sensorData_t *sensors);
   void (*waitDataReady)(void);
   bool (*readGyro)(Axis3f *gyro);
-  bool (*readAcc)(Axis3f *acc);
+  bool (*readAccel)(Axis3f *acc);
   bool (*readBaro)(baro_t *baro);
-  void (*setAccMode)(accModes accMode);
+  void (*setAccelMode)(AccelModes mode);
   void (*dataAvailableCallback)(void);
 	const char *name;
 } Sensors;
@@ -66,9 +66,9 @@ static const Sensors sensorsFunctions[SENSORS_COUNT] = {
     .acquire = sensorsBmi088Bmp388Acquire,
     .waitDataReady = sensorsBmi088Bmp388WaitDataReady,
     .readGyro = sensorsBmi088Bmp388ReadGyro,
-    .readAcc = sensorsBmi088Bmp388ReadAccel,
+    .readAccel = sensorsBmi088Bmp388ReadAccel,
     .readBaro = sensorsBmi088Bmp388ReadBaro,
-    .setAccMode = sensorsBmi088Bmp388SetAccMode,
+    .setAccelMode = sensorsBmi088Bmp388SetAccelMode,
     .dataAvailableCallback = sensorsBmi088Bmp388DataAvailableCallback,
 		.name = "BMI088BMP388",
   },
@@ -101,16 +101,16 @@ bool sensorsReadGyro(Axis3f *gyro) {
   return sensorsFunctions[currentSensors].readGyro(gyro);
 }
 
-bool sensorsReadAcc(Axis3f *acc) {
-  return sensorsFunctions[currentSensors].readAcc(acc);
+bool sensorsReadAccel(Axis3f *acc) {
+  return sensorsFunctions[currentSensors].readAccel(acc);
 }
 
 bool sensorsReadBaro(baro_t *baro) {
   return sensorsFunctions[currentSensors].readBaro(baro);
 }
 
-void sensorsSetAccMode(accModes accMode) {
-  sensorsFunctions[currentSensors].setAccMode(accMode);
+void sensorsSetAccelMode(AccelModes mode) {
+  sensorsFunctions[currentSensors].setAccelMode(mode);
 }
 
 SensorsType sensorsGetType() {

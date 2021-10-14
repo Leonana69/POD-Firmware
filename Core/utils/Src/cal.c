@@ -263,3 +263,14 @@ uint16_t capValueUint16(int32_t value) {
     value = 0;
   return (uint16_t)value;
 }
+
+float fVariance(float *buffer, uint32_t length) {
+  float sum = 0;
+  float sumSq = 0;
+  for (uint32_t i = 0; i < length; i++) {
+    sum += buffer[i];
+    sumSq += buffer[i] * buffer[i];
+  }
+  sum = sum / length;
+  return sumSq / length - sum * sum;
+}

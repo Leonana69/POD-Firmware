@@ -115,7 +115,7 @@ C_SOURCES += bmi08a.c bmi08g.c bmp3.c
 VPATH += Core/modules/Src
 C_SOURCES += worker.c queuemonitor.c system.c mem.c crtp.c console.c comm.c ledseq.c crtp_link.c log.c crtp_platform.c param.c \
 	sysload.c commander.c crtp_commander.c crtp_commander_rpyt.c crtp_commander_generic.c stabilizer.c controller.c controller_pid_attitude.c \
-	controller_pid.c controller_pid_position.c estimator.c supervisor.c estimator_kalman.c sensors.c power_distribution.c
+	controller_pid.c controller_pid_position.c estimator.c supervisor.c estimator_kalman.c sensors.c power_distribution.c self_test.c
 
 # CMSIS DSP
 VPATH += Drivers/CMSIS/DSP/Source/FastMathFunctions

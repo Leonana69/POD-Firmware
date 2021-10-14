@@ -45,8 +45,8 @@
 #include "power_distribution.h"
 // TODO: enable collision
 // #include "collision_avoidance.h"
-// #include "health.h"
-// #include "supervisor.h"
+#include "self_test.h"
+#include "supervisor.h"
 
 // #include "usddeck.h"
 // #include "statsCnt.h"
@@ -164,11 +164,9 @@ void stabilizerInit() {
   estimatorInit();
   controllerInit();
   powerDistributionInit();
-
-  motorsSetRatio(1, 3000);
+  // TODO: check this
   // collisionAvoidanceInit();
-
-  // STATIC_MEM_TASK_CREATE(stabilizerTask, stabilizerTask, STABILIZER_TASK_NAME, NULL, STABILIZER_TASK_PRI);
+  STATIC_MEM_TASK_CREATE(stabilizerTask, stabilizerTask, STABILIZER_TASK_NAME, NULL, STABILIZER_TASK_PRI);
   isInit = true;
 }
 
@@ -180,7 +178,6 @@ bool stabilizerTest(void) {
   pass &= controllerTest();
   pass &= powerDistributionTest();
   // pass &= collisionAvoidanceTest();
-
   return pass;
 }
 
@@ -194,81 +191,66 @@ static void checkEmergencyStopTimeout() {
  */
 
 static void stabilizerTask() {
-  uint32_t tick;
-  uint32_t lastWakeTime;
-
-  // Wait for the system to be fully started to start stabilization loop
+  /*! Wait for the system to be fully started */
   systemWaitStart();
-  DEBUG_PRINT("Wait for sensor calibration...\n");
 
-  // Wait for sensors to be calibrated
-  lastWakeTime = osKernelGetTickCount();
-  // while (!sensorsAreCalibrated()) {
-  //   vTaskDelayUntil(&lastWakeTime, F2T(RATE_MAIN_LOOP));
-  // }
-  // Initialize tick to something else then 0
-  tick = 1;
+  uint32_t tick = 1;
+  uint32_t lastWakeTime = osKernelGetTickCount();
+  DEBUG_PRINT_UART("Wait for sensor calibration...\n");
+  while (!sensorsAreCalibrated())
+    osDelay(10);
 
   // rateSupervisorInit(&rateSupervisorContext, osKernelGetTickCount(), 1000, 997, 1003, 1);
 
-  DEBUG_PRINT("Ready to fly.\n");
+  DEBUG_PRINT_UART("Ready to fly.\n");
 
+  static int cnt = 0;
   while (1) {
-    // The sensor should unlock at 1kHz
-    // sensorsWaitDataReady();
+    /*! The sensor should unlock at 1kHz */
+    sensorsWaitDataReady();
+    sensorsAcquire(&sensorData);
+    /*! Update the drone flight state */
+    // TODO: check this
+    // supervisorUpdate(&sensorData);
 
-    // update sensorData struct (for logging variables)
-    // sensorsAcquire(&sensorData, tick);
+    if (1 || selfTestPassed()) {
+      estimatorUpdate(&state, tick);
+      compressState();
 
-    // if (healthShallWeRunTest()) {
-    //   healthRunTests(&sensorData);
-    // } else {
+      commanderGetSetpoint(&setpoint, &state);
+      compressSetpoint();
 
-    //   stateEstimator(&state, tick);
-    //   compressState();
+      // collisionAvoidanceUpdateSetpoint(&setpoint, &sensorData, &state, tick);
 
-    //   commanderGetSetpoint(&setpoint, &state);
-    //   compressSetpoint();
+      controllerUpdate(&control, &setpoint, &sensorData, &state, tick);
 
-    //   collisionAvoidanceUpdateSetpoint(&setpoint, &sensorData, &state, tick);
+      // checkEmergencyStopTimeout();
 
-      // controllerUpdate(&control, &setpoint, &sensorData, &state, tick);
+      if (emergencyStop)
+        powerStop();
+      else
+        powerDistributionUpdate(&control);
 
-    //   checkEmergencyStopTimeout();
+      // Log data to uSD card if configured
+      // if (   usddeckLoggingEnabled()
+      //     && usddeckLoggingMode() == usddeckLoggingMode_SynchronousStabilizer
+      //     && RATE_DO_EXECUTE(usddeckFrequency(), tick)) {
+      //   usddeckTriggerLogging();
+      // }
 
-    //   //
-    //   // The supervisor module keeps track of Crazyflie state such as if
-    //   // we are ok to fly, or if the Crazyflie is in flight.
-    //   //
-    //   supervisorUpdate(&sensorData);
-
-    //   if (emergencyStop || (systemIsArmed() == false)) {
-    //     powerStop();
-    //   } else {
-    //     powerDistribution(&control);
-    //   }
-
-    //   // Log data to uSD card if configured
-    //   if (   usddeckLoggingEnabled()
-    //       && usddeckLoggingMode() == usddeckLoggingMode_SynchronousStabilizer
-    //       && RATE_DO_EXECUTE(usddeckFrequency(), tick)) {
-    //     usddeckTriggerLogging();
-    //   }
-
-    //   calcSensorToOutputLatency(&sensorData);
-    //   tick++;
-    //   STATS_CNT_RATE_EVENT(&stabilizerRate);
-
-    //   if (!rateSupervisorValidate(&rateSupervisorContext, osKernelGetTickCount())) {
-    //     if (!rateWarningDisplayed) {
-    //       DEBUG_PRINT("WARNING: stabilizer loop rate is off (%lu)\n", rateSupervisorLatestCount(&rateSupervisorContext));
-    //       rateWarningDisplayed = true;
-    //     }
-    //   }
-    // }
-
-		// TODO: remove this
-		osDelay(100);
+      calcSensorToOutputLatency(&sensorData);
+      tick++;
+      // TODO: check the rate
+      // STATS_CNT_RATE_EVENT(&stabilizerRate);
+      // if (!rateSupervisorValidate(&rateSupervisorContext, osKernelGetTickCount())) {
+      //   if (!rateWarningDisplayed) {
+      //     DEBUG_PRINT("WARNING: stabilizer loop rate is off (%lu)\n", rateSupervisorLatestCount(&rateSupervisorContext));
+      //     rateWarningDisplayed = true;
+      //   }
+      // }
+    } else
+      selfTestRun(&sensorData);
+      
   }
 }
 

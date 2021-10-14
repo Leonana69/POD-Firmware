@@ -88,8 +88,8 @@ STATIC_MEM_TASK_ALLOC(sensorsTask, SENSORS_TASK_STACKSIZE);
 STATIC_MEM_MUTEX_ALLOC(accelDataMutex);
 STATIC_MEM_MUTEX_ALLOC(gyroDataMutex);
 STATIC_MEM_MUTEX_ALLOC(baroDataMutex);
-static Axis3i16 accelData;
-static Axis3i16 gyroData;
+static Axis3f accelData;
+static Axis3f gyroData;
 static baro_t baroData;
 
 /*! @brief This structure containing relevant bmi08x info */
@@ -206,7 +206,6 @@ static void sensorsTask(void *param) {
 	struct bmi08x_sensor_data bmi08xGyro;
   struct bmp3_data bmp3Baro;
   systemWaitStart();
-
   Axis3f accelScaled;
   measurement_t measurement;
   /** wait an additional second the keep bus free
@@ -220,6 +219,7 @@ static void sensorsTask(void *param) {
       /*! get data from chosen sensors */
       sensorsGyroGet(&bmi08xGyro);
       sensorsAccelGet(&bmi08xAccel);
+      
 
       /*! calibrate if necessary */
       if (!gyroBiasFound)
@@ -241,6 +241,7 @@ static void sensorsTask(void *param) {
       accelScaled.x = bmi08xAccel.x * accelValue2Gravity / accelScale;
       accelScaled.y = bmi08xAccel.y * accelValue2Gravity / accelScale;
       accelScaled.z = bmi08xAccel.z * accelValue2Gravity / accelScale;
+      
       sensorsAccAlignToGravity(&accelScaled, &sensorData.accel);
       applyAxis3fLpf((lpf2pData*)(&accelLpf), &sensorData.accel);
 
@@ -271,7 +272,6 @@ static void sensorsTask(void *param) {
       osMutexRelease(baroDataMutex);
 			baroMeasDelay = 0;
 		}
-
     osSemaphoreRelease(readDataReady);
   }
 }
@@ -405,7 +405,7 @@ void sensorsBmi088Bmp388Init(SensorsInterfaceType interface) {
   gyroBias.y = 0;
   gyroBias.z = 0;
   sensorsDeviceInit();
-  // sensorsTaskInit();
+  sensorsTaskInit();
 	isInit = true;
 }
 
@@ -499,23 +499,22 @@ static void sensorsAddBiasValue(int16_t x, int16_t y, int16_t z) {
 
 bool sensorsBmi088Bmp388ManufacturingTest(void) {
   bool testStatus = true;
-
   int8_t rslt = 0;
   rslt = bmi08a_perform_selftest(&bmi08xDev);
   if (rslt != BMI08X_W_SELF_TEST_FAIL) {
-    DEBUG_PRINT("BMI088 Accel self-test [OK].\n");
+    DEBUG_PRINT_UART("BMI088 Accel self-test [OK].\n");
   } else {
-    DEBUG_PRINT("BMI088 Accel self-test [FAILED].\n");
+    DEBUG_PRINT_UART("BMI088 Accel self-test [FAILED].\n");
     testStatus = false;
   }
-
-  rslt = bmi08g_perform_selftest(&bmi08xDev);
-  if (rslt != BMI08X_W_SELF_TEST_FAIL) {
-    DEBUG_PRINT("BMI088 Gyro self-test [OK].\n");
-  } else {
-    DEBUG_PRINT("BMI088 Gyro self-test [FAILED].\n");
-    testStatus = false;
-  }
+  /*! Gyro test is conflict with interrupt, following code will cause system to reboot. */
+  // rslt = bmi08g_perform_selftest(&bmi08xDev);
+  // if (rslt != BMI08X_W_SELF_TEST_FAIL) {
+  //   DEBUG_PRINT_UART("BMI088 Gyro self-test [OK].\n");
+  // } else {
+  //   DEBUG_PRINT_UART("BMI088 Gyro self-test [FAILED].\n");
+  //   testStatus = false;
+  // }
   return testStatus;
 }
 
@@ -543,9 +542,9 @@ static void sensorsAccAlignToGravity(Axis3f* in, Axis3f* out) {
   out->z = ry.z;
 }
 
-void sensorsBmi088Bmp388SetAccMode(accModes accMode) {
-  switch (accMode) {
-    case ACC_MODE_PROPTEST:
+void sensorsBmi088Bmp388SetAccelMode(AccelModes mode) {
+  switch (mode) {
+    case ACCEL_MODE_PROPTEST:
       /* set bandwidth and range of accel (280Hz cut-off according to datasheet) */
       bmi08xDev.accel_cfg.bw = BMI08X_ACCEL_BW_NORMAL;
       bmi08xDev.accel_cfg.range = BMI088_ACCEL_RANGE_24G;
@@ -556,7 +555,7 @@ void sensorsBmi088Bmp388SetAccMode(accModes accMode) {
       for (uint8_t i = 0; i < 3; i++)
         lpf2pInit(&accelLpf[i], 1000, 500);
       break;
-    case ACC_MODE_FLIGHT:
+    case ACCEL_MODE_FLIGHT:
     default:
       /* set bandwidth and range of accel (145Hz cut-off according to datasheet) */
       bmi08xDev.accel_cfg.bw = BMI08X_ACCEL_BW_OSR4;

@@ -182,7 +182,6 @@ STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(kalmanTask, 3 * configMINIMAL_STACK_
 
 static void kalmanTask() {
   systemWaitStart();
-
 	float dt;
   bool doneUpdate;
   uint32_t lastPrediction = osKernelGetTickCount();

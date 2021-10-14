@@ -85,14 +85,14 @@
 static bool selftestPassed;
 static bool armed = ARM_INIT;
 static bool forceArm;
-static bool isInit;
+static bool isInit = false;
 
 static char nrf_version[16];
 
 STATIC_MEM_TASK_ALLOC(systemTask, SYSTEM_TASK_STACKSIZE);
 
-/* System wide synchronisation */
-STATIC_MEM_MUTEX_ALLOC(canStartMutex);
+/*! System wide synchronisation */
+STATIC_MEM_SEMAPHORE_ALLOC(canStartSemaphore);
 
 /* Private functions */
 static void systemTask(void *arg);
@@ -107,13 +107,11 @@ void systemLaunch(void) {
 }
 
 // This must be the first module to be initialized!
-void systemInit(void) {
+static void systemInit(void) {
   if (isInit)
     return;
 
-  STATIC_MUTEX_CREATE(canStartMutex);
-  osSemaphoreAcquire(canStartMutex, osDelayMax);
-
+  STATIC_SEMAPHORE_CREATE(canStartSemaphore, 1, 0);
   usecTimerInit();
   ledInit();
   ledSet(CHG_LED, 1);
@@ -152,6 +150,7 @@ void systemInit(void) {
   sysLoadInit();
   commanderInit();
   memInit();
+  stabilizerInit();
   /* these modules are not used */
   // storageInit();
   // buzzerInit();
@@ -162,24 +161,23 @@ void systemInit(void) {
   isInit = true;
 }
 
-bool systemTest() {
+static bool systemTest() {
   bool pass = isInit;
-  // TODO: enable test
-  // pass &= ledseqTest();
-  // pass &= pmTest();
-  // pass &= workerTest();
-  // pass &= buzzerTest();
-  // pass &= sysLoadTest();
-  // pass &= pmTest();
+  pass &= commTest();
+  pass &= configblockTest();
+  pass &= workerTest();
+  pass &= ledseqTest();
+  pass &= pmTest();
+  pass &= sysLoadTest();
+  pass &= commanderTest();
+  pass &= memTest();
+  pass &= stabilizerTest();
   return pass;
 }
 
-/* Private functions implementation */
 void systemTask(void *arg) {
-  bool pass = true;
-  // Init the high-levels modules
+  /*! Init all modules */
   systemInit();
-  stabilizerInit();
 
   // StateEstimatorType estimator = anyEstimator;
   // estimatorKalmanTaskInit();
@@ -195,68 +193,11 @@ void systemTask(void *arg) {
 
   // systemRequestNRFVersion();
 
-  /* Test the modules */
-  // DEBUG_PRINT("About to run tests in system.c.\n");
-  // if (systemTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("system [FAIL]\n");
-  // }
-  // if (configblockTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("configblock [FAIL]\n");
-  // }
-  // if (storageTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("storage [FAIL]\n");
-  // }
-  // if (commTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("comm [FAIL]\n");
-  // }
-  // if (commanderTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("commander [FAIL]\n");
-  // }
-  // if (stabilizerTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("stabilizer [FAIL]\n");
-  // }
-  // if (estimatorKalmanTaskTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("estimatorKalmanTask [FAIL]\n");
-  // }
-  // if (deckTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("deck [FAIL]\n");
-  // }
-  // if (soundTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("sound [FAIL]\n");
-  // }
-  // if (memTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("mem [FAIL]\n");
-  // }
-  // if (watchdogNormalStartTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("watchdogNormalStart [FAIL]\n");
-  // }
-  // if (cfAssertNormalStartTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("cfAssertNormalStart [FAIL]\n");
-  // }
-  // if (peerLocalizationTest() == false) {
-  //   pass = false;
-  //   DEBUG_PRINT("peerLocalization [FAIL]\n");
-  // }
-
   /* Start the firmware */
-  if (pass) {
+  if (systemTest()) {
     DEBUG_PRINT_UART("Self test passed!\n");
     selftestPassed = 1;
     systemStart();
-    // TODO: add sound
-    // soundSetEffect(SND_STARTUP);
     ledseqRun(&seq_alive);
     ledseqRun(&seq_testPassed);
   } else {
@@ -290,7 +231,7 @@ void systemTask(void *arg) {
 
 /* Global system variables */
 void systemStart() {
-  osMutexRelease(canStartMutex);
+  osSemaphoreRelease(canStartSemaphore);
 #ifndef DEBUG
   // TODO: init IWDG
   // watchdogInit();
@@ -301,18 +242,9 @@ void systemWaitStart(void) {
   // This permits to guarantee that the system task is initialized before other
   // tasks waits for the start event.
   while (!isInit)
-    osDelay(2);
-
-  osMutexAcquire(canStartMutex, osWaitForever);
-  osMutexRelease(canStartMutex);
-}
-
-void systemSetArmed(bool val) {
-  armed = val;
-}
-
-bool systemIsArmed() {
-  return armed || forceArm;
+    osDelay(10);
+  osSemaphoreAcquire(canStartSemaphore, osWaitForever);
+  osSemaphoreRelease(canStartSemaphore);
 }
 
 void systemRequestShutdown() {

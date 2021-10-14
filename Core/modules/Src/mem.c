@@ -106,7 +106,8 @@ void memInit(void) {
 }
 
 bool memTest(void) {
-  return isInit && (owMemHandler != 0);
+  // TODO: check this
+  return isInit;// && (owMemHandler != 0);
 }
 
 void memoryRegisterHandler(const MemoryHandlerDef_t* handlerDef){

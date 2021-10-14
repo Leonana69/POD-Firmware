@@ -35,6 +35,7 @@
 #include "commander.h"
 #include "static_mem.h"
 #include "worker.h"
+#include "debug.h"
 
 static bool isInit = false;
 

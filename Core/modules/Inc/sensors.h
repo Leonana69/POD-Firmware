@@ -29,7 +29,10 @@
 #include "stabilizer_types.h"
 #include <stdbool.h>
 
-typedef enum { ACC_MODE_PROPTEST, ACC_MODE_FLIGHT } accModes;
+typedef enum {
+  ACCEL_MODE_PROPTEST,
+  ACCEL_MODE_FLIGHT
+} AccelModes;
 
 typedef enum {
   SENSORS_BMI088_BMP388,
@@ -55,7 +58,7 @@ void sensorsWaitDataReady();
 
 // Allows individual sensor measurement
 bool sensorsReadGyro(Axis3f *gyro);
-bool sensorsReadAcc(Axis3f *acc);
+bool sensorsReadAccel(Axis3f *accel);
 bool sensorsReadBaro(baro_t *baro);
 
 SensorsType sensorsGetType();
@@ -64,7 +67,7 @@ const char* sensorsGetName();
 /**
  * Set acc mode, one of accModes enum
  */
-void sensorsSetAccMode(accModes accMode);
+void sensorsSetAccelMode(AccelModes mode);
 void sensorsAvailableCallback();
 
 #endif //__SENSORS_H__

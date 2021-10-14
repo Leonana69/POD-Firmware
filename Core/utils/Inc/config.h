@@ -111,8 +111,6 @@
 #define BLUE_L_Pin        GPIO_PIN_2
 #define BLUE_L_GPIO_Port  GPIOD
 
-#define osDelayMax        0xFFFF
-
 /*
  * FreeRTOS
  */

@@ -128,4 +128,6 @@ static inline float arm_sqrt(float32_t in) {
   return pOut;
 }
 
+float fVariance(float *buffer, uint32_t length);
+
 #endif

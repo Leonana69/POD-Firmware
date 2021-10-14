@@ -59,7 +59,6 @@ void commInit(void) {
   paramInit();
 
   // locSrvInit();
-  
   isInit = true;
 }
 

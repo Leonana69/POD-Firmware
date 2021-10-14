@@ -94,6 +94,7 @@ static void timerHandler(void *arg) {
     uint32_t totalRunTime;
 
     TaskStatus_t taskStats[TASK_MAX_COUNT];
+    // TODO: check this
     uint32_t taskCount = uxTaskGetSystemState(taskStats, TASK_MAX_COUNT, &totalRunTime);
     ASSERT(taskCount < TASK_MAX_COUNT);
 
@@ -110,8 +111,9 @@ static void timerHandler(void *arg) {
       taskData_t* previousTaskData = getPreviousTaskData(stats->xTaskNumber);
 
       uint32_t taskRunTime = stats->ulRunTimeCounter;
-      float load = f * (taskRunTime - previousTaskData->ulRunTimeCounter);
-      DEBUG_PRINT("%.2f \t%u \t%s\n", (double)load, stats->usStackHighWaterMark, stats->pcTaskName);
+      // TODO: check this
+      // float load = f * (taskRunTime - previousTaskData->ulRunTimeCounter);
+      // DEBUG_PRINT("%.2f \t%u \t%s\n", (double)load, stats->usStackHighWaterMark, stats->pcTaskName);
 
       previousTaskData->ulRunTimeCounter = taskRunTime;
     }
