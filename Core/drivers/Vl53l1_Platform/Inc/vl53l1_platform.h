@@ -34,7 +34,7 @@
 #include "vl53l1_platform_log.h"
 
 #define VL53L1_IPP_API
-#include "vl53l1_platform_ipp_imports.h"
+// #include "vl53l1_platform_ipp_imports.h"
 #include "vl53l1_platform_user_data.h"
 
 #ifdef __cplusplus
@@ -191,16 +191,18 @@ VL53L1_Error VL53L1_WaitMs(
 		int32_t       wait_ms);
 
 
-/*
+/**
  * @brief Gets current system tick count in [ms]
  *
- * @return  time_ms : current time in [ms]
+ * @param[in]   pdev      : pointer to device structure (device handle)
+ * @param[in]   time_ms : current time in [ms]
  *
  * @return  VL53L1_ERROR_NONE     Success
  * @return  "Other error code"    See ::VL53L1_Error
  */
 
 VL53L1_Error VL53L1_GetTickCount(
+	VL53L1_Dev_t *pdev,
 	uint32_t *ptime_ms);
 
 

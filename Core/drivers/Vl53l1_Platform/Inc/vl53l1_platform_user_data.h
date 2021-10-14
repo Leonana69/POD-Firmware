@@ -74,7 +74,7 @@ typedef struct {
 typedef VL53L1_Dev_t *VL53L1_DEV;
 
 /**
- * @def PALDevDataGet
+ * @def VL53L1DevDataGet
  * @brief Get ST private structure @a VL53L1_DevData_t data access
  *
  * @param Dev       Device Handle
@@ -83,17 +83,17 @@ typedef VL53L1_Dev_t *VL53L1_DEV;
  * like PALDevDataGet(FilterData.field)[i] or
  * PALDevDataGet(FilterData.MeasurementIndex)++
  */
-#define PALDevDataGet(Dev, field) (Dev->Data.field)
+#define VL53L1DevDataGet(Dev, field) (Dev->Data.field)
 
 
 /**
- * @def PALDevDataSet(Dev, field, data)
+ * @def VL53L1DevDataSet(Dev, field, data)
  * @brief  Set ST private structure @a VL53L1_DevData_t data field
  * @param Dev       Device Handle
  * @param field     ST structure field name
  * @param data      Data to be set
  */
-#define PALDevDataSet(Dev, field, data) ((Dev->Data.field) = (data))
+#define VL53L1DevDataSet(Dev, field, data) ((Dev->Data.field) = (data))
 
 
 /**

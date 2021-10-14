@@ -106,10 +106,15 @@ C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c 
 # drivers
 VPATH += Core/drivers/Src
 C_SOURCES += _gpio.c _usart.c _tim.c _i2c.c led.c eeprom.c syslink.c radiolink.c pm.c sensors_bmi088_bmp388.c \
-	motors.c
+	motors.c tof.c
 
 VPATH += Core/drivers/Bosch/Src
 C_SOURCES += bmi08a.c bmi08g.c bmp3.c
+
+VPATH += Core/drivers/Vl53l1/Src
+C_SOURCES += vl53l1_api_calibration.c vl53l1_api_core.c vl53l1_api_debug.c vl53l1_api_preset_modes.c vl53l1_api_strings.c \
+	vl53l1_api.c vl53l1_core_support.c vl53l1_core.c vl53l1_error_strings.c vl53l1_register_funcs.c vl53l1_silicon_core.c \
+	vl53l1_wait.c
 
 # modules
 VPATH += Core/modules/Src
@@ -185,14 +190,21 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
 -IDrivers/CMSIS/Include \
 -IDrivers/STM32F4xx_HAL_Driver/Inc/Legacy \
--ICore/drivers/Inc \
--ICore/utils/Inc \
--ICore/modules/Inc \
 -IDrivers/CMSIS/DSP/Include \
 -IMiddlewares/Third_Party/FreeRTOS/Source/include \
 -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
--ICore/drivers/Bosch/Inc
+
+######################################
+# guojun's C includes
+######################################
+C_INCLUDES += \
+-ICore/drivers/Inc \
+-ICore/utils/Inc \
+-ICore/modules/Inc \
+-ICore/drivers/Bosch/Inc \
+-ICore/drivers/Vl53l1/Inc \
+-ICore/drivers/Vl53l1_Platform/Inc
 
 
 # compile gcc flags
