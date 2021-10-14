@@ -89,6 +89,7 @@
 // ****** I2C ******
 #define eepromI2CHandle hi2c1
 #define sensorsI2CHandle hi2c3
+#define tofI2CHandle hi2c1
 
 // ****** DMA ******
 #define nrfUartTxDmaHandle hdma_usart6_tx

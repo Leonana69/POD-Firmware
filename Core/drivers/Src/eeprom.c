@@ -82,14 +82,14 @@ bool eepromTestConnection(void) {
   if (!isInit)
     return false;
 
-  return I2CRead16(I2Cx, devAddr, 0, 1, &tmp);
+  return i2cMemRead16(I2Cx, devAddr, 0, 1, &tmp);
 }
 
 bool eepromReadBuffer(uint8_t* buffer, uint16_t readAddr, uint16_t len) {
   if ((uint32_t)readAddr + len > EEPROM_SIZE)
     return false;
 
-  return I2CRead16(I2Cx, devAddr, readAddr, len, buffer);
+  return i2cMemRead16(I2Cx, devAddr, readAddr, len, buffer);
 }
 
 bool eepromWriteBuffer(const uint8_t* buffer, uint16_t writeAddr, uint16_t len) {
@@ -115,7 +115,7 @@ bool eepromWriteBuffer(const uint8_t* buffer, uint16_t writeAddr, uint16_t len) 
 
     // Writing page
     for (int retry = 0; retry < 10; retry++) {
-      status = I2CWrite16(I2Cx, devAddr, pageAddress, pageIndex, pageBuffer);
+      status = i2cMemWrite16(I2Cx, devAddr, pageAddress, pageIndex, pageBuffer);
       if (status)
         break;
 			osDelay(6);
@@ -126,7 +126,7 @@ bool eepromWriteBuffer(const uint8_t* buffer, uint16_t writeAddr, uint16_t len) 
     // Waiting for page to be written
     for (int retry = 0; retry < 30; retry++) {
       uint8_t dummy;
-			status = I2CWrite16(I2Cx, devAddr, 0xFFFF, 1, &dummy);
+			status = i2cMemWrite16(I2Cx, devAddr, 0xFFFF, 1, &dummy);
       if (status)
         break;
 			osDelay(1);

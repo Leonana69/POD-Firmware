@@ -17,16 +17,17 @@ typedef struct {
 
 extern I2CDrv eepromI2C;
 extern I2CDrv sensorI2C;
+extern I2CDrv tofI2C;
 
 void _I2C_Init();
-bool I2CRead16(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
-bool I2CWrite16(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
+bool i2cMemRead16(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
+bool i2cMemWrite16(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
 
-bool I2CRead8(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
-bool I2CWrite8(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
+bool i2cMemRead8(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
+bool i2cMemWrite8(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
 
-int8_t i2cSensorsRead(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr);
-int8_t i2cSensorsWrite(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr);
+int8_t i2cSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr);
+int8_t i2cSensorsWrite(uint8_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr);
 
 void sensorsI2cDmaIsr();
 #endif
