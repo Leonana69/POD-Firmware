@@ -30,9 +30,10 @@
 
 #include <stdbool.h>
 
+// TODO: remove this
 // If using HAL library, this should be 0xA0
-#define EEPROM_I2C_ADDR     0xA0
-// #define EEPROM_I2C_ADDR     0x50
+// #define EEPROM_I2C_ADDR     0xA0
+#define EEPROM_I2C_ADDR     0x50
 #define EEPROM_SIZE         0x1FFF
 
 /**

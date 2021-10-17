@@ -66,6 +66,7 @@
 // #include "deck.h"
 // #include "extrx.h"
 // #include "app.h"
+#include "tof.h"
 #include "static_mem.h"
 // #include "peer_localization.h"
 // #include "i2cdev.h"
@@ -151,6 +152,7 @@ static void systemInit(void) {
   commanderInit();
   memInit();
   stabilizerInit();
+  tofInit();
   /* these modules are not used */
   // storageInit();
   // buzzerInit();
@@ -172,6 +174,7 @@ static bool systemTest() {
   pass &= commanderTest();
   pass &= memTest();
   pass &= stabilizerTest();
+  pass &= tofTest();
   return pass;
 }
 

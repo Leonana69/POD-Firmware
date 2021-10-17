@@ -137,8 +137,8 @@ static bool sensorsBmi088Bmp388ManufacturingTest(void);
 
 /*! @brief Sensor delay_us function */
 static void sensorsUsDelay(uint32_t period, void *intf_ptr) {
-  uint32_t period_ms = period / 1000;
-  if (period < 1000) {
+  uint32_t period_ms = (period + 500) / 1000;
+  if (period_ms == 0) {
     osDelay(1);
   } else
     osDelay(period_ms);

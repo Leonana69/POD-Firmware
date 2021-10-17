@@ -157,6 +157,7 @@
 #define UART2_TASK_NAME         "UART2"
 #define CRTP_SRV_TASK_NAME      "CRTP-SRV"
 #define PLATFORM_SRV_TASK_NAME  "PLATFORM-SRV"
+#define TOF_TASK_NAME           "TOF"
 
 // Task priorities
 #define STABILIZER_TASK_PRI     5
@@ -197,6 +198,8 @@
 #define CRTP_SRV_TASK_PRI       0
 #define PLATFORM_SRV_TASK_PRI   0
 
+#define TOF_TASK_PRI            2
+
 // Task stack sizes
 #define SYSTEM_TASK_STACKSIZE         (2* configMINIMAL_STACK_SIZE)
 #define LEDSEQCMD_TASK_STACKSIZE      configMINIMAL_STACK_SIZE
@@ -230,5 +233,7 @@
 #define UART2_TASK_STACKSIZE          configMINIMAL_STACK_SIZE
 #define CRTP_SRV_TASK_STACKSIZE       configMINIMAL_STACK_SIZE
 #define PLATFORM_SRV_TASK_STACKSIZE   configMINIMAL_STACK_SIZE
+
+#define TOF_TASK_STACKSIZE            (2 * configMINIMAL_STACK_SIZE)
 
 #endif /* __CONFIG_H__ */

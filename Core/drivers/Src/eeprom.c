@@ -82,14 +82,14 @@ bool eepromTestConnection(void) {
   if (!isInit)
     return false;
 
-  return i2cMemRead16(I2Cx, devAddr, 0, 1, &tmp);
+  return i2cMemReadDma16(I2Cx, devAddr, 0, 1, &tmp);
 }
 
 bool eepromReadBuffer(uint8_t* buffer, uint16_t readAddr, uint16_t len) {
   if ((uint32_t)readAddr + len > EEPROM_SIZE)
     return false;
 
-  return i2cMemRead16(I2Cx, devAddr, readAddr, len, buffer);
+  return i2cMemReadDma16(I2Cx, devAddr, readAddr, len, buffer);
 }
 
 bool eepromWriteBuffer(const uint8_t* buffer, uint16_t writeAddr, uint16_t len) {
