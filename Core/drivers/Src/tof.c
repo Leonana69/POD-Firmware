@@ -81,7 +81,7 @@ void tofTask() {
 		if (tofData.distance < RANGE_OUTLIER_LIMIT) {
 			tofData.timestamp = osKernelGetTickCount();
 			tofData.distance = tofData.distance * 0.001f;
-      float stdDev = expStdA * (1.0f  + expf(expCoeff * (tofData.distance - expPointA)));
+      tofData.stdDev = expStdA * (1.0f  + expf(expCoeff * (tofData.distance - expPointA)));
 			DEBUG_PRINT_UART("enqueue: %f\n", tofData.distance);
 			estimatorEnqueueTOF(&tofData);
 		}

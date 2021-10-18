@@ -100,11 +100,6 @@ typedef struct {
 
 void kalmanCoreInit(kalmanCoreData_t* this);
 
-/*  - Measurement updates based on sensors */
-
-// Barometer
-void kalmanCoreUpdateWithBaro(kalmanCoreData_t* this, float baroAsl, bool quadIsFlying);
-
 /**
  * Primary Kalman filter functions
  *

@@ -257,7 +257,8 @@ static void kalmanTask() {
     // static int cnt = 0;
     // if (cnt++ == 500) {
     //   cnt = 0;
-    //   DEBUG_PRINT_UART("%.1f %.1f %.1f\n", taskEstimatorState.velocity.x, taskEstimatorState.velocity.y, taskEstimatorState.velocity.z);
+    //   DEBUG_PRINT_UART("%.1f,%.1f,%.1f %.1f,%.1f,%.1f\n", taskEstimatorState.acc.x, taskEstimatorState.acc.y, taskEstimatorState.acc.z,
+    //   taskEstimatorState.attitude.x, taskEstimatorState.attitude.y, taskEstimatorState.attitude.z);
     // }
 		// TODO: add this
     // STATS_CNT_RATE_EVENT(&updateCounter);

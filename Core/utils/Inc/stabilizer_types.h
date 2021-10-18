@@ -29,8 +29,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "imu_types.h"
-
-#define GRAVITY_EARTH  (9.80665f)
+// TODO: replace this
+// #define GRAVITY_EARTH  (9.80665f)
+#define GRAVITY_EARTH  (9.81f)
 /* Data structure used by the stabilizer subsystem.
  * All have a timestamp to be set when the data is calculated.
  */

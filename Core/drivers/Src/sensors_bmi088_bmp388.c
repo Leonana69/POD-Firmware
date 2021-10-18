@@ -259,13 +259,6 @@ static void sensorsTask(void *param) {
       osMutexRelease(gyroDataMutex);
     }
 
-    static int cnt = 0;
-    if (cnt++ == 500) {
-      cnt = 0;
-      DEBUG_PRINT_UART("%.1f,%.1f,%.1f  %.1f,%.1f,%.1f\n", (double)sensorData.accel.x, (double)sensorData.accel.y, (double)sensorData.accel.z,
-        (double)sensorData.gyro.x, (double)sensorData.gyro.y, (double)sensorData.gyro.z);
-    }
-
 		static uint8_t baroMeasDelay = 0;
 		if (++baroMeasDelay == SENSORS_DELAY_BARO) {
       sensorBaroGet(&bmp3Baro);
@@ -507,7 +500,7 @@ static void sensorsAddBiasValue(int16_t x, int16_t y, int16_t z) {
 }
 
 bool sensorsBmi088Bmp388ManufacturingTest(void) {
-  // TODO: remove this
+  // TODO: check selftest, it will cause the zero-accel data
   return 1;
   bool testStatus = true;
   int8_t rslt = 0;

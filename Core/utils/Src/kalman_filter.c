@@ -115,7 +115,7 @@ static void assertStateNotNaN(const kalmanCoreData_t* this) {
 
 
 // The bounds on the covariance, these shouldn't be hit, but sometimes are... why?
-#define MAX_COVARIANCE (100)
+#define MAX_COVARIANCE (100.0f)
 #define MIN_COVARIANCE (1e-6f)
 
 // Small number epsilon, to prevent dividing by zero
@@ -133,7 +133,6 @@ static float procNoiseAcc_z = 1.0f;
 static float procNoiseVel = 0;
 static float procNoisePos = 0;
 static float procNoiseAtt = 0;
-static float measNoiseBaro = 2.0f; // meters
 static float measNoiseGyro_rollpitch = 0.1f; // radians per second
 static float measNoiseGyro_yaw = 0.1f; // radians per second
 
@@ -176,14 +175,12 @@ void kalmanCoreInit(kalmanCoreData_t* this) {
   // the first prediction step, since in the finalization, after shifting
   // attitude errors into the attitude state, the rotation matrix is updated.
   for (int i = 0; i < 3; i++)
-    this->R[i][i] = 1;
+    for (int j = 0; j < 3; j++)
+      this->R[i][j] = (i == j) ? 1 : 0;
 
-  // guojun: duplicated init
-  // for (int i = 0; i< KC_STATE_DIM; i++) {
-  //   for (int j = 0; j < KC_STATE_DIM; j++) {
-  //     this->P[i][j] = 0; // set covariances to zero (diagonals will be changed from zero in the next section)
-  //   }
-  // }
+  for (int i = 0; i < KC_STATE_DIM; i++)
+    for (int j = 0; j < KC_STATE_DIM; j++)
+      this->P[i][j] = 0;
 
   // initialize state variances
   this->P[KC_STATE_X][KC_STATE_X]  = powf(stdDevInitialPosition_xy, 2);
@@ -200,7 +197,7 @@ void kalmanCoreInit(kalmanCoreData_t* this) {
 
   this->Pm.numRows = KC_STATE_DIM;
   this->Pm.numCols = KC_STATE_DIM;
-  this->Pm.pData = (float*)this->P;
+  this->Pm.pData = (float *)this->P;
 
   this->baroReferenceHeight = 0.0;
 }
@@ -208,7 +205,7 @@ void kalmanCoreInit(kalmanCoreData_t* this) {
 void kalmanCoreScalarUpdate(kalmanCoreData_t* this, arm_matrix_instance_f32 *Hm, float error, float stdMeasNoise) {
   // The Kalman gain as a column vector
   NO_DMA_CCM_SAFE_ZERO_INIT static float K[KC_STATE_DIM];
-  static arm_matrix_instance_f32 Km = { KC_STATE_DIM, 1, (float *)K };
+  static arm_matrix_instance_f32 Km = { KC_STATE_DIM, 1, K };
 
   // Temporary matrices for the covariance updates
   NO_DMA_CCM_SAFE_ZERO_INIT __attribute__((aligned(4))) static float tmpNN1d[KC_STATE_DIM * KC_STATE_DIM];
@@ -238,11 +235,19 @@ void kalmanCoreScalarUpdate(kalmanCoreData_t* this, arm_matrix_instance_f32 *Hm,
   float R = stdMeasNoise * stdMeasNoise;
   // (H * P_n,n-1 * H^T + R_n)
   float HPHR = R;
-  for (int i = 0; i < KC_STATE_DIM; i++) { // Add the element of HPH' to the above
+  for (int i = 0; i < KC_STATE_DIM; i++)
+    // Add the element of HPH' to the above
     HPHR += Hm->pData[i] * PHTd[i]; // this obviously only works if the update is scalar (as in this function)
-  }
-  ASSERT(!isnan(HPHR));
 
+  // for (int i = 0; i < KC_STATE_DIM; i++) {
+  //   for (int j = 0; j < KC_STATE_DIM; j++) {
+  //     DEBUG_PRINT_UART("%.4f ", (double)this->Pm.pData[i]);
+  //   }
+  //   DEBUG_PRINT_UART("\n");
+  // }
+  
+  DEBUG_PRINT_UART("scalar2: %f %f\n", (double)stdMeasNoise, (double)HPHR);
+  ASSERT(!isnan(HPHR));
   // ====== MEASUREMENT UPDATE: K_n = P_n,n-1 * H^T * (H * P_n,n-1 * H^T + R_n)^-1 ======
   // Calculate the Kalman gain and perform the state update
   for (int i = 0; i < KC_STATE_DIM; i++) {
@@ -252,7 +257,7 @@ void kalmanCoreScalarUpdate(kalmanCoreData_t* this, arm_matrix_instance_f32 *Hm,
     this->S[i] = this->S[i] + K[i] * error; // state update
   }
   assertStateNotNaN(this);
-
+  
   // ====== COVARIANCE UPDATE: P_n,n = (K_n * H - I) * P_n,n-1 * (K_n * H - I)^T + K_n * R_n * K_n^T ======
   // K_n * H
   mat_mult(&Km, Hm, &tmpNN1m);
@@ -266,6 +271,7 @@ void kalmanCoreScalarUpdate(kalmanCoreData_t* this, arm_matrix_instance_f32 *Hm,
   // (K_n * H - I) * P_n,n-1 * (K_n * H - I)^T
   mat_mult(&tmpNN3m, &tmpNN2m, &this->Pm);
   assertStateNotNaN(this);
+
   // add the measurement variance and ensure boundedness and symmetry
   // TODO: Why would it hit these bounds? Needs to be investigated.
   // K_n * R_n * K_n^T
@@ -320,21 +326,6 @@ void kalmanCoreScalarUpdate(kalmanCoreData_t* this, arm_matrix_instance_f32 *Hm,
 //     assertStateNotNaN(this);
 
 // }
-
-void kalmanCoreUpdateWithBaro(kalmanCoreData_t* this, float baroAsl, bool quadIsFlying) {
-  float h[KC_STATE_DIM] = { 0 };
-  arm_matrix_instance_f32 H = { 1, KC_STATE_DIM, h };
-
-  h[KC_STATE_Z] = 1;
-
-  if (!quadIsFlying || this->baroReferenceHeight < 1) {
-    //TODO: maybe we could track the zero height as a state. Would be especially useful if UWB anchors had barometers.
-    this->baroReferenceHeight = baroAsl;
-  }
-
-  float meas = (baroAsl - this->baroReferenceHeight);
-  kalmanCoreScalarUpdate(this, &H, meas - this->S[KC_STATE_Z], measNoiseBaro);
-}
 
 void kalmanCorePredict(kalmanCoreData_t* this, Axis3f *acc, Axis3f *gyro, float dt, bool quadIsFlying) {
   /* Here we discretize (euler forward) and linearise the quadrocopter dynamics in order
@@ -569,6 +560,8 @@ void kalmanCorePredict(kalmanCoreData_t* this, Axis3f *acc, Axis3f *gyro, float 
 }
 
 void kalmanCoreAddProcessNoise(kalmanCoreData_t* this, float dt) {
+  static int cnt = 0;
+  
   if (dt > 0) {
     this->P[KC_STATE_X][KC_STATE_X] += powf(procNoiseAcc_xy * dt * dt + procNoiseVel * dt + procNoisePos, 2);  // add process noise on position
     this->P[KC_STATE_Y][KC_STATE_Y] += powf(procNoiseAcc_xy * dt * dt + procNoiseVel * dt + procNoisePos, 2);  // add process noise on position
@@ -587,6 +580,7 @@ void kalmanCoreAddProcessNoise(kalmanCoreData_t* this, float dt) {
     for (int j = i; j < KC_STATE_DIM; j++) {
       float p = 0.5f * this->P[i][j] + 0.5f * this->P[j][i];
       if (isnan(p) || p > MAX_COVARIANCE) {
+        DEBUG_PRINT_UART("MAX: %f %f\n", this->P[i][j], this->P[j][i]);
         this->P[i][j] = this->P[j][i] = MAX_COVARIANCE;
       } else if (i == j && p < MIN_COVARIANCE ) {
         this->P[i][j] = this->P[j][i] = MIN_COVARIANCE;
