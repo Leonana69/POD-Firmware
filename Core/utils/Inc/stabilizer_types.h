@@ -55,7 +55,7 @@ struct rpyt {
 
 typedef struct rpyt attitude_t;
 typedef struct rpyt rate_t;
-typedef struct rpyt acc_t;
+typedef struct rpyt accel_t;
 typedef struct rpyt position_t;
 
 /* vector */
@@ -178,7 +178,7 @@ typedef struct state_s {
   quaternion_t attitudeQuaternion;
   point_t position;         // m
   velocity_t velocity;      // m/s
-  acc_t acc;                // Gs (but acc.z without considering gravity)
+  accel_t acc;                // Gs (but acc.z without considering gravity)
 } state_t;
 
 typedef struct control_s {
@@ -203,7 +203,7 @@ typedef struct setpoint_s {
   float thrust;
   point_t position;         // m
   velocity_t velocity;      // m/s
-  acc_t acceleration;       // m/s^2
+  accel_t acceleration;       // m/s^2
   bool velocity_body;       // true if velocity is given in body frame; false if velocity is given in world frame
 
   struct {

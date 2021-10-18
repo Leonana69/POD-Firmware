@@ -1,6 +1,7 @@
 #include "kalman_filter_update.h"
 
 void kalmanCoreUpdateWithTof(kalmanCoreData_t* this, tofMeasurement_t *tof) {
+  return;
   // Updates the filter with a measured distance in the zb direction using the
   float h[KC_STATE_DIM] = { 0 };
   arm_matrix_instance_f32 H = { 1, KC_STATE_DIM, h };

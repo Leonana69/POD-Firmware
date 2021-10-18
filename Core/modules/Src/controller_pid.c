@@ -15,7 +15,7 @@ static bool tiltCompensationEnabled = false;
 
 static attitude_t attitudeTarget;
 static rate_t rateTarget;
-static acc_t output;
+static accel_t output;
 static float actuatorThrust;
 
 static float cmd_thrust;

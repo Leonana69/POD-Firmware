@@ -241,6 +241,7 @@ static void sensorsTask(void *param) {
       accelScaled.x = bmi08xAccel.x * accelValue2Gravity / accelScale;
       accelScaled.y = bmi08xAccel.y * accelValue2Gravity / accelScale;
       accelScaled.z = bmi08xAccel.z * accelValue2Gravity / accelScale;
+
       
       sensorsAccAlignToGravity(&accelScaled, &sensorData.accel);
       applyAxis3fLpf((lpf2pData*)(&accelLpf), &sensorData.accel);
@@ -256,6 +257,13 @@ static void sensorsTask(void *param) {
       osMutexAcquire(gyroDataMutex, osWaitForever);
       memcpy(&gyroData, &sensorData.gyro, sizeof(gyroData));
       osMutexRelease(gyroDataMutex);
+    }
+
+    static int cnt = 0;
+    if (cnt++ == 500) {
+      cnt = 0;
+      DEBUG_PRINT_UART("%.1f,%.1f,%.1f  %.1f,%.1f,%.1f\n", (double)sensorData.accel.x, (double)sensorData.accel.y, (double)sensorData.accel.z,
+        (double)sensorData.gyro.x, (double)sensorData.gyro.y, (double)sensorData.gyro.z);
     }
 
 		static uint8_t baroMeasDelay = 0;
@@ -377,10 +385,10 @@ static void sensorsDeviceInit(void) {
     lpf2pInit(&accelLpf[i], 1000, ACCEL_LPF_CUTOFF_FREQ);
   }
 
-  cosPitch = radians(cosf(configblockGetCalibPitch()));
-  sinPitch = radians(sinf(configblockGetCalibPitch()));
-  cosRoll = radians(cosf(configblockGetCalibRoll()));
-  sinRoll = radians(sinf(configblockGetCalibRoll()));
+  cosPitch = cosf(radians(configblockGetCalibPitch()));
+  sinPitch = sinf(radians(configblockGetCalibPitch()));
+  cosRoll = cosf(radians(configblockGetCalibRoll()));
+  sinRoll = sinf(radians(configblockGetCalibRoll()));
 }
 
 static void sensorsTaskInit() {
@@ -397,6 +405,7 @@ static void sensorsTaskInit() {
 void sensorsBmi088Bmp388Init(SensorsInterfaceType interface) {
 	if (isInit)
 		return;
+
 	currentInterface = interface;
   accelScale = 1.0f;
   gyroBiasObj.isBufferFilled = false;
@@ -498,6 +507,8 @@ static void sensorsAddBiasValue(int16_t x, int16_t y, int16_t z) {
 }
 
 bool sensorsBmi088Bmp388ManufacturingTest(void) {
+  // TODO: remove this
+  return 1;
   bool testStatus = true;
   int8_t rslt = 0;
   rslt = bmi08a_perform_selftest(&bmi08xDev);

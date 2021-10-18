@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "static_mem.h"
 #include "debug.h"
 
@@ -92,7 +93,7 @@ const char* estimatorGetName() {
 void estimatorEnqueue(const measurement_t *measurement) {
   if (!measurementsQueue)
     return;
-
+  
 	osMessageQueuePut(measurementsQueue, measurement, 0, 0);
 
   // if (result == pdTRUE) {

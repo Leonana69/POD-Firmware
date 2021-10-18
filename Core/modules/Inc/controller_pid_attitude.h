@@ -5,7 +5,7 @@
 
 void controllerPidAttitudeInit();
 
-void controllerPidAttitudeRateUpdate(rate_t measure, rate_t target, acc_t *output);
+void controllerPidAttitudeRateUpdate(rate_t measure, rate_t target, accel_t *output);
 
 void controllerPidAttitudeValUpdate(attitude_t measure, attitude_t target, rate_t *output);
 

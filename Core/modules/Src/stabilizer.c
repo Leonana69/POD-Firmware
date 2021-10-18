@@ -159,10 +159,10 @@ static void compressSetpoint() {
 void stabilizerInit() {
   if (isInit)
     return;
-
-  sensorsInit();
+  
   estimatorInit();
   controllerInit();
+  sensorsInit();
   powerDistributionInit();
   // TODO: check this
   // collisionAvoidanceInit();

@@ -61,13 +61,8 @@
 #include "kalman_filter.h"
 #include "kalman_filter_update.h"
 
-// #include "FreeRTOS.h"
-// #include "queue.h"
-// #include "task.h"
-// #include "semphr.h"
-// #include "sensors.h"
 #include "static_mem.h"
-
+#include "stabilizer_types.h"
 #include "system.h"
 #include "log.h"
 #include "param.h"
@@ -140,11 +135,11 @@ NO_DMA_CCM_SAFE_ZERO_INIT static kalmanCoreData_t coreData;
 
 static bool isInit = false;
 
-static Axis3f accAccumulator;
+static Axis3f accelAccumulator;
 static Axis3f gyroAccumulator;
-static uint32_t accAccumulatorCount;
+static uint32_t accelAccumulatorCount;
 static uint32_t gyroAccumulatorCount;
-static Axis3f accLatest;
+static Axis3f accelLatest;
 static Axis3f gyroLatest;
 static bool quadIsFlying = false;
 
@@ -180,6 +175,7 @@ STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(kalmanTask, 3 * configMINIMAL_STACK_
 
 static void kalmanTask() {
   systemWaitStart();
+  DEBUG_PRINT_UART("kalmanTask\n");
 	float dt;
   bool doneUpdate;
   uint32_t lastPrediction = osKernelGetTickCount();
@@ -187,7 +183,6 @@ static void kalmanTask() {
   uint32_t lastPNUpdate = osKernelGetTickCount();
 
   // rateSupervisorInit(&rateSupervisorContext, osKernelGetTickCount(), ONE_SECOND, PREDICT_RATE - 1, PREDICT_RATE + 1, 1);
-
   while (1) {
     osSemaphoreAcquire(runKalman, osWaitForever);
 
@@ -221,18 +216,15 @@ static void kalmanTask() {
       // }
     }
 
-    /**
-     * Add process noise every loop, rather than every prediction
-     */
+    /*! Add process noise every loop, rather than every prediction */
 		dt = (osTick - lastPNUpdate) / (float)osKernelGetTickFreq();
 		if (dt > 0.0f) {
 			kalmanCoreAddProcessNoise(&coreData, dt);
 			lastPNUpdate = osTick;
 		}
 
-		if (updateQueuedMeasurements(osTick)) {
+		if (updateQueuedMeasurements(osTick))
 			doneUpdate = true;
-		}
 
     /**
      * If an update has been made, the state is finalized:
@@ -259,8 +251,14 @@ static void kalmanTask() {
      * This is done every round, since the external state includes some sensor data
      */
     osMutexAcquire(dataMutex, osWaitForever);
-    kalmanCoreExternalizeState(&coreData, &taskEstimatorState, &accLatest, osTick);
+    kalmanCoreExternalizeState(&coreData, &taskEstimatorState, &accelLatest, osTick);
     osMutexRelease(dataMutex);
+    // TODO: fix velocity
+    // static int cnt = 0;
+    // if (cnt++ == 500) {
+    //   cnt = 0;
+    //   DEBUG_PRINT_UART("%.1f %.1f %.1f\n", taskEstimatorState.velocity.x, taskEstimatorState.velocity.y, taskEstimatorState.velocity.z);
+    // }
 		// TODO: add this
     // STATS_CNT_RATE_EVENT(&updateCounter);
   }
@@ -277,26 +275,25 @@ void estimatorKalmanUpdate(state_t *state, const uint32_t tick) {
 }
 
 static bool predictStateForward(uint32_t osTick, float dt) {
-  if (gyroAccumulatorCount == 0 || accAccumulatorCount == 0)
+  if (gyroAccumulatorCount == 0 || accelAccumulatorCount == 0)
     return false;
-  // gyro is in deg/sec but the estimator requires rad/sec
+  /*! deg/sec to rad/sec */
   Axis3f gyroAverage;
   gyroAverage.x = radians(gyroAccumulator.x) / gyroAccumulatorCount;
   gyroAverage.y = radians(gyroAccumulator.y) / gyroAccumulatorCount;
   gyroAverage.z = radians(gyroAccumulator.z) / gyroAccumulatorCount;
 
-  // accelerometer is in Gs but the estimator requires ms^-2
+  /*! Gs to ms^-2 */
   Axis3f accAverage;
-  accAverage.x = accAccumulator.x * GRAVITY_EARTH / accAccumulatorCount;
-  accAverage.y = accAccumulator.y * GRAVITY_EARTH / accAccumulatorCount;
-  accAverage.z = accAccumulator.z * GRAVITY_EARTH / accAccumulatorCount;
+  accAverage.x = accelAccumulator.x * GRAVITY_EARTH / accelAccumulatorCount;
+  accAverage.y = accelAccumulator.y * GRAVITY_EARTH / accelAccumulatorCount;
+  accAverage.z = accelAccumulator.z * GRAVITY_EARTH / accelAccumulatorCount;
 
-  // reset for next call
-  accAccumulator = (Axis3f){ .axis = { 0 } };
-  accAccumulatorCount = 0;
+  accelAccumulator = (Axis3f){ .axis = { 0 } };
+  accelAccumulatorCount = 0;
   gyroAccumulator = (Axis3f){ .axis = { 0 } };
   gyroAccumulatorCount = 0;
-
+  
   quadIsFlying = supervisorIsFlying();
   kalmanCorePredict(&coreData, &accAverage, &gyroAverage, dt, quadIsFlying);
   return true;
@@ -310,7 +307,6 @@ static bool updateQueuedMeasurements(const uint32_t tick) {
    * we therefore consume all measurements since the last loop, rather than accumulating
    */
 
-  // Pull the latest sensors values of interest; discard the rest
   measurement_t m;
   while (estimatorDequeue(&m)) {
     switch (m.type) {
@@ -372,11 +368,11 @@ static bool updateQueuedMeasurements(const uint32_t tick) {
         gyroAccumulatorCount++;
         break;
       case MeasurementTypeAcceleration:
-        accAccumulator.x += m.data.acceleration.accel.x;
-        accAccumulator.y += m.data.acceleration.accel.y;
-        accAccumulator.z += m.data.acceleration.accel.z;
-        accLatest = m.data.acceleration.accel;
-        accAccumulatorCount++;
+        accelAccumulator.x += m.data.acceleration.accel.x;
+        accelAccumulator.y += m.data.acceleration.accel.y;
+        accelAccumulator.z += m.data.acceleration.accel.z;
+        accelLatest = m.data.acceleration.accel;
+        accelAccumulatorCount++;
         break;
       case MeasurementTypeBarometer:
         if (useBaroUpdate) {
@@ -397,17 +393,17 @@ void estimatorKalmanInit() {
 	if (isInit)
 		return;
   estimatorKalmanReset();
-	STATIC_SEMAPHORE_CREATE(runKalman, 1, 0);
+	STATIC_SEMAPHORE_CREATE(runKalman, 1, 1);
 	STATIC_MUTEX_CREATE(dataMutex);
   STATIC_MEM_TASK_CREATE(kalmanTask, kalmanTask, KALMAN_TASK_NAME, NULL, KALMAN_TASK_PRI);
 	isInit = true;
 }
 
 void estimatorKalmanReset() {
-  accAccumulator = (Axis3f){ .axis = { 0 } };
+  accelAccumulator = (Axis3f){ .axis = { 0 } };
   gyroAccumulator = (Axis3f){ .axis = { 0 } };
 
-  accAccumulatorCount = 0;
+  accelAccumulatorCount = 0;
   gyroAccumulatorCount = 0;
   kalmanCoreInit(&coreData);
 }

@@ -13,10 +13,12 @@
 #include "system.h"
 #include "stabilizer_types.h"
 #include "estimator.h"
+#include "log.h"
 
 static bool isInit = false;
 
 static VL53L1_Dev_t vl53l1Dev;
+static uint16_t rangeLast;
 #define expCoeff 2.92135f
 #define expPointA 2.5f
 #define expStdA 0.0025f
@@ -33,15 +35,14 @@ void tofInit() {
 		return;
 	I2Cx = &tofI2C;
 
-	if (vl53l1Init()) {
+	if (vl53l1Init())
 		STATIC_MEM_TASK_CREATE(tofTask, tofTask, TOF_TASK_NAME, NULL, TOF_TASK_PRI);
-	}
 
 	isInit = true;
 }
 
 bool tofTest() {
-	return isInit && vl53l1Test();
+	return isInit;
 }
 
 void tofTask() {
@@ -73,14 +74,17 @@ void tofTask() {
 		}
 		VL53L1_GetRangingMeasurementData(&vl53l1Dev, &vl53l1RangingData);
 		tofData.distance = vl53l1RangingData.RangeMilliMeter;
+		rangeLast = vl53l1RangingData.RangeMilliMeter;
 		VL53L1_ClearInterruptAndStartMeasurement(&vl53l1Dev);
-		DEBUG_PRINT_UART("dis: %d\n", vl53l1RangingData.RangeMilliMeter);
-	// 	if (tofData.distance < RANGE_OUTLIER_LIMIT) {
-	// 		tofData.timestamp = osKernelGetTickCount();
-	// 		tofData.distance = tofData.distance * 0.001f;
-    //   float stdDev = expStdA * (1.0f  + expf(expCoeff * (tofData.distance - expPointA)));
-	// 		estimatorEnqueueTOF(&tofData);
-	// 	}
+		// TODO: remove this
+		// DEBUG_PRINT_UART("dis: %d\n", vl53l1RangingData.RangeMilliMeter);
+		if (tofData.distance < RANGE_OUTLIER_LIMIT) {
+			tofData.timestamp = osKernelGetTickCount();
+			tofData.distance = tofData.distance * 0.001f;
+      float stdDev = expStdA * (1.0f  + expf(expCoeff * (tofData.distance - expPointA)));
+			DEBUG_PRINT_UART("enqueue: %f\n", tofData.distance);
+			estimatorEnqueueTOF(&tofData);
+		}
 	}
 }
 
@@ -91,6 +95,11 @@ bool vl53l1Init() {
 	vl53l1Dev.i2c_slave_address = VL53L1_EWOK_I2C_DEV_ADDR_DEFAULT;
 	vl53l1Dev.comms_type = VL53L1_I2C;
 	vl53l1Dev.comms_speed_khz = 400;
+
+	if (HAL_I2C_IsDeviceReady(I2Cx->hi2c, vl53l1Dev.i2c_slave_address << 1, 3, 100) != HAL_OK) {
+		DEBUG_PRINT_UART("VL53L1X not found.\n");
+		return false;
+	}
 
 	status = VL53L1_DataInit(&vl53l1Dev);
 	if (status != VL53L1_ERROR_NONE) {
@@ -391,3 +400,10 @@ VL53L1_Error VL53L1_WaitValueMaskEx(VL53L1_Dev_t *pdev, uint32_t timeout_ms, uin
 
 	return status;
 }
+
+LOG_GROUP_START(vl53l1x)
+/**
+ * @brief True if motion occured since the last measurement
+ */
+LOG_ADD(LOG_UINT16, distance, &rangeLast)
+LOG_GROUP_STOP(vl53l1x)

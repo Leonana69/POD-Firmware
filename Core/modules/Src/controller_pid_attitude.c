@@ -85,7 +85,7 @@ void controllerPidAttitudeInit() {
 	pidInit(&yaw.rate, &paramYaw.val);
 }
 
-void controllerPidAttitudeRateUpdate(rate_t measure, rate_t target, acc_t *output) {
+void controllerPidAttitudeRateUpdate(rate_t measure, rate_t target, accel_t *output) {
 	output->roll = pidUpdate(&roll.rate, measure.roll, target.roll, true);
 	output->pitch = pidUpdate(&pitch.rate, measure.pitch, target.pitch, true);
 	output->yaw = pidUpdate(&yaw.rate, measure.yaw, target.yaw, true);
