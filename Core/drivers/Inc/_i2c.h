@@ -9,8 +9,8 @@
 
 typedef struct {
 	I2C_HandleTypeDef* hi2c;
-	osSemaphoreId_t i2cBusSemaphore;
-	StaticSemaphore_t i2cBusSemaphoreBuffer;
+	osSemaphoreId_t i2cRxDmaSemaphore;
+	StaticSemaphore_t i2cRxDmaSemaphoreBuffer;
 } I2CDrv;
 
 extern I2CDrv eepromI2C;
@@ -30,7 +30,7 @@ uint8_t i2cTofWrite(I2CDrv *dev, uint32_t devAddr, uint32_t regAddr, uint16_t le
 int8_t i2cSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr);
 int8_t i2cSensorsWrite(uint8_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr);
 
-void sensorsI2cDmaIsr();
-void eepromI2cDmaIsr();
+void sensorsI2cRxDmaIsr();
+void eepromI2cRxDmaIsr();
 
 #endif

@@ -30,6 +30,7 @@
 #include "_tim.h"
 #include "_gpio.h"
 #include "_i2c.h"
+#include "_spi.h"
 
 // TODO: add IWDG
 // #include "iwdg.h"
@@ -67,6 +68,7 @@
 // #include "extrx.h"
 // #include "app.h"
 #include "tof.h"
+#include "flow.h"
 #include "static_mem.h"
 // #include "peer_localization.h"
 // #include "i2cdev.h"
@@ -104,6 +106,7 @@ void systemLaunch(void) {
   _UART_Init();
   _TIM_Init();
   _I2C_Init();
+  _SPI_Init();
   STATIC_MEM_TASK_CREATE(systemTask, systemTask, SYSTEM_TASK_NAME, NULL, SYSTEM_TASK_PRI);
 }
 
@@ -153,6 +156,7 @@ static void systemInit(void) {
   memInit();
   stabilizerInit();
   tofInit();
+  flowInit();
   /* these modules are not used */
   // storageInit();
   // buzzerInit();

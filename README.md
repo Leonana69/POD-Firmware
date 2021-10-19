@@ -77,6 +77,14 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
 
 11. Comment the #define __FPU_PRESENT in Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h
     - This line will cause redefinition of __FPU_PRESENT, I guess it's a mismatch between CMSIS and STM32CubeMX.
+
+12. Enable SPI1 and GPIO PB4
+    - Mode: Full-Duplex Master
+    - Prescaler: 64
+    - Enable Rx DMA: DMA2 Stream 0
+        - NVIC PP: 7
+    - Enable Tx DMA: DMA2 Stream 5
+        - NVIC PP: 7
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld

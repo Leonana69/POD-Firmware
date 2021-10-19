@@ -68,25 +68,10 @@
 #include "param.h"
 #include "debug.h"
 #include "config.h"
-// #include "physicalConstants.h"
 #include "supervisor.h"
 
 // #include "statsCnt.h"
 // #include "rateSupervisor.h"
-
-// Measurement models
-// #include "mm_distance.h"
-// #include "mm_absolute_height.h"
-// #include "mm_position.h"
-// #include "mm_pose.h"
-// #include "mm_tdoa.h"
-// #include "mm_flow.h"
-// #include "mm_tof.h"
-// #include "mm_yaw_error.h"
-// #include "mm_sweep_angles.h"
-
-// #include "mm_tdoa_robust.h"
-// #include "mm_distance_robust.h"
 
 #define DEBUG_MODULE "ESTKALMAN"
 
@@ -336,11 +321,10 @@ static bool updateQueuedMeasurements(const uint32_t tick) {
       //   doneUpdate = true;
       //   break;
 
-      // TODO: enable Flow
-      // case MeasurementTypeFlow:
-      //   kalmanCoreUpdateWithFlow(&coreData, &m.data.flow, &gyroLatest);
-      //   doneUpdate = true;
-      //   break;
+      case MeasurementTypeFlow:
+        // kalmanCoreUpdateWithFlow(&coreData, &m.data.flow, &gyroLatest);
+        doneUpdate = true;
+        break;
 
       // case MeasurementTypeYawError:
       //   kalmanCoreUpdateWithYawError(&coreData, &m.data.yawError);

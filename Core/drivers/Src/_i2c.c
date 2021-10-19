@@ -9,22 +9,21 @@
 I2CDrv eepromI2C;
 I2CDrv sensorI2C;
 I2CDrv tofI2C;
-uint8_t i2cTxBuff[64];
 
 void _I2C_Init() {
 	eepromI2C.hi2c = &eepromI2CHandle;
 	sensorI2C.hi2c = &sensorsI2CHandle;
 	tofI2C.hi2c = &tofI2CHandle;
-	eepromI2C.i2cBusSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("EEPROMI2C", &eepromI2C.i2cBusSemaphoreBuffer, sizeof(eepromI2C.i2cBusSemaphoreBuffer)));
-	sensorI2C.i2cBusSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("SENSORI2C", &sensorI2C.i2cBusSemaphoreBuffer, sizeof(sensorI2C.i2cBusSemaphoreBuffer)));
+	eepromI2C.i2cRxDmaSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("EEPROMI2C", &eepromI2C.i2cRxDmaSemaphoreBuffer, sizeof(eepromI2C.i2cRxDmaSemaphoreBuffer)));
+	sensorI2C.i2cRxDmaSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("SENSORI2C", &sensorI2C.i2cRxDmaSemaphoreBuffer, sizeof(sensorI2C.i2cRxDmaSemaphoreBuffer)));
 	/*! eeprom and tof share the same i2c */
-	tofI2C.i2cBusSemaphore = eepromI2C.i2cBusSemaphore;
+	tofI2C.i2cRxDmaSemaphore = eepromI2C.i2cRxDmaSemaphore;
 }
 
 bool i2cMemReadDma16(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data) {
 	HAL_StatusTypeDef status;
 	status = HAL_I2C_Mem_Read_DMA(dev->hi2c, devAddr << 1, memAddr, I2C_MEMADD_SIZE_16BIT, data, len);
-	osSemaphoreAcquire(dev->i2cBusSemaphore, osWaitForever);
+	osSemaphoreAcquire(dev->i2cRxDmaSemaphore, osWaitForever);
 	return status == HAL_OK;
 }
 
@@ -37,7 +36,7 @@ bool i2cMemWrite16(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len
 bool i2cMemReadDma8(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data) {
 	HAL_StatusTypeDef status;
 	status = HAL_I2C_Mem_Read_DMA(dev->hi2c, devAddr << 1, memAddr, I2C_MEMADD_SIZE_8BIT, data, len);
-	osSemaphoreAcquire(dev->i2cBusSemaphore, osWaitForever);
+	osSemaphoreAcquire(dev->i2cRxDmaSemaphore, osWaitForever);
 	return status == HAL_OK;
 }
 
@@ -54,7 +53,7 @@ uint8_t i2cTofReadDma(I2CDrv *dev, uint32_t devAddr, uint32_t regAddr, uint16_t 
 	buffer[1] = regAddr & 0xFF;
 	HAL_I2C_Master_Transmit(dev->hi2c, devAddr << 1, buffer, 2, 1000);
 	status = HAL_I2C_Master_Receive_DMA(dev->hi2c, devAddr << 1, data, len);
-	osSemaphoreAcquire(dev->i2cBusSemaphore, osWaitForever);
+	osSemaphoreAcquire(dev->i2cRxDmaSemaphore, osWaitForever);
 	return status;
 }
 
@@ -66,8 +65,8 @@ uint8_t i2cTofWrite(I2CDrv *dev, uint32_t devAddr, uint32_t regAddr, uint16_t le
 	return HAL_I2C_Master_Transmit(dev->hi2c, devAddr << 1, buffer, len + 2, 1000);
 }
 
-void eepromI2cDmaIsr() {
-	osSemaphoreRelease(eepromI2C.i2cBusSemaphore);
+void eepromI2cRxDmaIsr() {
+	osSemaphoreRelease(eepromI2C.i2cRxDmaSemaphore);
 }
 
 /*! @brief Sensor I2C read function */
@@ -76,7 +75,7 @@ int8_t i2cSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *int
   uint16_t DevAddress = *(uint8_t*)intfPtr << 1;
   HAL_I2C_Master_Transmit(sensorI2C.hi2c, DevAddress, &regAddr, 1, 1000);
   status = HAL_I2C_Master_Receive_DMA(sensorI2C.hi2c, DevAddress, regData, len);
-  osSemaphoreAcquire(sensorI2C.i2cBusSemaphore, osWaitForever);
+  osSemaphoreAcquire(sensorI2C.i2cRxDmaSemaphore, osWaitForever);
 	/**
 	 * HAL_StatusTypeDef: 0, 1, 2, 3
 	 * BMI08X_INTF_RET_TYPE: 0, -1, -2, ..., -9
@@ -96,6 +95,6 @@ int8_t i2cSensorsWrite(uint8_t regAddr, const uint8_t *regData, uint32_t len, vo
   return -status;
 }
 
-void sensorsI2cDmaIsr() {
-	osSemaphoreRelease(sensorI2C.i2cBusSemaphore);
+void sensorsI2cRxDmaIsr() {
+	osSemaphoreRelease(sensorI2C.i2cRxDmaSemaphore);
 }

@@ -16,6 +16,10 @@
 #include "log.h"
 
 static bool isInit = false;
+static I2CDrv *I2Cx;
+#define TOF_RATE RATE_25_HZ
+static void tofTask();
+STATIC_MEM_TASK_ALLOC(tofTask, TOF_TASK_STACKSIZE);
 
 static VL53L1_Dev_t vl53l1Dev;
 static uint16_t rangeLast;
@@ -25,11 +29,7 @@ static uint16_t rangeLast;
 #define RANGE_OUTLIER_LIMIT 5000
 static bool vl53l1Init();
 static bool vl53l1Test();
-static void tofTask();
-STATIC_MEM_TASK_ALLOC(tofTask, TOF_TASK_STACKSIZE);
 
-
-static I2CDrv *I2Cx;
 void tofInit() {
 	if (isInit)
 		return;
@@ -48,26 +48,14 @@ bool tofTest() {
 void tofTask() {
 	VL53L1_Error status;
 	uint32_t lastWakeTime = osKernelGetTickCount();
+	uint32_t wakeDelay = osKernelGetTickFreq() / TOF_RATE;
 	tofMeasurement_t tofData;
-	uint8_t mesDataReady;
 	VL53L1_RangingMeasurementData_t vl53l1RangingData;
 	systemWaitStart();
-	VL53L1_StopMeasurement(&vl53l1Dev);
-	/**
-	 * DISTANCE MODE								Dark	Strong light
-	 * VL53L1_DISTANCEMODE_SHORT		136		135
-	 * VL53L1_DISTANCEMODE_MEDIUM		290		76
-	 * VL53L1_DISTANCEMODE_LONG			360		73
-	 */
-	VL53L1_SetPresetMode(&vl53l1Dev, VL53L1_PRESETMODE_LITE_RANGING);
-	VL53L1_SetDistanceMode(&vl53l1Dev, VL53L1_DISTANCEMODE_SHORT);
-	VL53L1_SetMeasurementTimingBudgetMicroSeconds(&vl53l1Dev, 10000);
-	VL53L1_StartMeasurement(&vl53l1Dev);
 
 	static int cnt = 0;
-
 	while (1) {
-		osDelayUntil(lastWakeTime + 40);
+		osDelayUntil(lastWakeTime + wakeDelay);
 		lastWakeTime = osKernelGetTickCount();
 		VL53L1_WaitMeasurementDataReady(&vl53l1Dev);
 		VL53L1_GetRangingMeasurementData(&vl53l1Dev, &vl53l1RangingData);
@@ -77,7 +65,7 @@ void tofTask() {
 
 		if (cnt++ == 25) {
 			cnt = 0;
-			DEBUG_PRINT_UART("enqueue: %f\n", tofData.distance);
+			DEBUG_PRINT_UART("H ENQ: %f\n", tofData.distance);
 		}
 
 		if (tofData.distance < RANGE_OUTLIER_LIMIT) {
@@ -91,7 +79,6 @@ void tofTask() {
 }
 
 /*! vl53l1 platform functions */
-
 bool vl53l1Init() {
 	VL53L1_Error status;
 	vl53l1Dev.i2c_slave_address = VL53L1_EWOK_I2C_DEV_ADDR_DEFAULT;
@@ -114,6 +101,18 @@ bool vl53l1Init() {
 		DEBUG_PRINT_UART("Static init [FAILED].\n");
 		return false;
 	}
+
+	VL53L1_StopMeasurement(&vl53l1Dev);
+	/**
+	 * DISTANCE MODE								Dark	Strong light
+	 * VL53L1_DISTANCEMODE_SHORT		136		135
+	 * VL53L1_DISTANCEMODE_MEDIUM		290		76
+	 * VL53L1_DISTANCEMODE_LONG			360		73
+	 */
+	VL53L1_SetPresetMode(&vl53l1Dev, VL53L1_PRESETMODE_LITE_RANGING);
+	VL53L1_SetDistanceMode(&vl53l1Dev, VL53L1_DISTANCEMODE_SHORT);
+	VL53L1_SetMeasurementTimingBudgetMicroSeconds(&vl53l1Dev, 10000);
+	VL53L1_StartMeasurement(&vl53l1Dev);
 
 	DEBUG_PRINT_UART("VL53L1 Init [OK].\n");
 	return true;
