@@ -46,14 +46,13 @@ bool tofTest() {
 }
 
 void tofTask() {
+	systemWaitStart();
 	VL53L1_Error status;
 	uint32_t lastWakeTime = osKernelGetTickCount();
 	uint32_t wakeDelay = osKernelGetTickFreq() / TOF_RATE;
 	tofMeasurement_t tofData;
 	VL53L1_RangingMeasurementData_t vl53l1RangingData;
-	systemWaitStart();
-
-	static int cnt = 0;
+	
 	while (1) {
 		osDelayUntil(lastWakeTime + wakeDelay);
 		lastWakeTime = osKernelGetTickCount();
@@ -62,11 +61,6 @@ void tofTask() {
 		tofData.distance = vl53l1RangingData.RangeMilliMeter;
 		rangeLast = vl53l1RangingData.RangeMilliMeter;
 		VL53L1_ClearInterruptAndStartMeasurement(&vl53l1Dev);
-
-		if (cnt++ == 25) {
-			cnt = 0;
-			DEBUG_PRINT_UART("H ENQ: %f\n", tofData.distance);
-		}
 
 		if (tofData.distance < RANGE_OUTLIER_LIMIT) {
 			tofData.timestamp = osKernelGetTickCount();
