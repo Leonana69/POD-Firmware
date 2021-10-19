@@ -90,10 +90,7 @@
 
 #define DEBUG_MODULE "ESTKALMAN"
 
-
-
 // #define KALMAN_USE_BARO_UPDATE
-
 
 // Semaphore to signal that we got data from the stabilizer loop to process
 // TODO: change kalman to a function
@@ -103,10 +100,8 @@ STATIC_MEM_SEMAPHORE_ALLOC(runKalman);
 // functions called by the stabilizer loop
 STATIC_MEM_MUTEX_ALLOC(dataMutex);
 
-/**
- * Tuning parameters
- */
-#define PREDICT_RATE RATE_100_HZ // this is slower than the IMU update rate of 500Hz
+/*! Tuning parameters */
+#define PREDICT_RATE RATE_100_HZ // this is slower than the IMU update rate of 1000Hz
 // The bounds on the covariance, these shouldn't be hit, but sometimes are... why?
 #define MAX_COVARIANCE (100)
 #define MIN_COVARIANCE (1e-6f)
@@ -175,7 +170,6 @@ STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(kalmanTask, 3 * configMINIMAL_STACK_
 
 static void kalmanTask() {
   systemWaitStart();
-  DEBUG_PRINT_UART("kalmanTask\n");
 	float dt;
   bool doneUpdate;
   uint32_t lastPrediction = osKernelGetTickCount();
@@ -186,22 +180,22 @@ static void kalmanTask() {
   while (1) {
     osSemaphoreAcquire(runKalman, osWaitForever);
 
-    // If the client triggers an estimator reset via parameter update
+    /*! If the client triggers an estimator reset via parameter update */
     if (coreData.resetEstimation) {
       estimatorKalmanReset();
       paramSetInt(paramGetVarId("kalman", "resetEstimation"), 0);
     }
 
-    // Tracks whether an update to the state has been made, and the state therefore requires finalization
+    /*! Tracks whether an update to the state has been made, and the state therefore requires finalization */
     doneUpdate = false;
-    uint32_t osTick = osKernelGetTickCount(); // would be nice if this had a precision higher than 1ms...
+    uint32_t osTick = osKernelGetTickCount();
 
   #ifdef KALMAN_DECOUPLE_XY
     kalmanCoreDecoupleXY(&coreData);
   #endif
 
     // Run the system dynamics to predict the state forward.
-    if (osTick >= nextPrediction) { // update at the PREDICT_RATE
+    if (osTick >= nextPrediction) {
       dt = (osTick - lastPrediction) / (float)osKernelGetTickFreq();
       if (predictStateForward(osTick, dt)) {
         lastPrediction = osTick;
@@ -253,13 +247,6 @@ static void kalmanTask() {
     osMutexAcquire(dataMutex, osWaitForever);
     kalmanCoreExternalizeState(&coreData, &taskEstimatorState, &accelLatest, osTick);
     osMutexRelease(dataMutex);
-    // TODO: fix velocity
-    // static int cnt = 0;
-    // if (cnt++ == 500) {
-    //   cnt = 0;
-    //   DEBUG_PRINT_UART("%.1f,%.1f,%.1f %.1f,%.1f,%.1f\n", taskEstimatorState.acc.x, taskEstimatorState.acc.y, taskEstimatorState.acc.z,
-    //   taskEstimatorState.attitude.x, taskEstimatorState.attitude.y, taskEstimatorState.attitude.z);
-    // }
 		// TODO: add this
     // STATS_CNT_RATE_EVENT(&updateCounter);
   }
@@ -283,7 +270,6 @@ static bool predictStateForward(uint32_t osTick, float dt) {
   gyroAverage.x = radians(gyroAccumulator.x) / gyroAccumulatorCount;
   gyroAverage.y = radians(gyroAccumulator.y) / gyroAccumulatorCount;
   gyroAverage.z = radians(gyroAccumulator.z) / gyroAccumulatorCount;
-
   /*! Gs to ms^-2 */
   Axis3f accAverage;
   accAverage.x = accelAccumulator.x * GRAVITY_EARTH / accelAccumulatorCount;

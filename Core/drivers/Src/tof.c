@@ -59,30 +59,32 @@ void tofTask() {
 	 * VL53L1_DISTANCEMODE_MEDIUM		290		76
 	 * VL53L1_DISTANCEMODE_LONG			360		73
 	 */
-	VL53L1_SetDistanceMode(&vl53l1Dev, VL53L1_DISTANCEMODE_MEDIUM);
-	VL53L1_SetMeasurementTimingBudgetMicroSeconds(&vl53l1Dev, 25000);
-	VL53L1_SetInterMeasurementPeriodMilliSeconds(&vl53l1Dev, 250);
+	VL53L1_SetPresetMode(&vl53l1Dev, VL53L1_PRESETMODE_LITE_RANGING);
+	VL53L1_SetDistanceMode(&vl53l1Dev, VL53L1_DISTANCEMODE_SHORT);
+	VL53L1_SetMeasurementTimingBudgetMicroSeconds(&vl53l1Dev, 10000);
 	VL53L1_StartMeasurement(&vl53l1Dev);
 
+	static int cnt = 0;
+
 	while (1) {
-		osDelayUntil(lastWakeTime + 1000);
+		osDelayUntil(lastWakeTime + 40);
 		lastWakeTime = osKernelGetTickCount();
-		mesDataReady = 0;
-		while (mesDataReady == 0) {
-			VL53L1_GetMeasurementDataReady(&vl53l1Dev, &mesDataReady);
-			osDelay(1);
-		}
+		VL53L1_WaitMeasurementDataReady(&vl53l1Dev);
 		VL53L1_GetRangingMeasurementData(&vl53l1Dev, &vl53l1RangingData);
 		tofData.distance = vl53l1RangingData.RangeMilliMeter;
 		rangeLast = vl53l1RangingData.RangeMilliMeter;
 		VL53L1_ClearInterruptAndStartMeasurement(&vl53l1Dev);
-		// TODO: remove this
-		// DEBUG_PRINT_UART("dis: %d\n", vl53l1RangingData.RangeMilliMeter);
+
+		if (cnt++ == 25) {
+			cnt = 0;
+			DEBUG_PRINT_UART("enqueue: %f\n", tofData.distance);
+		}
+
 		if (tofData.distance < RANGE_OUTLIER_LIMIT) {
 			tofData.timestamp = osKernelGetTickCount();
 			tofData.distance = tofData.distance * 0.001f;
       tofData.stdDev = expStdA * (1.0f  + expf(expCoeff * (tofData.distance - expPointA)));
-			DEBUG_PRINT_UART("enqueue: %f\n", tofData.distance);
+			
 			estimatorEnqueueTOF(&tofData);
 		}
 	}
