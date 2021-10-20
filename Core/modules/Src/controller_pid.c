@@ -9,6 +9,7 @@
 #include "cal.h"
 #include "log.h"
 #include "param.h"
+#include "debug.h"
 
 static bool isInit = false;
 static bool tiltCompensationEnabled = false;
@@ -43,7 +44,6 @@ void controllerPidUpdate(control_t *control, setpoint_t *setpoint,
                                          const sensorData_t *sensors,
                                          const state_t *state,
                                          const uint32_t tick) {
-	// TODO: move this after postition control
   if (RATE_DO_EXECUTE(ATTITUDE_RATE, tick)) {
     // Rate-controled YAW is moving YAW angle setpoint
     if (setpoint->mode.yaw == modeVelocity) {
@@ -106,9 +106,7 @@ void controllerPidUpdate(control_t *control, setpoint_t *setpoint,
     control->pitch = 0;
     control->yaw = 0;
 		controllerPidAttitudeResetAll();
-		// TODO: check if we need to reset the filter
 		controllerPidPositionResetAll(false);
-    // Reset the calculated YAW angle for rate control
     attitudeTarget.yaw = state->attitude.yaw;
   }
 

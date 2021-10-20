@@ -40,22 +40,21 @@
 
 typedef struct {
 	float kp;           //< proportional gain
-  float ki;           //< integral gain
-  float kd;           //< derivative gain
+	float ki;           //< integral gain
+	float kd;           //< derivative gain
 	float rate;					//< reciprocal of dt
 
 	float dt;           //< delta-time dt
-	float target;      //< set point
-  float error;        //< error
-  float prevError;    //< previous error
-  float integ;        //< integral
-  float deriv;        //< derivative
-  
-  float iLimit;       //< integral limit, absolute value. '0' means no limit.
-  float oLimit;  			//< total PID output limit, absolute value. '0' means no limit.
+	float error;        //< error
+	float prevError;    //< previous error
+	float integ;        //< integral
+	float deriv;        //< derivative
 
-  lpf2pData dFilter;  //< filter for D term
-  bool enableDFilter; //< filter for D term enable flag
+	float iLimit;       //< integral limit, absolute value. '0' means no limit.
+	float oLimit;  			//< total PID output limit, absolute value. '0' means no limit.
+
+	lpf2pData dFilter;  //< filter for D term
+	bool enableDFilter; //< filter for D term enable flag
 } PidObject;
 
 typedef struct {
@@ -120,20 +119,6 @@ void pidReset(PidObject* pid);
  * @return PID algorithm output
  */
 float pidUpdate(PidObject* pid, const float measured, const float target, const bool updateError);
-
-/**
- * Set a new set point for the PID to track.
- *
- * @param[in] pid   A pointer to the pid object.
- * @param[in] angle The new set point
- */
-void pidSetTarget(PidObject* pid, const float target);
-
-/**
- * Set a new set point for the PID to track.
- * @return The set point
- */
-float pidGetTarget(PidObject* pid);
 
 // TODO: add comments
 void pidSetError(PidObject* pid, const float error);

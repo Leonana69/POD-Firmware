@@ -2,6 +2,7 @@
 #include "stabilizer_types.h"
 #include "cal.h"
 #include "controller_pid_attitude.h"
+#include "debug.h"
 
 static CascadePidObject roll;
 static CascadePidObject pitch;
@@ -82,7 +83,7 @@ void controllerPidAttitudeInit() {
 	pidInit(&pitch.val, &paramPitch.val);
 	pidInit(&pitch.rate, &paramPitch.rate);
 	pidInit(&yaw.val, &paramYaw.val);
-	pidInit(&yaw.rate, &paramYaw.val);
+	pidInit(&yaw.rate, &paramYaw.rate);
 }
 
 void controllerPidAttitudeRateUpdate(rate_t measure, rate_t target, accel_t *output) {
@@ -117,8 +118,8 @@ void controllerPidAttitudeRateReset(uint8_t rpy) {
 }
 
 void controllerPidAttitudeResetAll() {
-	controllerPidAttitudeValReset(PID_ROLL & PID_PITCH & PID_YAW);
-	controllerPidAttitudeRateReset(PID_ROLL & PID_PITCH & PID_YAW);
+	controllerPidAttitudeValReset(PID_ROLL | PID_PITCH | PID_YAW);
+	controllerPidAttitudeRateReset(PID_ROLL | PID_PITCH | PID_YAW);
 }
 
 // TODO: add log and param

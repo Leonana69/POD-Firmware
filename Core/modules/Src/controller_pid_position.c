@@ -2,6 +2,7 @@
 #include "stabilizer_types.h"
 #include "cal.h"
 #include "controller_pid_position.h"
+#include "debug.h"
 
 static CascadePidObject cpidX;
 static CascadePidObject cpidY;
@@ -29,7 +30,7 @@ static CascadePidParam paramX = {
 		.kd = 0.0,
 		.rate = POSITION_RATE,
 		.iLimit = 0.0,
-		.oLimit = 20.0,
+		.oLimit = 22.0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	}
@@ -52,7 +53,7 @@ static CascadePidParam paramY = {
 		.kd = 0.0,
 		.rate = POSITION_RATE,
 		.iLimit = 0.0,
-		.oLimit = 20.0,
+		.oLimit = 22.0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	}
@@ -87,7 +88,7 @@ void controllerPidPositionInit() {
 	pidInit(&cpidY.val, &paramY.val);
 	pidInit(&cpidY.rate, &paramY.rate);
 	pidInit(&cpidZ.val, &paramZ.val);
-	pidInit(&cpidZ.rate, &paramZ.val);
+	pidInit(&cpidZ.rate, &paramZ.rate);
 }
 
 void controllerPidPositionUpdate(float* thrust, attitude_t *attitude,
@@ -114,36 +115,37 @@ void controllerPidPositionUpdate(float* thrust, attitude_t *attitude,
 
 	float accX = pidUpdate(&cpidX.rate, state->velocity.x, setpoint->velocity.x, true);
 	float accY = pidUpdate(&cpidY.rate, state->velocity.y, setpoint->velocity.y, true);
-	attitude->roll = fConstrain(-accY * cosYaw + accX * sinYaw, -1.0, 1.0);
-	attitude->pitch = fConstrain(-accX * cosYaw - accY * sinYaw, -1.0, 1.0);
+	attitude->roll = fConstrain(-accY * cosYaw + accX * sinYaw, -20.0, 20.0);
+	attitude->pitch = fConstrain(-accX * cosYaw - accY * sinYaw, -20.0, 20.0);
 
 	float accZ = pidUpdate(&cpidZ.rate, state->velocity.z, setpoint->velocity.z, true);
+
 	*thrust = accZ * THRUST_SCALE + THRUST_BASE;
 	if (*thrust < THRUST_MIN)
 		*thrust = THRUST_MIN;
 }
 
-void controllerPidPositionValReset(uint8_t rpy) {
-	if (rpy & PID_X)
+void controllerPidPositionValReset(uint8_t xyz) {
+	if (xyz & PID_X)
 		pidReset(&cpidX.val);
-	if (rpy & PID_Y)
+	if (xyz & PID_Y)
 		pidReset(&cpidY.val);
-	if (rpy & PID_Z)
+	if (xyz & PID_Z)
 		pidReset(&cpidZ.val);
 }
 
-void controllerPidPositionRateReset(uint8_t rpy) {
-	if (rpy & PID_X)
+void controllerPidPositionRateReset(uint8_t xyz) {
+	if (xyz & PID_X)
 		pidReset(&cpidX.rate);
-	if (rpy & PID_Y)
+	if (xyz & PID_Y)
 		pidReset(&cpidY.rate);
-	if (rpy & PID_Z)
+	if (xyz & PID_Z)
 		pidReset(&cpidZ.rate);
 }
 
 void controllerPidPositionResetAll(bool resetFilter) {
-	controllerPidPositionValReset(PID_X & PID_Y & PID_Z);
-	controllerPidPositionRateReset(PID_X & PID_Y & PID_Z);
+	controllerPidPositionValReset(PID_X | PID_Y | PID_Z);
+	controllerPidPositionRateReset(PID_X | PID_Y | PID_Z);
 	if (resetFilter) {
 		filterReset(&cpidX.val, paramX.val.rate, paramX.val.cutoffFreq, paramX.val.enableDFilter);
 		filterReset(&cpidX.rate, paramX.rate.rate, paramX.rate.cutoffFreq, paramX.rate.enableDFilter);

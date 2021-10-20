@@ -203,8 +203,6 @@ static void stabilizerTask() {
   // rateSupervisorInit(&rateSupervisorContext, osKernelGetTickCount(), 1000, 997, 1003, 1);
 
   DEBUG_PRINT_UART("Ready to fly.\n");
-
-  static int cnt = 0;
   while (1) {
     /*! The sensor should unlock at 1kHz */
     sensorsWaitDataReady();

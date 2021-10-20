@@ -164,7 +164,7 @@ static void kalmanTask() {
   // rateSupervisorInit(&rateSupervisorContext, osKernelGetTickCount(), ONE_SECOND, PREDICT_RATE - 1, PREDICT_RATE + 1, 1);
   while (1) {
     osSemaphoreAcquire(runKalman, osWaitForever);
-
+    
     /*! If the client triggers an estimator reset via parameter update */
     if (coreData.resetEstimation) {
       estimatorKalmanReset();
@@ -220,11 +220,11 @@ static void kalmanTask() {
 
         if (osTick > warningBlockTime) {
           warningBlockTime = osTick + WARNING_HOLD_BACK_TIME;
-          DEBUG_PRINT("State out of bounds, resetting\n");
+          DEBUG_PRINT_UART("State out of bounds, resetting\n");
         }
       }
     }
-
+    
     /**
      * Finally, the internal state is externalized.
      * This is done every round, since the external state includes some sensor data

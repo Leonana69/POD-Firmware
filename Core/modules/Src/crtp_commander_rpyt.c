@@ -132,7 +132,7 @@ void crtpCommanderRpytDecodeSetpoint(setpoint_t *setpoint, CRTPPacket *pk) {
     setpoint->thrust = 0;
     setpoint->mode.z = modeVelocity;
 
-    setpoint->velocity.z = ((float) rawThrust - 32767.f) / 32767.f;
+    setpoint->velocity.z = ((float) rawThrust - 32767.0f) / 32767.0f;
   } else {
     setpoint->mode.z = modeDisable;
     modeSet = false;
@@ -145,8 +145,8 @@ void crtpCommanderRpytDecodeSetpoint(setpoint_t *setpoint, CRTPPacket *pk) {
     setpoint->mode.roll = modeDisable;
     setpoint->mode.pitch = modeDisable;
 
-    setpoint->velocity.x = values->pitch/30.0f;
-    setpoint->velocity.y = values->roll/30.0f;
+    setpoint->velocity.x = values->pitch / 30.0f;
+    setpoint->velocity.y = values->roll / 30.0f;
     setpoint->attitude.roll  = 0;
     setpoint->attitude.pitch = 0;
   } else if (posSetMode && values->thrust != 0) {
@@ -159,7 +159,7 @@ void crtpCommanderRpytDecodeSetpoint(setpoint_t *setpoint, CRTPPacket *pk) {
 
     setpoint->position.x = -values->pitch;
     setpoint->position.y = values->roll;
-    setpoint->position.z = values->thrust/1000.0f;
+    setpoint->position.z = values->thrust / 1000.0f;
 
     setpoint->attitude.roll  = 0;
     setpoint->attitude.pitch = 0;
