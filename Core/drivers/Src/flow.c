@@ -89,6 +89,11 @@ static uint8_t registerRead(uint8_t reg) {
   return data;
 }
 
+/** @brief Write the secret sauce registers.
+ * Don't ask what these do, the datasheet refuses to explain.
+ * They are some proprietary calibration magic.
+ * @Source: https://github.com/pimoroni/pmw3901-python/blob/master/library/pmw3901/__init__.py
+ */
 static void InitRegisters() {
   registerWrite(0x7F, 0x00);
   registerWrite(0x55, 0x01);
