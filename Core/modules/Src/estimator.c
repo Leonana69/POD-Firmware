@@ -4,7 +4,6 @@
 
 #include "cfassert.h"
 #include "estimator.h"
-// #include "estimator_complementary.h"
 #include "estimator_kalman.h"
 #include "log.h"
 // #include "statsCnt.h"
@@ -170,8 +169,3 @@ void estimatorEnqueue(const measurement_t *measurement) {
 bool estimatorDequeue(measurement_t *measurement) {
   return osOK == osMessageQueueGet(measurementsQueue, measurement, NULL, 0);
 }
-
-// LOG_GROUP_START(estimator)
-//   STATS_CNT_RATE_LOG_ADD(rtApnd, &measurementAppendedCounter)
-//   STATS_CNT_RATE_LOG_ADD(rtRej, &measurementNotAppendedCounter)
-// LOG_GROUP_STOP(estimator)

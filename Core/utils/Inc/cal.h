@@ -11,6 +11,15 @@
 #define MIN(a, b) ((b) < (a) ? (b) : (a))
 #define MAX(a, b) ((b) > (a) ? (b) : (a))
 
+#define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
 uint8_t calculate_cksum(void* data, size_t len);
 
 uint16_t single2half(float number);

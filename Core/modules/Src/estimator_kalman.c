@@ -322,7 +322,7 @@ static bool updateQueuedMeasurements(const uint32_t tick) {
       //   break;
 
       case MeasurementTypeFlow:
-        // kalmanCoreUpdateWithFlow(&coreData, &m.data.flow, &gyroLatest);
+        kalmanCoreUpdateWithFlow(&coreData, &m.data.flow, &gyroLatest);
         doneUpdate = true;
         break;
 
