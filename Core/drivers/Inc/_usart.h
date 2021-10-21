@@ -11,11 +11,10 @@
 void _UART_Init(void);
 
 void nrfUartTxenFlowCtrlIsr();
-void nrfUartDmaIsr();
-
+void nrfUartRxDmaIsr();
 void nrfUartSendDataDmaBlocking(uint32_t size, uint8_t *data);
 void nrfUartGetPacketBlocking(SyslinkPacket* packet);
-void nrfUartIsr();
+void nrfUartRxIsr();
 
 int debugUartPutchar(int c);
 

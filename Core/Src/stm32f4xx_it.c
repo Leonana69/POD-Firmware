@@ -340,7 +340,7 @@ void DMA2_Stream7_IRQHandler(void)
   /* USER CODE END DMA2_Stream7_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart6_tx);
   /* USER CODE BEGIN DMA2_Stream7_IRQn 1 */
-  nrfUartDmaIsr();
+  nrfUartRxDmaIsr();
   /* USER CODE END DMA2_Stream7_IRQn 1 */
 }
 
@@ -350,7 +350,7 @@ void DMA2_Stream7_IRQHandler(void)
 void USART6_IRQHandler(void)
 {
   /* USER CODE BEGIN USART6_IRQn 0 */
-  nrfUartIsr();
+  nrfUartRxIsr();
   /* USER CODE END USART6_IRQn 0 */
   HAL_UART_IRQHandler(&huart6);
   /* USER CODE BEGIN USART6_IRQn 1 */

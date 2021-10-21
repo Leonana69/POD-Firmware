@@ -1,11 +1,13 @@
 # POD-Firmware
 
-This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate the orignal structure and uses HAL library instead of STM32 Standard Peripheral Libraries (SPL), which is deprecated.
+This project is based on the crazyflie-firmware. It uses STM32CubeMX to generate the initialization code and uses HAL library instead of STM32 Standard Peripheral Libraries (SPL), which is deprecated.
+
+# Documentation Coming Soon
 
 ## STM32CubeMX Setup
 
 1. Active TIM7 as usecTim
-    - Prescaler: ABP1 timer clock / 1000000 (84)
+    - Prescaler: 84 (ABP1 timer clock / 1000000)
     - Counter Mode: up
     - Counter Period: 0xFFFF (65535)
     - auto-reload preload: Disable
@@ -13,13 +15,13 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
     - Enable NVIC with Preemption Pri = 4
 
 2. NVIC
-    - DMA
+    - ...
 
 3. SYS
-    - Timebase Source: TIM6
+    - Timebase Source: TIM6 (Systick is used by FreeRTOS)
 
-3. Enable FreeRTOS
-    - CMSIS V2
+3. Enable FreeRTOS CMSIS V2
+    - 
 
 4. Enable I2C1 and I2C3
     - I2C Speed Mode: Fast Mode
@@ -51,7 +53,7 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
 7. LED GPIOs
     - PD2, PC0, PC1, PC2, PC3
 
-8. 
+8. ...
 
 9. Enable PC14 (GPIO_EXTI14)
     - GPIO Mode: External Interrupt Mode with Rising edge trigger detection
@@ -76,7 +78,7 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
     - The HAL_TIM_PWM_START needs to be called to enable the output.
 
 11. Comment the #define __FPU_PRESENT in Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h
-    - This line will cause redefinition of __FPU_PRESENT, I guess it's a mismatch between CMSIS and STM32CubeMX.
+    - This line will cause redefinition of __FPU_PRESENT, so you need to comment it each time after you generating the code.
 
 12. Enable SPI1 and GPIO PB4
     - Mode: Full-Duplex Master
@@ -85,6 +87,7 @@ This project is based on the crazyflie-firmware. It uses STM32CUBEMX to generate
         - NVIC PP: 7
     - Enable Tx DMA: DMA2 Stream 5
         - NVIC PP: 7
+
 ## Modifications to Auto-generated Files
 
 ### STM32F405RGTx_FLASH.ld
@@ -93,6 +96,9 @@ Change the flash origin address to 0x8004000:
 
 ```FLASH (rx)      : ORIGIN = 0x8004000, LENGTH = 1008K```
 
-Add _param, _log, _deckDriver, _eventtrigger to the ld file.
+Add _param and _log to .text section.
+
 ### stm32f4xx_it.c
+
+### freertos.c
 

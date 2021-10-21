@@ -78,7 +78,7 @@ void nrfUartTxenFlowCtrlIsr() {
 		HAL_UART_DMAResume(&nrfUart);
 }
 
-void nrfUartDmaIsr() {
+void nrfUartRxDmaIsr() {
 	// DMA2_Stream7_IRQHandler will be called twice for each transmission: halpcplt and cplt
 	static uint8_t callbackCnt = 0;
 	if (callbackCnt++) {
@@ -150,7 +150,7 @@ void nrfUartHandleDataFromIsr(uint8_t c) {
   }
 }
 
-void nrfUartIsr() {
+void nrfUartRxIsr() {
 	if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_RXNE) != 0)
 		nrfUartHandleDataFromIsr(__HAL_UART_FLUSH_DRREGISTER(&nrfUart));
 	__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_RXNE);
