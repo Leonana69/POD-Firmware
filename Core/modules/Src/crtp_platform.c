@@ -61,10 +61,7 @@ static void versionCommandProcess(CRTPPacket *p);
 void crtpPlatformInit(void) {
   if (isInit)
     return;
-	// TODO: see if this is useful
-  // appchannelInit();
 
-  //Start the task
   STATIC_MEM_TASK_CREATE(platformSrvTask, platformSrvTask, PLATFORM_SRV_TASK_NAME, NULL, PLATFORM_SRV_TASK_PRI);
 
   isInit = true;
@@ -91,7 +88,7 @@ static void platformSrvTask(void* prm) {
         versionCommandProcess(&p);
         break;
       case appChannel:
-			//TODO: fix this
+			  //TODO: fix this
         // appchannelIncomingPacket(&p);
         break;
       default:

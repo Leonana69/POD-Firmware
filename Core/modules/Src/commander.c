@@ -31,7 +31,6 @@
 // #include "crtp_commander_high_level.h"
 
 // #include "cf_math.h"
-// #include "FreeRTOS.h"
 #include "param.h"
 #include "static_mem.h"
 
@@ -84,7 +83,7 @@ void commanderSetSetpoint(setpoint_t *setpoint, int priority) {
 
 void commanderNotifySetpointsStop(int remainValidMillisecs) {
   uint32_t currentTime = osKernelGetTickCount();
-  int timeSetback = MIN(
+  int timeSetback = min(
     COMMANDER_WDT_TIMEOUT_SHUTDOWN - (remainValidMillisecs),
     currentTime
   );

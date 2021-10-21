@@ -546,6 +546,7 @@ static void sensorsAccAlignToGravity(Axis3f* in, Axis3f* out) {
   out->z = ry.z;
 }
 
+// TODO: fix mode change
 void sensorsBmi088Bmp388SetAccelMode(AccelModes mode) {
   switch (mode) {
     case ACCEL_MODE_PROPTEST:

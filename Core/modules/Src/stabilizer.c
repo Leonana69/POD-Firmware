@@ -43,8 +43,6 @@
 #include "controller.h"
 #include "estimator.h"
 #include "power_distribution.h"
-// TODO: enable collision
-// #include "collision_avoidance.h"
 #include "self_test.h"
 #include "supervisor.h"
 
@@ -164,8 +162,6 @@ void stabilizerInit() {
   controllerInit();
   sensorsInit();
   powerDistributionInit();
-  // TODO: check this
-  // collisionAvoidanceInit();
   STATIC_MEM_TASK_CREATE(stabilizerTask, stabilizerTask, STABILIZER_TASK_NAME, NULL, STABILIZER_TASK_PRI);
   isInit = true;
 }
@@ -177,7 +173,6 @@ bool stabilizerTest(void) {
   pass &= estimatorTest();
   pass &= controllerTest();
   pass &= powerDistributionTest();
-  // pass &= collisionAvoidanceTest();
   return pass;
 }
 
@@ -208,9 +203,9 @@ static void stabilizerTask() {
     sensorsWaitDataReady();
     sensorsAcquire(&sensorData);
     /*! Update the drone flight state */
-    // TODO: check this
-    // supervisorUpdate(&sensorData);
+    supervisorUpdate(&sensorData);
 
+    // TODO: check selfTest
     if (1 || selfTestPassed()) {
       estimatorUpdate(&state, tick);
       compressState();

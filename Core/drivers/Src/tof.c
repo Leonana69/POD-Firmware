@@ -35,19 +35,18 @@ void tofInit() {
 		return;
 	I2Cx = &tofI2C;
 
-	if (vl53l1Init())
+	if (vl53l1Init()) {
 		STATIC_MEM_TASK_CREATE(tofTask, tofTask, TOF_TASK_NAME, NULL, TOF_TASK_PRI);
-
-	isInit = true;
+		isInit = true;
+	}
 }
 
 bool tofTest() {
-	return isInit;
+	return isInit & vl53l1Test();
 }
 
 void tofTask() {
 	systemWaitStart();
-	VL53L1_Error status;
 	uint32_t lastWakeTime = osKernelGetTickCount();
 	uint32_t wakeDelay = osKernelGetTickFreq() / TOF_RATE;
 	tofMeasurement_t tofData;
@@ -65,7 +64,7 @@ void tofTask() {
 		if (tofData.distance < RANGE_OUTLIER_LIMIT) {
 			tofData.timestamp = osKernelGetTickCount();
 			tofData.distance = tofData.distance * 0.001f;
-      tofData.stdDev = expStdA * (1.0f  + expf(expCoeff * (tofData.distance - expPointA)));
+			tofData.stdDev = expStdA * (1.0f  + expf(expCoeff * (tofData.distance - expPointA)));
 			
 			estimatorEnqueueTOF(&tofData);
 		}

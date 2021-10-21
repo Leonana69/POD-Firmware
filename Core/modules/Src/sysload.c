@@ -32,7 +32,7 @@
 #include "cfassert.h"
 #include "param.h"
 #include "static_mem.h"
-
+#include "cmsis_os.h"
 
 static void timerHandler(void *arg);
 static bool isInit = false;
@@ -103,7 +103,6 @@ static void timerHandler(void *arg) {
     // Dumps the the CPU load and stack usage for all tasks
     // CPU usage is since last dump in % compared to total time spent in tasks. Note that time spent in interrupts will be included in measured time.
     // Stack usage is displayed as nr of unused bytes at peak stack usage.
-
     DEBUG_PRINT("Task dump\n");
     DEBUG_PRINT("Load\tStack left\tName\n");
     for (int i = 0; i < taskCount; i++) {
@@ -111,10 +110,8 @@ static void timerHandler(void *arg) {
       taskData_t* previousTaskData = getPreviousTaskData(stats->xTaskNumber);
 
       uint32_t taskRunTime = stats->ulRunTimeCounter;
-      // TODO: check this
-      // float load = f * (taskRunTime - previousTaskData->ulRunTimeCounter);
-      // DEBUG_PRINT("%.2f \t%u \t%s\n", (double)load, stats->usStackHighWaterMark, stats->pcTaskName);
-
+      float load = f * (taskRunTime - previousTaskData->ulRunTimeCounter);
+      DEBUG_PRINT("%.2f \t%u \t%s\n", (double)load, stats->usStackHighWaterMark, stats->pcTaskName);
       previousTaskData->ulRunTimeCounter = taskRunTime;
     }
 

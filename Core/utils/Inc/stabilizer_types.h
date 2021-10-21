@@ -29,15 +29,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "imu_types.h"
-// TODO: replace this
-// #define GRAVITY_EARTH  (9.80665f)
-#define GRAVITY_EARTH  (9.81f)
-/* Data structure used by the stabilizer subsystem.
- * All have a timestamp to be set when the data is calculated.
+
+#define GRAVITY_EARTH  (9.80665f)
+/** Data structure used by the stabilizer subsystem.
+ *  All have a timestamp to be set when the data is calculated.
  */
-
-/** Attitude in euler angle form */
-
 struct rpyt {
 	uint32_t timestamp;
 	union {
@@ -67,7 +63,6 @@ typedef float mat3d[vec3d_size][vec3d_size];
 /* x,y,z vector */
 struct vec3_s {
   uint32_t timestamp;
-
   float x;
   float y;
   float z;
@@ -80,7 +75,6 @@ typedef struct vec3_s velocity_t;
 /* Orientation as a quaternion */
 typedef struct quaternion_s {
   uint32_t timestamp;
-
   union {
     struct {
       float q0;
@@ -299,7 +293,6 @@ typedef struct {
 #define DT_50_HZ 0.02
 #define DT_25_HZ 0.04
 
-// TODO: move this to config.h
 #define RATE_MAIN_LOOP 			RATE_1000_HZ
 #define ATTITUDE_RATE 			RATE_500_HZ
 #define ATTITUDE_UPDATE_DT 	DT_500_HZ

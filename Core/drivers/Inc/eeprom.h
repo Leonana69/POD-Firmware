@@ -29,10 +29,6 @@
 #define __EERROM_H__
 
 #include <stdbool.h>
-
-// TODO: remove this
-// If using HAL library, this should be 0xA0
-// #define EEPROM_I2C_ADDR     0xA0
 #define EEPROM_I2C_ADDR     0x50
 #define EEPROM_SIZE         0x1FFF
 
@@ -79,7 +75,4 @@ bool eepromReadBuffer(uint8_t* buffer, uint16_t readAddr, uint16_t len);
  */
 bool eepromWriteBuffer(const uint8_t* buffer, uint16_t writeAddr, uint16_t len);
 
-// TODO
-bool eepromWritePage(uint8_t* buffer, uint16_t writeAddr);
-
-#endif // EERROM_H
+#endif // __EERROM_H__

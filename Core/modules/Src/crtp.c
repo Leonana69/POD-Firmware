@@ -29,8 +29,6 @@
 
 #include "config.h"
 #include "crtp.h"
-// TODO: fix info
-// #include "info.h"
 #include "cfassert.h"
 #include "queuemonitor.h"
 #include "static_mem.h"

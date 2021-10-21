@@ -23,11 +23,8 @@ extern DMA_HandleTypeDef nrfUartTxDmaHandle;
 void _UART_Init(void) {
 	STATIC_SEMAPHORE_CREATE(nrfUartWaitSemaphore, 1, 0);
 	STATIC_MUTEX_CREATE(nrfUartBusMutex);
-
 	STATIC_MEM_QUEUE_CREATE(syslinkPacketDelivery);
 	DEBUG_QUEUE_MONITOR_REGISTER(syslinkPacketDelivery);
-	// TODO: check this
-	// HAL_DMA_RegisterCallback(&nrfUartTxDmaHandle, HAL_DMA_XFER_HALFCPLT_CB_ID, nrfUartDmaIsr);
 }
 
 int debugUartPutchar(int c) {
@@ -157,63 +154,4 @@ void nrfUartIsr() {
 	if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_RXNE) != 0)
 		nrfUartHandleDataFromIsr(__HAL_UART_FLUSH_DRREGISTER(&nrfUart));
 	__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_RXNE);
-
-	// TODO: fix this
-	// if (((nrfUart.Instance->SR & USART_SR_TXE) != RESET) && ((nrfUart.Instance->CR1 & USART_CR1_TXEIE) != RESET))
-	// {
-	// 	uint16_t *tmp;
-
-	// 	/* Check that a Tx process is ongoing */
-	// 	if (nrfUart.gState == HAL_UART_STATE_BUSY_TX)
-	// 	{
-	// 		if ((nrfUart.Init.WordLength == UART_WORDLENGTH_9B) && (nrfUart.Init.Parity == UART_PARITY_NONE))
-	// 		{
-	// 			tmp = (uint16_t *) nrfUart.pTxBuffPtr;
-	// 			nrfUart.Instance->DR = (uint16_t)(*tmp & (uint16_t)0x01FF);
-	// 			nrfUart.pTxBuffPtr += 2U;
-	// 		}
-	// 		else
-	// 		{
-	// 			nrfUart.Instance->DR = (uint8_t)(*nrfUart.pTxBuffPtr++ & (uint8_t)0x00FF);
-	// 		}
-
-	// 		if (--nrfUart.TxXferCount == 0U)
-	// 		{
-	// 			/* Disable the UART Transmit Complete Interrupt */
-	// 			__HAL_UART_DISABLE_IT(&nrfUart, UART_IT_TXE);
-
-	// 			/* Enable the UART Transmit Complete Interrupt */
-	// 			__HAL_UART_ENABLE_IT(&nrfUart, UART_IT_TC);
-	// 		}
-	// 	}
-	// 	return;
-	// }
-
-  // /* UART in mode Transmitter end --------------------------------------------*/
-  // if (((nrfUart.Instance->SR & USART_SR_TC) != RESET) && ((nrfUart.Instance->CR1 & USART_CR1_TCIE) != RESET))
-  // {
-  //   /* Disable the UART Transmit Complete Interrupt */
-  // 	__HAL_UART_DISABLE_IT(&nrfUart, UART_IT_TC);
-
-  // 	/* Tx process is ended, restore &nrfUart->gState to Ready */
-  // 	nrfUart.gState = HAL_UART_STATE_READY;
-  //   return;
-  // }
-
-	// if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_RXNE) != 0) {
-		// uint8_t rxDataInterrupt = (uint8_t)(huart6.Instance->DR & 0xFF);
-	// 	nrfUartHandleDataFromIsr(rxDataInterrupt);
-	// }
-	// else if (__HAL_UART_GET_FLAG(&nrfUart, UART_FLAG_TXE)) {
-		
-	// 	if (outDataIsr && (dataIndexIsr < dataSizeIsr)) {
-	// 		DEBUG_PRINT("tx\n");
-  	//     HAL_UART_Transmit(&nrfUart, &outDataIsr[dataIndexIsr], 1, HAL_TIMEOUT);
-  	//     dataIndexIsr++;
-  	//   } else {
-
-  	//     __HAL_UART_DISABLE_IT(&nrfUart, UART_IT_TXE);
-  	//   	osSemaphoreRelease(nrfUartWaitSemaphore);
-  	//   }
-	// }
 }

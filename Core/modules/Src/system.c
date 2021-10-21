@@ -28,7 +28,6 @@
 /* FreeRtos includes */
 #include "_usart.h"
 #include "_tim.h"
-#include "_gpio.h"
 #include "_i2c.h"
 #include "_spi.h"
 
@@ -102,7 +101,6 @@ static void systemTask(void *arg);
 
 /* Public functions */
 void systemLaunch(void) {
-  _GPIO_Init();
   _UART_Init();
   _TIM_Init();
   _I2C_Init();

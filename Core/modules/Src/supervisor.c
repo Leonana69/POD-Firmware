@@ -28,8 +28,6 @@
 #include <stdlib.h>
 
 #include "log.h"
-// TODO: enable motor
-// #include "motors.h"
 #include "pm.h"
 #include "stabilizer.h"
 #include "supervisor.h"

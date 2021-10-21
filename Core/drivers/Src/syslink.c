@@ -96,18 +96,19 @@ static void syslinkRouteIncommingPacket(SyslinkPacket *slp) {
       radiolinkSyslinkDispatch(slp);
       break;
     case SYSLINK_PM_GROUP:
+      // TODO: fix pm syslink
       // pmSyslinkUpdate(slp);
       osDelay(2);
       break;
     case SYSLINK_OW_GROUP:
+      // TODO: fix ow syslink
       // owSyslinkRecieve(slp);
       break;
     case SYSLINK_SYS_GROUP:
       systemSyslinkReceive(slp);
       break;
     default:
-      DEBUG_PRINT("Unknown packet:%X, %X.\n", slp->type, groupType);
-      // DEBUG_PRINT("Unknown packet:%X.\n", slp->type);
+      DEBUG_PRINT("Unknown packet:%X.\n", slp->type);
       break;
   }
 }

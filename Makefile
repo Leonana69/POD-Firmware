@@ -107,7 +107,7 @@ C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c 
 
 # drivers
 VPATH += Core/drivers/Src
-C_SOURCES += _gpio.c _usart.c _tim.c _i2c.c led.c eeprom.c syslink.c radiolink.c pm.c sensors_bmi088_bmp388.c \
+C_SOURCES += _usart.c _tim.c _i2c.c led.c eeprom.c syslink.c radiolink.c pm.c sensors_bmi088_bmp388.c \
 	motors.c tof.c _spi.c flow.c
 
 VPATH += Core/drivers/Bosch/Src
@@ -225,11 +225,10 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 ######################################
 # guojun's CFLAGS
 ######################################
-CFLAGS += -DDEBUG_UART3
 CFLAGS += -DSTM32F4XX -DSTM32F405xx
 CFLAGS += -DSTM32F40_41xxx -DARM_MATH_CM4
 CFLAGS += -D__FPU_PRESENT=1
-CFLAGS += -Wno-unused
+# CFLAGS += -Wno-unused
 # CFLAGS += -DSENSOR_INCLUDED_BMI088_BMP388
 
 #######################################

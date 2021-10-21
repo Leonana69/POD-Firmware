@@ -138,11 +138,6 @@ bool eepromWriteBuffer(const uint8_t* buffer, uint16_t writeAddr, uint16_t len) 
   return status;
 }
 
-bool eepromWritePage(uint8_t* buffer, uint16_t writeAddr) {
- //TODO: implement
-  return false;
-}
-
 static bool handleMemRead(const uint32_t memAddr, const uint8_t readLen, uint8_t* buffer) {
   bool result = false;
 

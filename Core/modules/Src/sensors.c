@@ -76,8 +76,7 @@ static const Sensors sensorsFunctions[SENSORS_COUNT] = {
 };
 
 void sensorsInit() {
-  // TODO: remove uart
-  DEBUG_PRINT_UART("Using %s (%d) sensors.\n", sensorsGetName(), currentSensors);
+  DEBUG_PRINT("Using %s (%d) sensors.\n", sensorsGetName(), currentSensors);
   sensorsFunctions[currentSensors].init(SENSORS_INTERFACE);
 }
 

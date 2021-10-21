@@ -553,8 +553,6 @@ void kalmanCorePredict(kalmanCoreData_t* this, Axis3f *acc, Axis3f *gyro, float 
 }
 
 void kalmanCoreAddProcessNoise(kalmanCoreData_t* this, float dt) {
-  static int cnt = 0;
-  
   if (dt > 0) {
     this->P[KC_STATE_X][KC_STATE_X] += powf(procNoiseAcc_xy * dt * dt + procNoiseVel * dt + procNoisePos, 2);  // add process noise on position
     this->P[KC_STATE_Y][KC_STATE_Y] += powf(procNoiseAcc_xy * dt * dt + procNoiseVel * dt + procNoisePos, 2);  // add process noise on position

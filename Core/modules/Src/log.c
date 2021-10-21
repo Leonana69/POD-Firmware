@@ -499,7 +499,7 @@ static int logAppendBlock(int id, struct ops_setting * settings, int len) {
     }
 
     if (settings[i].id != 255) {
-			//TOC variable
+			// TOC variable
       varId = variableGetIndex(settings[i].id);
 
       if (varId < 0) {
@@ -513,8 +513,8 @@ static int logAppendBlock(int id, struct ops_setting * settings, int len) {
       ops->acquisitionType = acquisitionTypeFromLogType(logs[varId].type);
 
       LOG_DEBUG("Appended variable %d to block %d\n", settings[i].id, id);
-    } else {                     //Memory variable
-      //TODO: Check that the address is in ram
+    } else {
+      // Memory variable
       ops->variable = (void*)(&settings[i] + 1);
       ops->storageType = (settings[i].logType >> 4) & LOG_TYPE_MASK;
       ops->logType = settings[i].logType & LOG_TYPE_MASK;
@@ -525,7 +525,7 @@ static int logAppendBlock(int id, struct ops_setting * settings, int len) {
     }
     blockAppendOps(block, ops);
 
-    LOG_DEBUG("   Now lenght %d\n", blockCalcLength(block));
+    LOG_DEBUG("Now lenght %d\n", blockCalcLength(block));
   }
 
   return 0;

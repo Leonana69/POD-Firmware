@@ -28,22 +28,10 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-// TODO: fix
-// #include "estimator.h"
 
 #define EMERGENCY_STOP_TIMEOUT_DISABLED (-1)
 
-/**
- * Initialize the stabilizer subsystem and launch the stabilizer loop task.
- * The stabilizer loop task will wait on systemWaitStart() before running.
- */
 void stabilizerInit();
-
-/**
- * Test the stabilizer subsystem. Calls test for all the stabilizer related
- * sensors.
- * @return True if all test has passed. False otherwise.
- */
 bool stabilizerTest();
 
 /**
@@ -63,6 +51,5 @@ void stabilizerResetEmergencyStop();
  *                RATE_MAIN_LOOP.
  */
 void stabilizerSetEmergencyStopTimeout(int timeout);
-
 
 #endif /* __STABILIZER_H__ */

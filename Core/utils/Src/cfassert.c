@@ -31,8 +31,7 @@
 #include "FreeRTOS.h"
 #include "cfassert.h"
 #include "led.h"
-// TODO: restore these
-// #include "power_distribution.h"
+#include "power_distribution.h"
 #include "debug.h"
 
 #define MAGIC_ASSERT_INDICATOR 0x2f8a001f
@@ -83,10 +82,8 @@ void assertFail(char *exp, char *file, int line) {
   ledClearAll();
   ledSet(ERR_LED1, 1);
   ledSet(ERR_LED2, 1);
-  // TODO: restore these
-  // powerStop();
+  powerStop();
   HAL_NVIC_SystemReset();
-  // NVIC_SystemReset();
 }
 
 void storeAssertFileData(const char *file, int line) {
@@ -97,14 +94,14 @@ void storeAssertFileData(const char *file, int line) {
 }
 
 void storeAssertHardfaultData(
-    unsigned int r0,
-    unsigned int r1,
-    unsigned int r2,
-    unsigned int r3,
-    unsigned int r12,
-    unsigned int lr,
-    unsigned int pc,
-    unsigned int psr) {
+  unsigned int r0,
+  unsigned int r1,
+  unsigned int r2,
+  unsigned int r3,
+  unsigned int r12,
+  unsigned int lr,
+  unsigned int pc,
+  unsigned int psr) {
   snapshot.magicNumber = MAGIC_ASSERT_INDICATOR;
   snapshot.type = snapshotTypeHardFault;
   snapshot.hardfault.r0 = r0;

@@ -116,10 +116,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    // TODO: toggle this for debug
     DEBUG_PRINT("RUN INTO MAIN WHILE LOOP!\n");
-    HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_2);
-    HAL_Delay(500);
+    return 0;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

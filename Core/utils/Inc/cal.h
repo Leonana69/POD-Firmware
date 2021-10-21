@@ -8,9 +8,6 @@
 #include "stm32fxxx.h"
 #include "arm_math.h"
 
-#define MIN(a, b) ((b) < (a) ? (b) : (a))
-#define MAX(a, b) ((b) > (a) ? (b) : (a))
-
 #define min(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
@@ -124,9 +121,8 @@ static inline void mat_scale(const arm_matrix_instance_f32 *pSrcA, float32_t sca
 }
 
 static inline void matrixcopy(int ROW, int COLUMN, float destmat[ROW][COLUMN], float srcmat[ROW][COLUMN]){
-	//TODO: check the dimension of the matrices
 	for (int i = 0; i < ROW; i++)
-		for(int j = 0; j < COLUMN; j++)
+		for (int j = 0; j < COLUMN; j++)
 			destmat[i][j] = srcmat[i][j];
 }
 
@@ -139,4 +135,4 @@ static inline float arm_sqrt(float32_t in) {
 
 float fVariance(float *buffer, uint32_t length);
 
-#endif
+#endif // __CAL_H__
