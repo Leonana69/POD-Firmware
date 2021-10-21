@@ -126,12 +126,9 @@ void crtpTxTask(void *param) {
   while (1) {
     if (link != &nopLink) {
       if (osMessageQueueGet(txQueue, &p, 0, osWaitForever) == osOK) {
-        // DEBUG_PRINT_UART("\ttx %d,%d,%d\n", p.port, p.channel, p.size);
-        // Keep testing, if the link changes to USB it will go though
-        while (link->sendPacket(&p) == false) {
-          // Relaxation time
+        /*! Keep testing, if the link changes to USB it will go though */
+        while (link->sendPacket(&p) == false)
           osDelay(10);
-        }
         stats.txCount++;
         updateStats();
       }
@@ -146,13 +143,9 @@ void crtpRxTask(void *param) {
   while (1) {
     if (link != &nopLink) {
       if (!link->receivePacket(&p)) {
-        // DEBUG_PRINT_UART("r %d,%d,%d,%d\n", p.port, p.channel, p.size, p.data[0]);
-        if (queues[p.port]) {
-          
-
-          // Block, since we should never drop a packet
+        if (queues[p.port])
+          /*! Block, since we should never drop a packet */
           osMessageQueuePut(queues[p.port], &p, 0, osWaitForever);
-        }
 
         if (callbacks[p.port])
           callbacks[p.port](&p);

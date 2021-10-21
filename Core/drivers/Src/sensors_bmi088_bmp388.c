@@ -304,9 +304,9 @@ static void sensorsDeviceInit(void) {
 	rslt = bmi08a_init(&bmi08xDev);
 	rslt |= bmi08g_init(&bmi08xDev);
 	if (rslt != BMI08X_OK)
-		DEBUG_PRINT_UART("BMI088 Init [FAILED].\n");
+		DEBUG_PRINT("BMI088 Init [FAILED].\n");
 	else {
-		DEBUG_PRINT_UART("BMI088 Init [OK].\n");
+		DEBUG_PRINT("BMI088 Init [OK].\n");
 		bmi08xDev.accel_cfg.range = BMI088_ACCEL_RANGE_24G;
 		bmi08xDev.accel_cfg.power = BMI08X_ACCEL_PM_ACTIVE;
 		bmi08xDev.accel_cfg.odr = BMI08X_ACCEL_ODR_1600_HZ;
@@ -315,7 +315,7 @@ static void sensorsDeviceInit(void) {
 		rslt = bmi08a_set_power_mode(&bmi08xDev);
 		rslt |= bmi08a_set_meas_conf(&bmi08xDev);
 		if (rslt != BMI08X_OK)
-			DEBUG_PRINT_UART("BMI088 Accel Meas Config [FAILED].\n");
+			DEBUG_PRINT("BMI088 Accel Meas Config [FAILED].\n");
 		
 		bmi08xDev.gyro_cfg.range = BMI08X_GYRO_RANGE_2000_DPS;
 		bmi08xDev.gyro_cfg.power = BMI08X_GYRO_PM_NORMAL;
@@ -325,7 +325,7 @@ static void sensorsDeviceInit(void) {
 		rslt = bmi08g_set_power_mode(&bmi08xDev);
 		rslt |= bmi08g_set_meas_conf(&bmi08xDev);
 		if (rslt != BMI08X_OK)
-			DEBUG_PRINT_UART("BMI088 Gyro Meas Config [FAILED].\n");
+			DEBUG_PRINT("BMI088 Gyro Meas Config [FAILED].\n");
 
 		gyroIntConfig.int_channel = BMI08X_INT_CHANNEL_3;
 		gyroIntConfig.int_type = BMI08X_GYRO_INT_DATA_RDY;
@@ -334,7 +334,7 @@ static void sensorsDeviceInit(void) {
 		gyroIntConfig.int_pin_cfg.enable_int_pin = BMI08X_ENABLE;
 		rslt = bmi08g_set_int_config(&gyroIntConfig, &bmi08xDev);
 		if (rslt != BMI08X_OK)
-			DEBUG_PRINT_UART("BMI088 Gyro Int Config [FAILED].\n");
+			DEBUG_PRINT("BMI088 Gyro Int Config [FAILED].\n");
 
 		bmi08xDev.delay_us(10000, NULL);
 	}
@@ -348,9 +348,9 @@ static void sensorsDeviceInit(void) {
   bmp3Dev.delay_us = &sensorsUsDelay;
 	rslt = bmp3_init(&bmp3Dev);
   if (rslt != BMP3_OK)
-  	DEBUG_PRINT_UART("BMP388 Init [FAILED].\n");
+  	DEBUG_PRINT("BMP388 Init [FAILED].\n");
  	else {
-		DEBUG_PRINT_UART("BMP388 Init [OK].\n");
+		DEBUG_PRINT("BMP388 Init [OK].\n");
 		bmp3Settings.int_settings.drdy_en = BMP3_ENABLE;
 		bmp3Settings.press_en = BMP3_ENABLE;
 		bmp3Settings.temp_en = BMP3_ENABLE;
@@ -364,11 +364,11 @@ static void sensorsDeviceInit(void) {
 
 		rslt = bmp3_set_sensor_settings(settings_sel, &bmp3Settings, &bmp3Dev);
 		if (rslt != BMP3_OK)
-  		DEBUG_PRINT_UART("BMP388 Setting [FAILED].\n");
+  		DEBUG_PRINT("BMP388 Setting [FAILED].\n");
 		bmp3Settings.op_mode = BMP3_MODE_NORMAL;
 		rslt = bmp3_set_op_mode(&bmp3Settings, &bmp3Dev);
 		if (rslt != BMP3_OK)
-  		DEBUG_PRINT_UART("BMP388 OP Mode [FAILED].\n");
+  		DEBUG_PRINT("BMP388 OP Mode [FAILED].\n");
 		bmp3Dev.delay_us(10000, NULL);
 	}
 
@@ -506,9 +506,9 @@ bool sensorsBmi088Bmp388ManufacturingTest(void) {
   int8_t rslt = 0;
   rslt = bmi08a_perform_selftest(&bmi08xDev);
   if (rslt != BMI08X_W_SELF_TEST_FAIL) {
-    DEBUG_PRINT_UART("BMI088 Accel self-test [OK].\n");
+    DEBUG_PRINT("BMI088 Accel self-test [OK].\n");
   } else {
-    DEBUG_PRINT_UART("BMI088 Accel self-test [FAILED].\n");
+    DEBUG_PRINT("BMI088 Accel self-test [FAILED].\n");
     testStatus = false;
   }
   /*! Gyro test is conflict with interrupt, following code will cause system to reboot. */
@@ -556,7 +556,7 @@ void sensorsBmi088Bmp388SetAccelMode(AccelModes mode) {
       bmi08xDev.accel_cfg.odr = BMI08X_ACCEL_ODR_1600_HZ;
       if (bmi08a_set_meas_conf(&bmi08xDev) != BMI08X_OK)
         // TODO: REMOVE UART
-        DEBUG_PRINT_UART("ACC config [FAIL]\n");
+        DEBUG_PRINT("ACC config [FAIL]\n");
       for (uint8_t i = 0; i < 3; i++)
         lpf2pInit(&accelLpf[i], 1000, 500);
       break;
@@ -567,7 +567,7 @@ void sensorsBmi088Bmp388SetAccelMode(AccelModes mode) {
       bmi08xDev.accel_cfg.range = BMI088_ACCEL_RANGE_24G;
       bmi08xDev.accel_cfg.odr = BMI08X_ACCEL_ODR_1600_HZ;
       if (bmi08a_set_meas_conf(&bmi08xDev) != BMI08X_OK)
-        DEBUG_PRINT_UART("ACC config [FAIL]\n");
+        DEBUG_PRINT("ACC config [FAIL]\n");
       for (uint8_t i = 0; i < 3; i++)
         lpf2pInit(&accelLpf[i], 1000, ACCEL_LPF_CUTOFF_FREQ);
       break;

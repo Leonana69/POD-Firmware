@@ -220,7 +220,7 @@ static void kalmanTask() {
 
         if (osTick > warningBlockTime) {
           warningBlockTime = osTick + WARNING_HOLD_BACK_TIME;
-          DEBUG_PRINT_UART("State out of bounds, resetting\n");
+          DEBUG_PRINT("State out of bounds, resetting\n");
         }
       }
     }

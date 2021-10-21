@@ -59,7 +59,7 @@ void selfTestRun(sensorData_t *sensors) {
 				accelVarBaseX = fVariance(accelX, PROP_TEST_DIM);
 				accelVarBaseY = fVariance(accelY, PROP_TEST_DIM);
 				accelVarBaseZ = fVariance(accelZ, PROP_TEST_DIM);
-				DEBUG_PRINT_UART("Accel base noise: X+Y=%.6f, Z=%.6f\n", accelVarBaseX + accelVarBaseY, accelVarBaseZ);
+				DEBUG_PRINT("Accel base noise: X+Y=%.6f, Z=%.6f\n", accelVarBaseX + accelVarBaseY, accelVarBaseZ);
 				currentState = TEST_PROP_MES;
 			}
 			break;
@@ -72,7 +72,7 @@ void selfTestRun(sensorData_t *sensors) {
 				accelVarX[curMotor] = fVariance(accelX, PROP_TEST_DIM);
 				accelVarY[curMotor] = fVariance(accelY, PROP_TEST_DIM);
 				accelVarZ[curMotor] = fVariance(accelZ, PROP_TEST_DIM);
-				DEBUG_PRINT_UART("Accel of motor %d: X+Y=%.6f, Z=%.6f\n", curMotor + 1, accelVarX[curMotor] + accelVarY[curMotor], accelVarZ[curMotor]);
+				DEBUG_PRINT("Accel of motor %d: X+Y=%.6f, Z=%.6f\n", curMotor + 1, accelVarX[curMotor] + accelVarY[curMotor], accelVarZ[curMotor]);
 			}
 			
 			loopCount++;
@@ -88,7 +88,7 @@ void selfTestRun(sensorData_t *sensors) {
 
 			if (curMotor == NBR_OF_MOTORS) {
 				loopCount = 0;
-				DEBUG_PRINT_UART("Self test done.\n");
+				DEBUG_PRINT("Self test done.\n");
 				currentState = TEST_DONE;
 				// sensorsSetAccelMode(ACCEL_MODE_FLIGHT);
 			}

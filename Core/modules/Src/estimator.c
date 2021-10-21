@@ -1,3 +1,4 @@
+#define DEBUG_MODULE "ESTI"
 #include <stdbool.h>
 #include "static_mem.h"
 #include "debug.h"
@@ -10,8 +11,6 @@
 // #include "eventtrigger.h"
 #include "cal.h"
 #include "config.h"
-
-#define DEBUG_MODULE "ESTI"
 
 static EstimatorType currentEstimator = ESTIMATOR_TYPE;
 

@@ -92,10 +92,10 @@ void configblockInit(void) {
       // Verify the config block
       if (configblock.magic == MAGIC && configblock.version == VERSION &&
           configblockCheckChecksum(&configblock)) {
-        DEBUG_PRINT_UART("EEPROM: v%d, verification [OK]\n", configblock.version);
+        DEBUG_PRINT("EEPROM: v%d, verification [OK]\n", configblock.version);
         cb_ok = true;
       } else
-        DEBUG_PRINT_UART("Verification [FAIL]: %lx %d\n", configblock.magic, configblock.version);
+        DEBUG_PRINT("Verification [FAIL]: %lx %d\n", configblock.magic, configblock.version);
     }
   } else {
     DEBUG_PRINT("EEPROM Connection [FAIL]\n");
@@ -103,14 +103,14 @@ void configblockInit(void) {
   }
 
   if (cb_ok == false) {
-    DEBUG_PRINT_UART("Try to write default configuration...\n");
+    DEBUG_PRINT("Try to write default configuration...\n");
     // Copy default data to used structure.
     memcpy((uint8_t *)&configblock, (uint8_t *)&configblockDefault, sizeof(configblock));
     // Write default configuration to eeprom
     if (configblockWrite(&configblockDefault))
       cb_ok = true;
     else {
-      DEBUG_PRINT_UART("Write failed!\n");
+      DEBUG_PRINT("Write failed!\n");
       return;
     }
   }

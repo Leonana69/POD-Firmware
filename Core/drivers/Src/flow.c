@@ -218,7 +218,6 @@ bool pmw3901Init() {
   uint8_t chipId = registerRead(0x00);
   uint8_t invChipId = registerRead(0x5f);
 
-  // DEBUG_PRINT_UART("Motion chip id: 0x%x:0x%x\n", chipId, invChipId);
   if (chipId == 0x49 && invChipId == 0xB6) {
     /*! Power on reset */
     registerWrite(0x3a, 0x5a);
@@ -233,7 +232,7 @@ bool pmw3901Init() {
     osDelay(1);
 
     InitRegisters();
-    DEBUG_PRINT_UART("PMW3901 Init [OK].\n");
+    DEBUG_PRINT("PMW3901 Init [OK].\n");
     return true;
   }
   return false;

@@ -191,13 +191,13 @@ static void stabilizerTask() {
 
   uint32_t tick = 1;
   uint32_t lastWakeTime = osKernelGetTickCount();
-  DEBUG_PRINT_UART("Wait for sensor calibration...\n");
+  DEBUG_PRINT("Wait for sensor calibration...\n");
   while (!sensorsAreCalibrated())
     osDelay(10);
 
   // rateSupervisorInit(&rateSupervisorContext, osKernelGetTickCount(), 1000, 997, 1003, 1);
 
-  DEBUG_PRINT_UART("Ready to fly.\n");
+  DEBUG_PRINT("Ready to fly.\n");
   while (1) {
     /*! The sensor should unlock at 1kHz */
     sensorsWaitDataReady();

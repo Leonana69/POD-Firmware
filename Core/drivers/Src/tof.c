@@ -79,19 +79,19 @@ bool vl53l1Init() {
 	vl53l1Dev.comms_speed_khz = 400;
 
 	if (HAL_I2C_IsDeviceReady(I2Cx->hi2c, vl53l1Dev.i2c_slave_address << 1, 3, 100) != HAL_OK) {
-		DEBUG_PRINT_UART("VL53L1X not found.\n");
+		DEBUG_PRINT("VL53L1X not found.\n");
 		return false;
 	}
 
 	status = VL53L1_DataInit(&vl53l1Dev);
 	if (status != VL53L1_ERROR_NONE) {
-		DEBUG_PRINT_UART("Data init [FAILED].\n");
+		DEBUG_PRINT("Data init [FAILED].\n");
 		return false;
 	}
 
 	status = VL53L1_StaticInit(&vl53l1Dev);
 	if (status != VL53L1_ERROR_NONE) {
-		DEBUG_PRINT_UART("Static init [FAILED].\n");
+		DEBUG_PRINT("Static init [FAILED].\n");
 		return false;
 	}
 
@@ -107,7 +107,7 @@ bool vl53l1Init() {
 	VL53L1_SetMeasurementTimingBudgetMicroSeconds(&vl53l1Dev, 10000);
 	VL53L1_StartMeasurement(&vl53l1Dev);
 
-	DEBUG_PRINT_UART("VL53L1 Init [OK].\n");
+	DEBUG_PRINT("VL53L1 Init [OK].\n");
 	return true;
 }
 

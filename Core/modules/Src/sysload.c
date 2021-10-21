@@ -70,7 +70,6 @@ bool sysLoadTest() {
 	return isInit;
 }
 
-
 static taskData_t* getPreviousTaskData(uint32_t xTaskNumber) {
   // Try to find the task in the list of tasks
   for (int i = 0; i < taskTopIndex; i++) {

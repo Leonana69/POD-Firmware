@@ -177,6 +177,7 @@ static bool systemTest() {
   pass &= memTest();
   pass &= stabilizerTest();
   pass &= tofTest();
+  pass &= flowTest();
   return pass;
 }
 
@@ -200,7 +201,7 @@ void systemTask(void *arg) {
 
   /* Start the firmware */
   if (systemTest()) {
-    DEBUG_PRINT_UART("Self test passed!\n");
+    DEBUG_PRINT("Self test passed!\n");
     selftestPassed = 1;
     systemStart();
     ledseqRun(&seq_alive);

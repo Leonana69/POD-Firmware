@@ -1,12 +1,11 @@
+#define DEBUG_MODULE "CTRL"
 #include "debug.h"
-
 #include "config.h"
 #include "cfassert.h"
 #include "controller.h"
 #include "controller_pid.h"
 // #include "controller_mellinger.h"
 // #include "controller_indi.h"
-#define DEBUG_MODULE "CTRL"
 
 static ControllerType currentController = CONTROLLER_TYPE;
 
@@ -25,8 +24,7 @@ static Controller controllerFunctions[] = {
 
 void controllerInit() {
   controllerFunctions[currentController].init();
-  // TODO: remove uart
-  DEBUG_PRINT_UART("Using %s (%d) controller.\n", controllerGetName(), currentController);
+  DEBUG_PRINT("Using %s (%d) controller.\n", controllerGetName(), currentController);
 }
 
 ControllerType controllerGetType() {

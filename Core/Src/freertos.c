@@ -22,7 +22,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
-#include "cmsis_os2.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -30,7 +30,6 @@
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
-typedef StaticQueue_t osStaticMessageQDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -55,22 +54,6 @@ const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 150 * 4,
   .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for myQueue01 */
-osMessageQueueId_t myQueue01Handle;
-uint8_t myQueue01Buffer[ 16 * sizeof( uint16_t ) ];
-osStaticMessageQDef_t myQueue01ControlBlock;
-const osMessageQueueAttr_t myQueue01_attributes = {
-  .name = "myQueue01",
-  .cb_mem = &myQueue01ControlBlock,
-  .cb_size = sizeof(myQueue01ControlBlock),
-  .mq_mem = &myQueue01Buffer,
-  .mq_size = sizeof(myQueue01Buffer)
-};
-/* Definitions for myBinarySem01 */
-osSemaphoreId_t myBinarySem01Handle;
-const osSemaphoreAttr_t myBinarySem01_attributes = {
-  .name = "myBinarySem01"
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -107,6 +90,7 @@ void vApplicationIdleHook( void )
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
+  /*! launch drone controller system */
   systemLaunch();
   /* USER CODE END Init */
 
@@ -114,22 +98,14 @@ void MX_FREERTOS_Init(void) {
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
-  /* Create the semaphores(s) */
-  /* creation of myBinarySem01 */
-  myBinarySem01Handle = osSemaphoreNew(1, 1, &myBinarySem01_attributes);
-
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
-  osSemaphoreAcquire(myBinarySem01Handle, osWaitForever);
+
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
-
-  /* Create the queue(s) */
-  /* creation of myQueue01 */
-  myQueue01Handle = osMessageQueueNew (16, sizeof(uint16_t), &myQueue01_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -155,12 +131,6 @@ void MX_FREERTOS_Init(void) {
   * @param  argument: Not used
   * @retval None
   */
-#include "led.h"
-#include "static_mem.h"
-#include "debug.h"
-#include "param.h"
-static int p = 0;
-// STATIC_MEM_QUEUE_ALLOC(syslinkPacketDelivery, 8, sizeof(uint8_t));
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
@@ -168,14 +138,6 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    // uint8_t x = 1;
-    // DEBUG_PRINT("space: %d\n", osMessageQueueGetSpace(syslinkPacketDelivery));
-    // osMessageQueueGet(syslinkPacketDelivery, &x, 0, 0);
-    // DEBUG_PRINT("space after: %d, data: %d\n", osMessageQueueGetSpace(syslinkPacketDelivery), x);
-    // DEBUG_PRINT_UART("p: %d\n", p);
-    ledSet(1, 1);
-    osDelay(1000);
-    ledSet(1, 0);
     osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */
@@ -183,9 +145,7 @@ void StartDefaultTask(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-PARAM_GROUP_START(freeRTOS)
-  PARAM_ADD(PARAM_INT32, p, &p)
-PARAM_GROUP_STOP(freeRTOS)
+
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

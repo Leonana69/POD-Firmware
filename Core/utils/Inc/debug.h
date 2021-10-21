@@ -18,7 +18,7 @@
 #else
 	#include "_usart.h"
   // #define DEBUG_PRINT(FMT, ...) eprintf(debugUartPutchar, FMT, ## __VA_ARGS__)
-  #define DEBUG_PRINT(FMT, ...)
+  #define DEBUG_PRINT(FMT, ...) consolePrintf(DEBUG_FMT(FMT), ##__VA_ARGS__)
   #define DEBUG_PRINT_UART(FMT, ...) eprintf(debugUartPutchar, FMT, ## __VA_ARGS__)
 	#define DEBUG_PRINT_CONSOLE(FMT, ...) consolePrintf(DEBUG_FMT(FMT), ##__VA_ARGS__)
 #endif
