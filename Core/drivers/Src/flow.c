@@ -48,8 +48,8 @@ void flowTask() {
   flowMeasurement_t flowData;
 
   while (1) {
-    osDelayUntil(lastWakeTime + wakeDelay);
-		lastWakeTime = osKernelGetTickCount();
+    lastWakeTime += wakeDelay;
+		osDelayUntil(lastWakeTime);
     pmw3901ReadMotion(&motionData);
     int16_t dx = -motionData.deltaY;
     int16_t dy = -motionData.deltaX;

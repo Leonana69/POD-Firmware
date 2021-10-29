@@ -53,8 +53,8 @@ void tofTask() {
 	VL53L1_RangingMeasurementData_t vl53l1RangingData;
 	
 	while (1) {
-		osDelayUntil(lastWakeTime + wakeDelay);
-		lastWakeTime = osKernelGetTickCount();
+		lastWakeTime += wakeDelay;
+		osDelayUntil(lastWakeTime);
 		VL53L1_WaitMeasurementDataReady(&vl53l1Dev);
 		VL53L1_GetRangingMeasurementData(&vl53l1Dev, &vl53l1RangingData);
 		tofData.distance = vl53l1RangingData.RangeMilliMeter;

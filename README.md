@@ -21,7 +21,7 @@ This project is based on the crazyflie-firmware. It uses STM32CubeMX to generate
     - Timebase Source: TIM6 (Systick is used by FreeRTOS)
 
 3. Enable FreeRTOS CMSIS V2
-    - 
+    - ...
 
 4. Enable I2C1 and I2C3
     - I2C Speed Mode: Fast Mode

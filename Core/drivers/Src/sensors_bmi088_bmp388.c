@@ -81,7 +81,6 @@ typedef struct {
 } BiasObj;
 
 /*! @brief mutexs */
-STATIC_MEM_SEMAPHORE_ALLOC(devDataReady);
 STATIC_MEM_SEMAPHORE_ALLOC(readDataReady);
 STATIC_MEM_TASK_ALLOC(sensorsTask, SENSORS_TASK_STACKSIZE);
 
@@ -212,52 +211,54 @@ static void sensorsTask(void *param) {
    * this is only required by the z-ranger, since the
    * configuration will be done after system start-up */
   //vTaskDelayUntil(&lastWakeTime, M2T(1500));
+  uint32_t lastWakeTime = osKernelGetTickCount();
   while (1) {
-    if (osOK == osSemaphoreAcquire(devDataReady, osWaitForever)) {
-      sensorData.interruptTimestamp = imuIntTimestamp;
+    lastWakeTime += 1;
+		osDelayUntil(lastWakeTime);
 
-      /*! get data from chosen sensors */
-      sensorsGyroGet(&bmi08xGyro);
-      sensorsAccelGet(&bmi08xAccel);
-      
+    sensorData.interruptTimestamp = imuIntTimestamp;
 
-      /*! calibrate if necessary */
-      if (!gyroBiasFound)
-        processGyroBias(bmi08xGyro.x, bmi08xGyro.y, bmi08xGyro.z);
-      else if (!accelScaleFound)
-        processAccelScale(bmi08xAccel.x, bmi08xAccel.y, bmi08xAccel.z);
+    /*! get data from chosen sensors */
+    sensorsGyroGet(&bmi08xGyro);
+    sensorsAccelGet(&bmi08xAccel);
+    
 
-      /*! Gyro compensation */
-      sensorData.gyro.x = (bmi08xGyro.x - gyroBias.x) * gyroVale2Degree;
-      sensorData.gyro.y = (bmi08xGyro.y - gyroBias.y) * gyroVale2Degree;
-      sensorData.gyro.z = (bmi08xGyro.z - gyroBias.z) * gyroVale2Degree;
-      applyAxis3fLpf((lpf2pData*)(&gyroLpf), &sensorData.gyro);
+    /*! calibrate if necessary */
+    if (!gyroBiasFound)
+      processGyroBias(bmi08xGyro.x, bmi08xGyro.y, bmi08xGyro.z);
+    else if (!accelScaleFound)
+      processAccelScale(bmi08xAccel.x, bmi08xAccel.y, bmi08xAccel.z);
 
-      measurement.type = MeasurementTypeGyroscope;
-      measurement.data.gyroscope.gyro = sensorData.gyro;
-      estimatorEnqueue(&measurement);
+    /*! Gyro compensation */
+    sensorData.gyro.x = (bmi08xGyro.x - gyroBias.x) * gyroVale2Degree;
+    sensorData.gyro.y = (bmi08xGyro.y - gyroBias.y) * gyroVale2Degree;
+    sensorData.gyro.z = (bmi08xGyro.z - gyroBias.z) * gyroVale2Degree;
+    applyAxis3fLpf((lpf2pData*)(&gyroLpf), &sensorData.gyro);
 
-      /*! Accel compensation */
-      accelScaled.x = bmi08xAccel.x * accelValue2Gravity / accelScale;
-      accelScaled.y = bmi08xAccel.y * accelValue2Gravity / accelScale;
-      accelScaled.z = bmi08xAccel.z * accelValue2Gravity / accelScale;
+    measurement.type = MeasurementTypeGyroscope;
+    measurement.data.gyroscope.gyro = sensorData.gyro;
+    estimatorEnqueue(&measurement);
 
-      
-      sensorsAccAlignToGravity(&accelScaled, &sensorData.accel);
-      applyAxis3fLpf((lpf2pData*)(&accelLpf), &sensorData.accel);
+    /*! Accel compensation */
+    accelScaled.x = bmi08xAccel.x * accelValue2Gravity / accelScale;
+    accelScaled.y = bmi08xAccel.y * accelValue2Gravity / accelScale;
+    accelScaled.z = bmi08xAccel.z * accelValue2Gravity / accelScale;
 
-      measurement.type = MeasurementTypeAcceleration;
-      measurement.data.acceleration.accel = sensorData.accel;
-      estimatorEnqueue(&measurement);
+    
+    sensorsAccAlignToGravity(&accelScaled, &sensorData.accel);
+    applyAxis3fLpf((lpf2pData*)(&accelLpf), &sensorData.accel);
 
-      // TODO: not sure if this works well
-      osMutexAcquire(accelDataMutex, osWaitForever);
-      memcpy(&accelData, &sensorData.accel, sizeof(accelData));
-      osMutexRelease(accelDataMutex);
-      osMutexAcquire(gyroDataMutex, osWaitForever);
-      memcpy(&gyroData, &sensorData.gyro, sizeof(gyroData));
-      osMutexRelease(gyroDataMutex);
-    }
+    measurement.type = MeasurementTypeAcceleration;
+    measurement.data.acceleration.accel = sensorData.accel;
+    estimatorEnqueue(&measurement);
+
+    // TODO: not sure if this works well
+    osMutexAcquire(accelDataMutex, osWaitForever);
+    memcpy(&accelData, &sensorData.accel, sizeof(accelData));
+    osMutexRelease(accelDataMutex);
+    osMutexAcquire(gyroDataMutex, osWaitForever);
+    memcpy(&gyroData, &sensorData.gyro, sizeof(gyroData));
+    osMutexRelease(gyroDataMutex);
 
 		static uint8_t baroMeasDelay = 0;
 		if (++baroMeasDelay == SENSORS_DELAY_BARO) {
@@ -389,7 +390,6 @@ static void sensorsTaskInit() {
 	STATIC_MUTEX_CREATE(gyroDataMutex);
 	STATIC_MUTEX_CREATE(baroDataMutex);
 
-	STATIC_SEMAPHORE_CREATE(devDataReady, 1, 0);
   STATIC_SEMAPHORE_CREATE(readDataReady, 1, 0);
 
   STATIC_MEM_TASK_CREATE(sensorsTask, sensorsTask, SENSORS_TASK_NAME, NULL, SENSORS_TASK_PRI);
@@ -581,5 +581,4 @@ static void applyAxis3fLpf(lpf2pData *data, Axis3f* in) {
 
 void sensorsBmi088Bmp388DataAvailableCallback(void) {
   imuIntTimestamp = usecTimerStamp();
-  osSemaphoreRelease(devDataReady);
 }
