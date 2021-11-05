@@ -138,7 +138,7 @@ if __name__ == '__main__':
         ######################################
 
         if action == "info":
-            def print_info(version: int, connected_targets: [Target]):
+            def print_info(version: int, connected_targets: List[Target]):
                 print("Connected to bootloader on {} (version=0x{:X})".format(
                     BootVersion.to_ver_string(version),
                     version
