@@ -38,24 +38,12 @@ void consoleInit(void);
 bool consoleTest(void);
 
 /**
- * Put a character to the console buffer
+ * Put a character to the console buffer, can be called by interrup
  *
  * @param ch character that shall be printed
  * @return The character casted to unsigned int or EOF in case of error
  */
 int consolePutchar(int ch);
-
-/**
- * Put a character to the console buffer
- *
- * @param ch character that shall be printed
- * @return The character casted to unsigned int or EOF in case of error
- *
- * @note This version can be called by interrup. In such case the internal
- * buffer is going to be used. If a task currently is printing or if the
- * interrupts prints too much the data will be ignored.
- */
-int consolePutcharFromISR(int ch);
 
 /**
  * Put a null-terminated string on the console buffer

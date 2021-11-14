@@ -33,15 +33,6 @@
 #include "debug.h"
 #include "config.h"
 
-#ifdef STM32F40_41xxx
-#include "stm32f4xx.h"
-#else
-#include "stm32f10x.h"
-#ifndef SCB_ICSR_VECTACTIVE_Msk
-#define SCB_ICSR_VECTACTIVE_Msk 0x1FFUL
-#endif
-#endif
-
 static CRTPPacket messageToPrint;
 static bool messageSendingIsPending = false;
 static osSemaphoreId_t synch = NULL;
@@ -84,11 +75,8 @@ bool consoleTest(void) {
 int consolePutchar(int ch) {
 	if (!isInit)
     return 0;
-  bool isInInterrupt = (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0;
-
-  if (isInInterrupt)
-    return consolePutcharFromISR(ch);
-  if (osSemaphoreAcquire(synch, osWaitForever) == osOK) {
+  
+  if (osSemaphoreAcquire(synch, 0) == osOK) {
     // Try to send if we already have a pending message
     if (messageSendingIsPending)
       consoleSendMessage();
@@ -111,19 +99,6 @@ int consolePutchar(int ch) {
   return (unsigned char)ch;
 }
 
-int consolePutcharFromISR(int ch) {
-	// if called from ISR, timout should be 0
-  if (osSemaphoreAcquire(synch, 0) == osOK) {
-    if (messageToPrint.size < CRTP_MAX_DATA_SIZE) {
-      messageToPrint.data[messageToPrint.size] = (unsigned char)ch;
-      messageToPrint.size++;
-    }
-    osSemaphoreRelease(synch);
-  }
-
-  return ch;
-}
-
 int consolePuts(char *str) {
   int ret = 0;
 
@@ -139,7 +114,6 @@ void consoleFlush(void) {
     osSemaphoreRelease(synch);
   }
 }
-
 
 static int findMarkerStart() {
   int start = messageToPrint.size;

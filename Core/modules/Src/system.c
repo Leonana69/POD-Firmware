@@ -25,7 +25,6 @@
  */
 #define DEBUG_MODULE "SYS"
 
-/* FreeRtos includes */
 #include "_usart.h"
 #include "_tim.h"
 #include "_i2c.h"
@@ -50,8 +49,6 @@
 #include "configblock.h"
 #include "worker.h"
 #include "crtp.h"
-// #include "uart1.h"
-// #include "uart2.h"
 #include "comm.h"
 #include "stabilizer.h"
 #include "commander.h"
@@ -61,32 +58,19 @@
 #include "sysload.h"
 // #include "proximity.h"
 // #include "watchdog.h"
-// #include "queuemonitor.h"
-// #include "estimator_kalman.h"
 // #include "deck.h"
 // #include "extrx.h"
-// #include "app.h"
 #include "tof.h"
 #include "flow.h"
 #include "static_mem.h"
-// #include "peer_localization.h"
-// #include "i2cdev.h"
 #include "cfassert.h"
 
 #include <string.h>
 
 #include "sensors_bmi088_bmp388.h"
 
-#ifndef START_DISARMED
-#define ARM_INIT true
-#else
-#define ARM_INIT false
-#endif
-
 /* Private variable */
 static bool selftestPassed;
-static bool armed = ARM_INIT;
-static bool forceArm;
 static bool isInit = false;
 
 static char nrf_version[16];
@@ -114,37 +98,10 @@ static void systemInit(void) {
     return;
 
   STATIC_SEMAPHORE_CREATE(canStartSemaphore, 1, 0);
-  usecTimerInit();
   ledInit();
   ledSet(CHG_LED, 1);
-#ifdef DEBUG_QUEUE_MONITOR
-  queueMonitorInit();
-#endif
-#ifdef ENABLE_UART1
-  uart1Init(9600);
-#endif
-#ifdef ENABLE_UART2
-  uart2Init(115200);
-#endif
-  
-  // communication module init
+  usecTimerInit();
   commInit();
-  
-  DEBUG_PRINT("----------------------------\n");
-  DEBUG_PRINT_CONSOLE("Console Init.\n");
-  // DEBUG_PRINT("%s is up and running!\n", platformConfigGetDeviceTypeName());
-  // guojun: UART debug
-  
-  // if (V_PRODUCTION_RELEASE) {
-  //   DEBUG_PRINT("Production release %s\n", V_STAG);
-  // } else {
-  //   DEBUG_PRINT("Build %s:%s (%s) %s\n", V_SLOCAL_REVISION,
-  //               V_SREVISION, V_STAG, (V_MODIFIED)?"MODIFIED":"CLEAN");
-  // }
-  DEBUG_PRINT("I am 0x%08X%08X%08X and I have %dKB of flash!\n",
-              *((int*)(MCU_ID_ADDRESS + 8)), *((int*)(MCU_ID_ADDRESS + 4)),
-              *((int*)(MCU_ID_ADDRESS + 0)), *((short*)(MCU_FLASH_SIZE_ADDRESS)));
-  
   configblockInit();
   workerInit();
   ledseqInit();
@@ -155,12 +112,13 @@ static void systemInit(void) {
   stabilizerInit();
   tofInit();
   flowInit();
-  /* these modules are not used */
-  // storageInit();
-  // buzzerInit();
-  // peerLocalizationInit();
-  // debugInit();
-  // adcInit();
+
+  DEBUG_PRINT("----------------------------\n");
+  DEBUG_PRINT_CONSOLE("Console Init.\n");
+  
+  DEBUG_PRINT("I am 0x%08X%08X%08X and I have %dKB of flash!\n",
+              *((int*)(MCU_ID_ADDRESS + 8)), *((int*)(MCU_ID_ADDRESS + 4)),
+              *((int*)(MCU_ID_ADDRESS + 0)), *((short*)(MCU_FLASH_SIZE_ADDRESS)));
 
   isInit = true;
 }
@@ -184,19 +142,6 @@ static bool systemTest() {
 void systemTask(void *arg) {
   /*! Init all modules */
   systemInit();
-
-  // StateEstimatorType estimator = anyEstimator;
-  // estimatorKalmanTaskInit();
-  // deckInit();
-  // estimator = deckGetRequiredEstimator();
-  // stabilizerInit(estimator);
-  // if (deckGetRequiredLowInterferenceRadioMode() && platformConfigPhysicalLayoutAntennasAreClose())
-  //   platformSetLowInterferenceRadioMode();
-  
-#ifdef PROXIMITY_ENABLED
-  proximityInit();
-#endif
-
   // systemRequestNRFVersion();
 
   /* Start the firmware */
@@ -209,7 +154,7 @@ void systemTask(void *arg) {
   } else {
     selftestPassed = 0;
     if (systemTest()) {
-      while(1) {
+      while (1) {
         ledseqRun(&seq_testFailed);
         osDelay(2000);
         // System can be forced to start by setting the param to 1 from the cfclient
@@ -230,7 +175,7 @@ void systemTask(void *arg) {
 
   // Should never reach this point!
   DEBUG_PRINT("RUN INTO WRONG POINT!\n");
-  while(1)
+  while (1)
     osDelay(osWaitForever);
 }
 
@@ -343,19 +288,4 @@ PARAM_GROUP_START(system)
  */
 PARAM_ADD_CORE(PARAM_INT8 | PARAM_RONLY, selftestPassed, &selftestPassed)
 
-/**
- * @brief Set to nonzero to force system to be armed
- */
-PARAM_ADD(PARAM_INT8, forceArm, &forceArm)
-
 PARAM_GROUP_STOP(sytem)
-
-/**
- *  System loggable variables to check different system states.
- */
-LOG_GROUP_START(sys)
-/**
- * @brief If zero, arming system is preventing motors to start
- */
-LOG_ADD(LOG_INT8, armed, &armed)
-LOG_GROUP_STOP(sys)

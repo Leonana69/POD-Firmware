@@ -39,18 +39,17 @@
 
 #include "sensors.h"
 #include "commander.h"
-// #include "crtp_localization_service.h"
 #include "controller.h"
 #include "estimator.h"
 #include "power_distribution.h"
 #include "self_test.h"
 #include "supervisor.h"
 
-// #include "usddeck.h"
 // #include "statsCnt.h"
 #include "static_mem.h"
 // #include "rateSupervisor.h"
 
+#define ENABLE_SELF_TEST 1
 static bool isInit = false;
 static bool emergencyStop = false;
 static int emergencyStopTimeout = EMERGENCY_STOP_TIMEOUT_DISABLED;
@@ -123,7 +122,6 @@ static void compressState() {
 
   stateCompressed.ax = state.acc.x * GRAVITY_EARTH * 1000.0f;
   stateCompressed.ay = state.acc.y * GRAVITY_EARTH * 1000.0f;
-	// TODO: check this
   stateCompressed.az = (state.acc.z + 1) * GRAVITY_EARTH * 1000.0f;
 
   float const q[4] = {
@@ -177,7 +175,8 @@ bool stabilizerTest(void) {
 }
 
 static void checkEmergencyStopTimeout() {
-	emergencyStop = (emergencyStopTimeout-- <= 0);
+  if (emergencyStopTimeout >= 0)
+	  emergencyStop = (emergencyStopTimeout-- <= 0);
 }
 
 /* The stabilizer loop runs at 1kHz (stock) or 500Hz (kalman). It is the
@@ -190,7 +189,6 @@ static void stabilizerTask() {
   systemWaitStart();
 
   uint32_t tick = 1;
-  uint32_t lastWakeTime = osKernelGetTickCount();
   DEBUG_PRINT("Wait for sensor calibration...\n");
   while (!sensorsAreCalibrated())
     osDelay(10);
@@ -205,31 +203,20 @@ static void stabilizerTask() {
     /*! Update the drone flight state */
     supervisorUpdate(&sensorData);
 
-    // TODO: check selfTest
-    if (1 || selfTestPassed()) {
+    if (ENABLE_SELF_TEST || selfTestPassed()) {
       estimatorUpdate(&state, tick);
       compressState();
-
       commanderGetSetpoint(&setpoint, &state);
       compressSetpoint();
 
-      // collisionAvoidanceUpdateSetpoint(&setpoint, &sensorData, &state, tick);
-
       controllerUpdate(&control, &setpoint, &sensorData, &state, tick);
-
-      // checkEmergencyStopTimeout();
+      
+      checkEmergencyStopTimeout();
 
       if (emergencyStop)
         powerStop();
       else
         powerDistributionUpdate(&control);
-
-      // Log data to uSD card if configured
-      // if (   usddeckLoggingEnabled()
-      //     && usddeckLoggingMode() == usddeckLoggingMode_SynchronousStabilizer
-      //     && RATE_DO_EXECUTE(usddeckFrequency(), tick)) {
-      //   usddeckTriggerLogging();
-      // }
 
       calcSensorToOutputLatency(&sensorData);
       tick++;
@@ -369,22 +356,6 @@ LOG_ADD_CORE(LOG_FLOAT, x, &sensorData.gyro.x)
 LOG_ADD_CORE(LOG_FLOAT, y, &sensorData.gyro.y)
 LOG_ADD_CORE(LOG_FLOAT, z, &sensorData.gyro.z)
 LOG_GROUP_STOP(gyro)
-
-#ifdef LOG_SEC_IMU
-LOG_GROUP_START(accSec)
-LOG_ADD(LOG_FLOAT, x, &sensorData.accSec.x)
-LOG_ADD(LOG_FLOAT, y, &sensorData.accSec.y)
-LOG_ADD(LOG_FLOAT, z, &sensorData.accSec.z)
-LOG_GROUP_STOP(accSec)
-#endif
-
-#ifdef LOG_SEC_IMU
-LOG_GROUP_START(gyroSec)
-LOG_ADD(LOG_FLOAT, x, &sensorData.gyroSec.x)
-LOG_ADD(LOG_FLOAT, y, &sensorData.gyroSec.y)
-LOG_ADD(LOG_FLOAT, z, &sensorData.gyroSec.z)
-LOG_GROUP_STOP(gyroSec)
-#endif
 
 /**
  * Log group for the barometer.

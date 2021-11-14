@@ -29,7 +29,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "debug.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -116,8 +116,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    DEBUG_PRINT("RUN INTO MAIN WHILE LOOP!\n");
-    return 0;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
