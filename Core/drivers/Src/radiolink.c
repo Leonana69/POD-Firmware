@@ -35,7 +35,6 @@
 #include "log.h"
 #include "led.h"
 #include "ledseq.h"
-#include "queuemonitor.h"
 #include "static_mem.h"
 #include "cfassert.h"
 #include "debug.h"
@@ -78,9 +77,7 @@ void radiolinkInit(void) {
     return;
 
   STATIC_MEM_QUEUE_CREATE(txQueue);
-  DEBUG_QUEUE_MONITOR_REGISTER(txQueue);
   STATIC_MEM_QUEUE_CREATE(crtpPacketDelivery);
-  DEBUG_QUEUE_MONITOR_REGISTER(crtpPacketDelivery);
 
   ASSERT(crtpPacketDelivery);
   syslinkInit();

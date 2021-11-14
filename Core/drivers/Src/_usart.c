@@ -6,7 +6,6 @@
 #include "dma.h"
 #include <string.h>
 
-#include "queuemonitor.h"
 #include "debug.h"
 #include "crtp.h"
 
@@ -24,7 +23,6 @@ void _UART_Init(void) {
 	STATIC_SEMAPHORE_CREATE(nrfUartWaitSemaphore, 1, 0);
 	STATIC_MUTEX_CREATE(nrfUartBusMutex);
 	STATIC_MEM_QUEUE_CREATE(syslinkPacketDelivery);
-	DEBUG_QUEUE_MONITOR_REGISTER(syslinkPacketDelivery);
 }
 
 int debugUartPutchar(int c) {

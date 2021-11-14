@@ -36,9 +36,6 @@
 #include "eeprom.h"
 #include "cal.h"
 
-#include "_i2c.h"
-
-
 /* Internal format of the config block */
 #define MAGIC 0x43427830
 #define VERSION 1

@@ -28,7 +28,6 @@
 #include <errno.h>
 
 #include "static_mem.h"
-#include "queuemonitor.h"
 
 #include "debug.h"
 
@@ -47,7 +46,6 @@ void workerInit() {
     return;
 
   STATIC_MEM_QUEUE_CREATE(workerQueue);
-  DEBUG_QUEUE_MONITOR_REGISTER(workerQueue);
   isInit = true;
 }
 

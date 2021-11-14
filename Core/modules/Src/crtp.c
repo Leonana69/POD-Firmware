@@ -30,7 +30,6 @@
 #include "config.h"
 #include "crtp.h"
 #include "cfassert.h"
-#include "queuemonitor.h"
 #include "static_mem.h"
 #include "log.h"
 #include "debug.h"
@@ -80,7 +79,6 @@ void crtpInit(void) {
     return;
 
   txQueue = osMessageQueueNew(CRTP_TX_QUEUE_SIZE, sizeof(CRTPPacket), NULL);
-  DEBUG_QUEUE_MONITOR_REGISTER(txQueue);
 
   STATIC_MEM_TASK_CREATE(crtpTxTask, crtpTxTask, CRTP_TX_TASK_NAME, NULL, CRTP_TX_TASK_PRI);
   STATIC_MEM_TASK_CREATE(crtpRxTask, crtpRxTask, CRTP_RX_TASK_NAME, NULL, CRTP_RX_TASK_PRI);
@@ -95,7 +93,6 @@ bool crtpTest(void) {
 void crtpInitTaskQueue(CRTPPort portId) {
   ASSERT(queues[portId] == NULL);
   queues[portId] = osMessageQueueNew(CRTP_RX_QUEUE_SIZE, sizeof(CRTPPacket), NULL);
-  DEBUG_QUEUE_MONITOR_REGISTER(queues[portId]);
 }
 
 int crtpReceivePacket(CRTPPort portId, CRTPPacket *p) {
