@@ -23,20 +23,20 @@
  *
  */
 
-#ifndef __SENSORS_BMI088_BMP388_H__
-#define __SENSORS_BMI088_BMP388_H__
+#ifndef __SENSORS_BMI270_BMP384_H__
+#define __SENSORS_BMI270_BMP384_H__
 
 #include "sensors.h"
 
-void sensorsBmi088Bmp388Init(SensorsInterfaceType interface);
-bool sensorsBmi088Bmp388Test(void);
-bool sensorsBmi088Bmp388AreCalibrated(void);
-void sensorsBmi088Bmp388Acquire(sensorData_t *sensors);
-void sensorsBmi088Bmp388WaitDataReady(void);
-bool sensorsBmi088Bmp388ReadGyro(Axis3f *gyro);
-bool sensorsBmi088Bmp388ReadAccel(Axis3f *accel);
-bool sensorsBmi088Bmp388ReadBaro(baro_t *baro);
-void sensorsBmi088Bmp388SetAccelMode(AccelModes mode);
-void sensorsBmi088Bmp388DataAvailableCallback(void);
+void sensorsBmi270Bmp384Init(SensorsInterfaceType interface);
+bool sensorsBmi270Bmp384Test(void);
+bool sensorsBmi270Bmp384AreCalibrated(void);
+void sensorsBmi270Bmp384Acquire(sensorData_t *sensors);
+void sensorsBmi270Bmp384WaitDataReady(void);
+bool sensorsBmi270Bmp384ReadGyro(Axis3f *gyro);
+bool sensorsBmi270Bmp384ReadAccel(Axis3f *accel);
+bool sensorsBmi270Bmp384ReadBaro(baro_t *baro);
+void sensorsBmi270Bmp384SetAccelMode(AccelModes mode);
+void sensorsBmi270Bmp384DataAvailableCallback(void);
 
-#endif // __SENSORS_BMI088_BMP388_H__
+#endif // __SENSORS_BMI270_BMP384_H__

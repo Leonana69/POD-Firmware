@@ -108,10 +108,10 @@ C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c 
 # drivers
 VPATH += Core/drivers/Src
 C_SOURCES += _usart.c _tim.c _i2c.c led.c eeprom.c syslink.c radiolink.c pm.c sensors_bmi088_bmp388.c \
-	motors.c tof.c _spi.c flow.c
+	motors.c tof.c _spi.c flow.c sensors_bmi270_bmp384.c
 
 VPATH += Core/drivers/Bosch/Src
-C_SOURCES += bmi08a.c bmi08g.c bmp3.c
+C_SOURCES += bmi08a.c bmi08g.c bmp3.c bmi2.c bmi270.c
 
 VPATH += Core/drivers/Vl53l1/Src
 C_SOURCES += vl53l1_api_calibration.c vl53l1_api_core.c vl53l1_api_debug.c vl53l1_api_preset_modes.c vl53l1_api_strings.c \

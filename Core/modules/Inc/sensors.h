@@ -36,6 +36,7 @@ typedef enum {
 
 typedef enum {
   SENSORS_BMI088_BMP388,
+  SENSORS_BMI270_BMP384,
   SENSORS_COUNT,
 } SensorsType;
 

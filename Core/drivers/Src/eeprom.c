@@ -67,13 +67,7 @@ bool eepromInit() {
 }
 
 bool eepromTest(void) {
-  bool status;
-  status = eepromTestConnection();
-  if (status)
-    DEBUG_PRINT("I2C connection [OK].\n");
-  else
-    DEBUG_PRINT("I2C connection [FAIL].\n");
-  return status;
+  return eepromTestConnection();
 }
 
 bool eepromTestConnection(void) {

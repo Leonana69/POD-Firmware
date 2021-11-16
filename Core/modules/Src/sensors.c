@@ -35,10 +35,12 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-#define SENSOR_INCLUDED_BMI088_BMP388
-
-#if defined(SENSOR_INCLUDED_BMI088_BMP388) || defined(SENSOR_INCLUDED_BMI088_SPI_BMP388)
+#if (SENSORS_TYPE == SENSORS_BMI088_BMP388)
   #include "sensors_bmi088_bmp388.h"
+#endif
+
+#if (SENSORS_TYPE == SENSORS_BMI270_BMP384)
+  #include "sensors_bmi270_bmp384.h"
 #endif
 
 static SensorsType currentSensors = SENSORS_TYPE;
@@ -58,7 +60,7 @@ typedef struct {
 } Sensors;
 
 static const Sensors sensorsFunctions[SENSORS_COUNT] = {
-#ifdef SENSOR_INCLUDED_BMI088_BMP388
+#if (SENSORS_TYPE == SENSORS_BMI088_BMP388)
   {
     .init = sensorsBmi088Bmp388Init,
     .test = sensorsBmi088Bmp388Test,
@@ -71,6 +73,21 @@ static const Sensors sensorsFunctions[SENSORS_COUNT] = {
     .setAccelMode = sensorsBmi088Bmp388SetAccelMode,
     .dataAvailableCallback = sensorsBmi088Bmp388DataAvailableCallback,
 		.name = "BMI088BMP388",
+  },
+#endif
+#if (SENSORS_TYPE == SENSORS_BMI270_BMP384)
+  {
+    .init = sensorsBmi270Bmp384Init,
+    .test = sensorsBmi270Bmp384Test,
+    .areCalibrated = sensorsBmi270Bmp384AreCalibrated,
+    .acquire = sensorsBmi270Bmp384Acquire,
+    .waitDataReady = sensorsBmi270Bmp384WaitDataReady,
+    .readGyro = sensorsBmi270Bmp384ReadGyro,
+    .readAccel = sensorsBmi270Bmp384ReadAccel,
+    .readBaro = sensorsBmi270Bmp384ReadBaro,
+    .setAccelMode = sensorsBmi270Bmp384SetAccelMode,
+    .dataAvailableCallback = sensorsBmi270Bmp384DataAvailableCallback,
+		.name = "BMI270BMP384",
   },
 #endif
 };

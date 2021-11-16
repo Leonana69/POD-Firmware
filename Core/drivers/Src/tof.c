@@ -16,6 +16,7 @@
 #include "log.h"
 
 static bool isInit = false;
+static bool vl53l1Present = false;
 static I2CDrv *I2Cx;
 #define TOF_RATE RATE_25_HZ
 static void tofTask();
@@ -42,7 +43,7 @@ void tofInit() {
 }
 
 bool tofTest() {
-	return isInit & vl53l1Test();
+	return (!vl53l1Present) || (isInit & vl53l1Test());
 }
 
 void tofTask() {
@@ -82,6 +83,7 @@ bool vl53l1Init() {
 		DEBUG_PRINT("VL53L1X not found.\n");
 		return false;
 	}
+	vl53l1Present = true;
 
 	status = VL53L1_DataInit(&vl53l1Dev);
 	if (status != VL53L1_ERROR_NONE) {

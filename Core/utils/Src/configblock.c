@@ -83,8 +83,8 @@ void configblockInit(void) {
     return;
 
   eepromInit();
-
   if (eepromTestConnection()) {
+    DEBUG_PRINT("EEPROM connection [OK].\n");
     if (eepromReadBuffer((uint8_t *)&configblock, 0, sizeof(configblock))) {
       // Verify the config block
       if (configblock.magic == MAGIC && configblock.version == VERSION &&

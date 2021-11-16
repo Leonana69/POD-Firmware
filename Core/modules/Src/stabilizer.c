@@ -167,9 +167,9 @@ void stabilizerInit() {
 bool stabilizerTest(void) {
   bool pass = true;
 
-  pass &= sensorsTest();
   pass &= estimatorTest();
   pass &= controllerTest();
+  pass &= sensorsTest();
   pass &= powerDistributionTest();
   return pass;
 }
