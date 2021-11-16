@@ -234,6 +234,8 @@ bool pmw3901Init() {
     InitRegisters();
     DEBUG_PRINT("PMW3901 Init [OK].\n");
     return true;
+  } else {
+    DEBUG_PRINT("PMW3901 not found.\n");
   }
   return false;
 }

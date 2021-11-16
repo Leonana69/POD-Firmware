@@ -219,7 +219,6 @@ static void sensorsTask(void *param) {
     sensorsGyroGet(&bmi08xGyro);
     sensorsAccelGet(&bmi08xAccel);
     
-
     /*! calibrate if necessary */
     if (!gyroBiasFound)
       processGyroBias(bmi08xGyro.x, bmi08xGyro.y, bmi08xGyro.z);

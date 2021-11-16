@@ -1828,7 +1828,8 @@ int8_t bmi2_get_regs(uint8_t reg_addr, uint8_t *data, uint16_t len, struct bmi2_
         }
         else
         {
-            dev->delay_us(2, dev->intf_ptr);
+            // dev->delay_us(2, dev->intf_ptr);
+            for (int i = 0; i < 10; i++);
         }
 
         if (dev->intf_rslt == BMI2_INTF_RET_SUCCESS)
@@ -1881,7 +1882,9 @@ int8_t bmi2_set_regs(uint8_t reg_addr, const uint8_t *data, uint16_t len, struct
         /* Delay for Normal mode of the sensor is 2 us */
         else
         {
-            dev->delay_us(2, dev->intf_ptr);
+            // dev->delay_us(2, dev->intf_ptr);
+            // FreeRTOS doesn't support real 2 us delay
+            for (int i = 0; i < 10; i++);
         }
 
         /* updating the advance power saver flag */

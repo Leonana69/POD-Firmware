@@ -201,7 +201,6 @@ static void sensorsTask(void *param) {
   /** wait an additional second the keep bus free
    * this is only required by the z-ranger, since the
    * configuration will be done after system start-up */
-  //vTaskDelayUntil(&lastWakeTime, M2T(1500));
   uint32_t lastWakeTime = osKernelGetTickCount();
   while (1) {
     lastWakeTime += 1;
@@ -210,7 +209,8 @@ static void sensorsTask(void *param) {
     sensorData.interruptTimestamp = imuIntTimestamp;
 
     /*! get data from chosen sensors */
-		bmi270_get_sensor_data(bmi270Data, 2, &bmi2Dev);
+		bmi2_get_sensor_data(&bmi270Data[0], 1, &bmi2Dev);
+		bmi2_get_sensor_data(&bmi270Data[1], 1, &bmi2Dev);
 
     /*! calibrate if necessary */
     if (!gyroBiasFound)
@@ -273,38 +273,37 @@ void sensorsBmi270Bmp384WaitDataReady() {
 
 static void sensorsDeviceInit(void) {
   int8_t rslt;
+	uint8_t chipId;
 	/*! wait for sensor to start */
 	osDelay(100);
 
 	/*! BMI270 */
-
 	bmi2Dev.intf_ptr = &intfAddr;
 	bmi2Dev.delay_us = &sensorsUsDelay;
 	bmi2Dev.read_write_len = 32;
-    bmi2Dev.config_file_ptr = NULL;
+  bmi2Dev.config_file_ptr = NULL;
 	if (currentInterface == SENSOR_INTF_I2C) {
 		bmi2Dev.intf = BMI2_I2C_INTF;
-        bmi2Dev.read = &i2cSensorsRead;
+    bmi2Dev.read = &i2cSensorsRead;
 		bmi2Dev.write = &i2cSensorsWrite;
 	} else {
 		bmi2Dev.intf = BMI2_SPI_INTF;
 		// TODO: spi read write
 	}
-
 	rslt = bmi270_init(&bmi2Dev);
-	if (rslt != BMI2_OK)
+  rslt |= bmi2_get_regs(BMI2_CHIP_ID_ADDR, &chipId, 1, &bmi2Dev);
+	if (rslt != BMI2_OK || chipId != BMI270_CHIP_ID)
 		DEBUG_PRINT("BMI270 Init [FAILED].\n");
 	else {
 		DEBUG_PRINT("BMI270 Init [OK].\n");
     bmi270Config[ACCEL].type = BMI2_ACCEL;
     bmi270Config[GYRO].type = BMI2_GYRO;
-    rslt = bmi2_get_sensor_config(bmi270Config, 2, &bmi2Dev);
-    if (rslt != BMI2_OK)
-			DEBUG_PRINT("BMI270 Accel Gyro Config [FAILED].\n");
-
-    rslt = bmi2_map_data_int(BMI2_DRDY_INT, BMI2_INT2, &bmi2Dev);
-    if (rslt != BMI2_OK)
-			DEBUG_PRINT("BMI270 Int2 Config [FAILED].\n");
+		uint8_t sensorsList[2] = { BMI2_ACCEL, BMI2_GYRO };
+		rslt = bmi2_sensor_enable(sensorsList, 2, &bmi2Dev);
+		/*! Disable power saving mode, this will cause severe delay */
+		rslt |= bmi2_set_adv_power_save(BMI2_DISABLE, &bmi2Dev);
+		if (rslt != BMI2_OK)
+			DEBUG_PRINT("BMI270 Enable [FAILED].\n");
 
     bmi270Config[ACCEL].cfg.acc.odr = BMI2_ACC_ODR_1600HZ;
     bmi270Config[ACCEL].cfg.acc.range = BMI2_ACC_RANGE_16G;
@@ -323,6 +322,25 @@ static void sensorsDeviceInit(void) {
 		rslt = bmi2_set_sensor_config(bmi270Config, 2, &bmi2Dev);
 		if (rslt != BMI2_OK)
 			DEBUG_PRINT("BMI270 Accel Gyro Meas Config [FAILED].\n");
+		struct bmi2_int_pin_config data_int_cfg;
+    data_int_cfg.pin_type = BMI2_INT2;
+    data_int_cfg.int_latch = BMI2_INT_NON_LATCH;
+    data_int_cfg.pin_cfg[0].output_en = BMI2_INT_OUTPUT_ENABLE; // Output enabled
+    data_int_cfg.pin_cfg[0].od = BMI2_INT_PUSH_PULL;            // OpenDrain disabled
+    data_int_cfg.pin_cfg[0].lvl = BMI2_INT_ACTIVE_HIGH;         // Signal High Active
+    data_int_cfg.pin_cfg[0].input_en = BMI2_INT_INPUT_DISABLE;  // Input Disabled
+    data_int_cfg.pin_cfg[1].output_en = BMI2_INT_OUTPUT_ENABLE; // Output enabled
+    data_int_cfg.pin_cfg[1].od = BMI2_INT_PUSH_PULL;            // OpenDrain disabled
+    data_int_cfg.pin_cfg[1].lvl = BMI2_INT_ACTIVE_HIGH;         // Signal High Active
+    data_int_cfg.pin_cfg[1].input_en = BMI2_INT_INPUT_DISABLE;  // Input Disabled
+    rslt = bmi2_set_int_pin_config(&data_int_cfg, &bmi2Dev);
+    if (rslt != BMI2_OK)
+      DEBUG_PRINT("BMI270 Set INT [FAIL]\n");
+
+    bmi2Dev.delay_us(50000, NULL);
+    rslt = bmi2_map_data_int(BMI2_DRDY_INT, BMI2_INT2, &bmi2Dev);
+    if (rslt != BMI2_OK)
+      DEBUG_PRINT("BMI270 Map INT [FAIL]\n");
 
 		bmi2Dev.delay_us(10000, NULL);
 	}
