@@ -55,7 +55,7 @@ ledseqContext_t* sequences = NO_CONTEXT;
 ledseqStep_t seq_calibrated_def[] = {
   {  true, LEDSEQ_WAITMS(50) },
   { false, LEDSEQ_WAITMS(450) },
-  {     0, LEDSEQ_LOOP },
+  {     0, LEDSEQ_STOP },
 };
 
 ledseqContext_t seq_calibrated = {
@@ -193,7 +193,6 @@ void ledseqInit() {
 			.cb_size = sizeof(timerBuffer[i])
 		};
 		timer[i] = osTimerNew(runLedseq, osTimerOnce, ledseqName[i], &timAttr);
-    // timer[i] = xTimerCreateStatic("ledseqTimer", M2T(1000), pdFALSE, (void*)i, runLedseq, &timerBuffer[i]);
   }
 	
 
@@ -205,7 +204,7 @@ void ledseqInit() {
 		.priority = LEDSEQCMD_TASK_PRI,
 	};
 	osThreadNew(lesdeqCmdTask, NULL, &thrAttr);
-  // osThreadNew(lesdeqCmdTask, LEDSEQCMD_TASK_NAME, LEDSEQCMD_TASK_STACKSIZE, NULL, LEDSEQCMD_TASK_PRI, NULL);
+  
 	ledseqEnable(true);
   isInit = true;
 }
@@ -245,9 +244,8 @@ bool ledseqRun(ledseqContext_t *context) {
   struct ledseqCmd_s command;
   command.command = run;
   command.sequence = context;
-  if (osMessageQueuePut(ledseqCmdQueue, &command, 0, 0) == osOK) {
+  if (osMessageQueuePut(ledseqCmdQueue, &command, 0, 0) == osOK)
     return true;
-  }
   return false;
 }
 
@@ -255,7 +253,7 @@ void ledseqRunBlocking(ledseqContext_t *context) {
   const led_t led = context->led;
 
   osMutexAcquire(ledseqMutex, osWaitForever);
-  context->state = 0;  //Reset the seq. to its first step
+  context->state = LEDSEQ_LIVE;  // Reset the seq. to its first step
   updateActive(led);
   osMutexRelease(ledseqMutex);
 
@@ -305,9 +303,8 @@ static void runLedseq(void *name) {
 	int tim = ((char*) name)[4] - 0x30;
   ledseqContext_t* context = activeSeq[tim];
 
-  if (NO_CONTEXT == context) {
+  if (NO_CONTEXT == context)
     return;
-  }
 
   bool leave = false;
   while (!leave) {
@@ -321,20 +318,19 @@ static void runLedseq(void *name) {
 
     switch (step->action) {
       case LEDSEQ_LOOP:
-        context->state = 0;
+        context->state = LEDSEQ_LIVE;
         break;
       case LEDSEQ_STOP:
         context->state = LEDSEQ_STOP;
         updateActive(led);
+        osTimerStart(timer[tim], 1);
         break;
       default:  //The step is a LED action and a time
         ledSet(led, step->value);
-        if (step->action == 0) {
+        if (step->action == 0)
           break;
-        }
-        // xTimerChangePeriod(xTimer, M2T(step->action), 0);
-        // xTimerStart(xTimer, 0);
-				osTimerStart(timer[tim], step->action);
+        else
+				  osTimerStart(timer[tim], step->action);
         leave = true;
         break;
     }
@@ -345,10 +341,8 @@ static void runLedseq(void *name) {
 void ledseqRegisterSequence(ledseqContext_t* context) {
   context->state = LEDSEQ_STOP;
   context->nextContext = NO_CONTEXT;
-	ledseqContext_t base = {
-		.nextContext = sequences,
-	};
-	ledseqContext_t* last = &base;
+
+	ledseqContext_t *last = sequences;
 
   if (sequences == NO_CONTEXT) {
     sequences = context;
@@ -362,13 +356,11 @@ void ledseqRegisterSequence(ledseqContext_t* context) {
   }
 }
 
-// Utility functions
-
 static void updateActive(led_t led) {
   activeSeq[led] = NO_CONTEXT;
   ledSet(led, false);
 
-  for (ledseqContext_t* s = sequences; s != 0; s = s->nextContext) {
+  for (ledseqContext_t *s = sequences; s != NO_CONTEXT; s = s->nextContext) {
     if (s->led == led && s->state != LEDSEQ_STOP) {
       activeSeq[led] = s;
       break;

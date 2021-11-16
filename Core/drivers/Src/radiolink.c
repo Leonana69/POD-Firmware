@@ -143,7 +143,7 @@ void radiolinkSyslinkDispatch(SyslinkPacket *slp) {
     ledseqRun(&seq_linkUp);
     // If a radio packet is received, one can be sent
     if (osMessageQueueGet(txQueue, &txPacket, 0, 0) == osOK) {
-      // ledseqRun(&seq_linkDown);
+      ledseqRun(&seq_linkDown);
       syslinkSendPacket(&txPacket);
     }
   } else if (slp->type == SYSLINK_RADIO_RAW_BROADCAST) {
@@ -203,11 +203,10 @@ bool radiolinkSendP2PPacketBroadcast(P2PPacket *p) {
   memcpy(slp.data, p->raw, p->size + 1);
 
   syslinkSendPacket(&slp);
-  // ledseqRun(&seq_linkDown);
+  ledseqRun(&seq_linkDown);
 
   return true;
 }
-
 
 struct crtpLinkOperations * radiolinkGetLink() {
   return &radiolinkOp;

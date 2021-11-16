@@ -49,8 +49,9 @@
 #define LEDSEQ_CHARGE_CYCLE_TIME_MAX    500
 //Led sequence action
 #define LEDSEQ_WAITMS(X) (X)
-#define LEDSEQ_STOP      -1
-#define LEDSEQ_LOOP      -2
+#define LEDSEQ_LIVE   0
+#define LEDSEQ_STOP   -1
+#define LEDSEQ_LOOP   -2
 
 typedef struct {
   bool value;
@@ -139,4 +140,4 @@ extern ledseqContext_t seq_charging;
 extern ledseqContext_t seq_testPassed;
 extern ledseqContext_t seq_testFailed;
 
-#endif
+#endif //__LEDSEQ_H__

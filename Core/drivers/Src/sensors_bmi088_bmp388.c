@@ -453,7 +453,7 @@ static void processGyroBias(int16_t gx, int16_t gy, int16_t gz) {
       gyroBias.y = gyroBiasObj.bias.y;
       gyroBias.z = gyroBiasObj.bias.z;
       ledseqRun(&seq_calibrated);
-    }   
+    }
   }
 }
 
@@ -499,16 +499,15 @@ static void sensorsAddBiasValue(int16_t x, int16_t y, int16_t z) {
 
 bool sensorsBmi088Bmp388ManufacturingTest(void) {
   // TODO: check selftest, it will cause the zero-accel data
-  return 1;
   bool testStatus = true;
-  int8_t rslt = 0;
-  rslt = bmi08a_perform_selftest(&bmi08xDev);
-  if (rslt != BMI08X_W_SELF_TEST_FAIL) {
-    DEBUG_PRINT("BMI088 Accel self-test [OK].\n");
-  } else {
-    DEBUG_PRINT("BMI088 Accel self-test [FAILED].\n");
-    testStatus = false;
-  }
+  // int8_t rslt = 0;
+  // rslt = bmi08a_perform_selftest(&bmi08xDev);
+  // if (rslt != BMI08X_W_SELF_TEST_FAIL) {
+  //   DEBUG_PRINT("BMI088 Accel self-test [OK].\n");
+  // } else {
+  //   DEBUG_PRINT("BMI088 Accel self-test [FAILED].\n");
+  //   testStatus = false;
+  // }
   /*! Gyro test is conflict with interrupt, following code will cause system to reboot. */
   // rslt = bmi08g_perform_selftest(&bmi08xDev);
   // if (rslt != BMI08X_W_SELF_TEST_FAIL) {
