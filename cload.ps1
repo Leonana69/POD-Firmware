@@ -1,0 +1,1 @@
+python3 ./cfloader.py -w radio://0/80/2M/E7E7E7E7E7 flash bin/POD-Firmware.bin stm32-fw
