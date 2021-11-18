@@ -13,9 +13,9 @@ PROG				?= $(BUILD_DIR)/$(TARGET)
 ######################################
 # guojun's C source
 ######################################
-VPATH += Core/Src
-C_SOURCES += dma.c freertos.c gpio.c i2c.c main.c spi.c stm32f4xx_hal_msp.c stm32f4xx_hal_timebase_tim.c \
-	stm32f4xx_it.c system_stm32f4xx.c tim.c usart.c
+# VPATH += Core/Src
+# C_SOURCES += dma.c freertos.c gpio.c i2c.c main.c spi.c stm32f4xx_hal_msp.c stm32f4xx_hal_timebase_tim.c \
+# 	stm32f4xx_it.c system_stm32f4xx.c tim.c usart.c
 
 # utils
 VPATH += Core/utils/Src
