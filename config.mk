@@ -13,6 +13,10 @@ PROG				?= $(BUILD_DIR)/$(TARGET)
 ######################################
 # guojun's C source
 ######################################
+VPATH += Core/Src
+C_SOURCES += dma.c freertos.c gpio.c i2c.c main.c spi.c stm32f4xx_hal_msp.c stm32f4xx_hal_timebase_tim.c \
+	stm32f4xx_it.c system_stm32f4xx.c tim.c usart.c
+
 # utils
 VPATH += Core/utils/Src
 C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c filter.c pid.c kalman_filter.c \
@@ -49,12 +53,14 @@ C_SOURCES += arm_common_tables.c
 # guojun's C includes
 ######################################
 C_INCLUDES += \
+-ICore/Inc \
 -ICore/drivers/Inc \
 -ICore/utils/Inc \
 -ICore/modules/Inc \
 -ICore/drivers/Bosch/Inc \
 -ICore/drivers/Vl53l1/Inc \
--ICore/drivers/Vl53l1_Platform/Inc
+-ICore/drivers/Vl53l1_Platform/Inc \
+-IDrivers/CMSIS/DSP/Include
 
 ######################################
 # guojun's CFLAGS
