@@ -4,6 +4,7 @@
 #include "eprintf.h"
 #include "console.h"
 #include "_usart.h"
+#include "config.h"
 
 #ifdef DEBUG_MODULE
 #define DEBUG_FMT(fmt) DEBUG_MODULE ": " fmt
