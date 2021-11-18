@@ -57,6 +57,7 @@ BUILD_DIR = bin
 C_SOURCES =  \
 Core/Src/main.c \
 Core/Src/stm32f4xx_it.c \
+Core/Src/system_stm32f4xx.c \
 Core/Src/gpio.c \
 Core/Src/stm32f4xx_hal_msp.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c \
