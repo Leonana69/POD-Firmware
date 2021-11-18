@@ -94,6 +94,7 @@
 
 // SPI
 #define PMW3901SpiHandle hspi1
+#define sensorSpiHandle hspi2
 
 // ****** DMA ******
 #define nrfUartTxDmaHandle hdma_usart6_tx
@@ -118,6 +119,8 @@
 
 #define PMW3901_CS_Pin GPIO_PIN_4
 #define PMW3901_CS_GPIO_Port GPIOB
+#define SENSOR_CS_Pin GPIO_PIN_13
+#define SENSOR_CS_GPIO_Port GPIOC
 
 /*
  * FreeRTOS

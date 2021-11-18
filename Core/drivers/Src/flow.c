@@ -21,8 +21,6 @@ static SPIDrv *SPIx;
 static void flowTask();
 STATIC_MEM_TASK_ALLOC(flowTask, FLOW_TASK_STACKSIZE);
 
-#define PMW3901_EN_CS() HAL_GPIO_WritePin(PMW3901_CS_GPIO_Port, PMW3901_CS_Pin, GPIO_PIN_RESET)
-#define PMW3901_DIS_CS() HAL_GPIO_WritePin(PMW3901_CS_GPIO_Port, PMW3901_CS_Pin, GPIO_PIN_SET)
 static bool pmw3901Init();
 static void pmw3901ReadMotion(motionBurst_t *motion);
 
