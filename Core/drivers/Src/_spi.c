@@ -12,8 +12,8 @@ void _SPI_Init() {
 	pmw3901SPI.spiRxDmaSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("PMW3901RX", &pmw3901SPI.spiRxDmaSemaphoreBuffer, sizeof(pmw3901SPI.spiRxDmaSemaphoreBuffer)));
 	pmw3901SPI.spiTxDmaSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("PMW3901TX", &pmw3901SPI.spiTxDmaSemaphoreBuffer, sizeof(pmw3901SPI.spiTxDmaSemaphoreBuffer)));
 
-	sensorsSPI.hspi = &sensorSpiHandle;
-	sensorsSPI.spiRxDmaSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("SENSORRX", &sensorsSPI.spiRxDmaSemaphoreBuffer, sizeof(sensorsSPI.spiRxDmaSemaphoreBuffer)));
+	sensorSPI.hspi = &sensorSpiHandle;
+	sensorSPI.spiRxDmaSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("SENSORRX", &sensorSPI.spiRxDmaSemaphoreBuffer, sizeof(sensorSPI.spiRxDmaSemaphoreBuffer)));
 }
 
 void pmw3901SpiRxDmaIsr() {
@@ -46,7 +46,7 @@ int8_t spiSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *int
 	HAL_StatusTypeDef status;
 	SENSOR_EN_CS();
 	HAL_SPI_Transmit(sensorSPI.hspi, &regAddr, 1, 1000);
-	HAL_SPI_Receive_DMA(sensorSPI.hspi, regData, len);
+	status = HAL_SPI_Receive_DMA(sensorSPI.hspi, regData, len);
 	osSemaphoreAcquire(sensorSPI.spiRxDmaSemaphore, osWaitForever);
 	SENSOR_DIS_CS();
 	return -status;
@@ -55,7 +55,6 @@ int8_t spiSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *int
 int8_t spiSensorsWrite(uint8_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr) {
 	static uint8_t sBuffer[33];
 	HAL_StatusTypeDef status;
-	uint16_t DevAddress = *(uint8_t*)intfPtr << 1;
 	memset(sBuffer, 0, 33);
 	sBuffer[0] = regAddr;
 	memcpy(sBuffer + 1, regData, len);
