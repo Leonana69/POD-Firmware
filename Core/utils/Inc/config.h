@@ -47,7 +47,7 @@
 
 #define WATCHDOG_RESET_PERIOD_MS 80
 
-#define DEBUG_PRINT_ON_UART
+// #define DEBUG_PRINT_ON_UART
 
 #define MIN_THRUST  1000
 #define MAX_THRUST  60000
@@ -63,12 +63,12 @@
  * SENSORS_INTERFACE: SENSOR_INTF_I2C
  *                    SENSOR_INTF_SPI
  */
-#define SENSORS_TYPE SENSORS_BMI270_BMP384
+#define SENSORS_TYPE SENSORS_BMI088_BMP388
 #define SENSORS_INTERFACE SENSOR_INTF_I2C
 
 /*! @brief Motor config
  * MOTOR_TYPE:  MOTOR_PWM
- *                MOTOR_DSHOT
+ *              MOTOR_DSHOT
  */
 #define MOTORS_TYPE MOTORS_PWM
 
@@ -92,14 +92,14 @@
 // ****** TIM ******
 #define usecTim         htim7
 #define MOTORS_TIM_BITS 8
-#define MOTOR1TIM       htim2
-#define MOTOR1CHANNEL   TIM_CHANNEL_2
-#define MOTOR2TIM       htim2
-#define MOTOR2CHANNEL   TIM_CHANNEL_4
-#define MOTOR3TIM       htim2
-#define MOTOR3CHANNEL   TIM_CHANNEL_1
-#define MOTOR4TIM       htim4
-#define MOTOR4CHANNEL   TIM_CHANNEL_4
+#define MOTOR1_TIM       htim2
+#define MOTOR1_CHANNEL   TIM_CHANNEL_2
+#define MOTOR2_TIM       htim2
+#define MOTOR2_CHANNEL   TIM_CHANNEL_4
+#define MOTOR3_TIM       htim2
+#define MOTOR3_CHANNEL   TIM_CHANNEL_1
+#define MOTOR4_TIM       htim4
+#define MOTOR4_CHANNEL   TIM_CHANNEL_4
 
 // ****** I2C ******
 #define eepromI2CHandle hi2c1

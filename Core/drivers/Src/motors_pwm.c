@@ -18,14 +18,14 @@ static void motorsBeep(uint8_t id, uint16_t cycle, uint16_t ratio, bool enable);
 void motorsPwmInit() {
 	if (isInit)
 		return;
-	MotorTim[0].tim = &MOTOR1TIM;
-	MotorTim[0].channel = MOTOR1CHANNEL;
-	MotorTim[1].tim = &MOTOR2TIM;
-	MotorTim[1].channel = MOTOR2CHANNEL;
-	MotorTim[2].tim = &MOTOR3TIM;
-	MotorTim[2].channel = MOTOR3CHANNEL;
-	MotorTim[3].tim = &MOTOR4TIM;
-	MotorTim[3].channel = MOTOR4CHANNEL;
+	MotorTim[0].tim = &MOTOR1_TIM;
+	MotorTim[0].channel = MOTOR1_CHANNEL;
+	MotorTim[1].tim = &MOTOR2_TIM;
+	MotorTim[1].channel = MOTOR2_CHANNEL;
+	MotorTim[2].tim = &MOTOR3_TIM;
+	MotorTim[2].channel = MOTOR3_CHANNEL;
+	MotorTim[3].tim = &MOTOR4_TIM;
+	MotorTim[3].channel = MOTOR4_CHANNEL;
 	for (int i = 0; i < NBR_OF_MOTORS; i++)
 		HAL_TIM_PWM_Start(MotorTim[i].tim, MotorTim[i].channel);
 	isInit = true;
