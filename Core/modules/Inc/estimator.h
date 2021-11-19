@@ -70,7 +70,6 @@ void estimatorInit();
 bool estimatorTest();
 void estimatorUpdate(state_t *state, const uint32_t tick);
 
-EstimatorType estimatorGetType();
 const char* estimatorGetName();
 
 // Support to incorporate additional sensors into the state estimate via the following functions

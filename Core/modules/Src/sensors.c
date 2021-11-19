@@ -129,10 +129,6 @@ void sensorsSetAccelMode(AccelModes mode) {
   sensorsFunctions[currentSensors].setAccelMode(mode);
 }
 
-SensorsType sensorsGetType() {
-  return currentSensors;
-}
-
 const char* sensorsGetName() {
   return sensorsFunctions[currentSensors].name;
 }

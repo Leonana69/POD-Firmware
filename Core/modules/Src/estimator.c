@@ -79,10 +79,6 @@ void estimatorUpdate(state_t *state, const uint32_t tick) {
   estimatorFunctions[currentEstimator].update(state, tick);
 }
 
-EstimatorType estimatorGetType(void) {
-  return currentEstimator;
-}
-
 const char* estimatorGetName() {
   return estimatorFunctions[currentEstimator].name;
 }

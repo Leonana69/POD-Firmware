@@ -27,10 +27,6 @@ void controllerInit() {
   DEBUG_PRINT("Using %s (%d) controller.\n", controllerGetName(), currentController);
 }
 
-ControllerType controllerGetType() {
-  return currentController;
-}
-
 bool controllerTest() {
   return controllerFunctions[currentController].test();
 }

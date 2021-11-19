@@ -44,7 +44,7 @@ bool selfTestPassed() {
 
 void selfTestRun(sensorData_t *sensors) {
 	static int loopCount = 0;
-	static int curMotor = 0;
+	static uint8_t curMotor = 0;
 	switch (currentState) {
 		case TEST_ACCEL_CONFIG:
 			// sensorsSetAccelMode(ACCEL_MODE_PROPTEST);

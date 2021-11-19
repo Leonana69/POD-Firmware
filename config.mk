@@ -25,7 +25,7 @@ C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c 
 # drivers
 VPATH += Core/drivers/Src
 C_SOURCES += _usart.c _tim.c _i2c.c led.c eeprom.c syslink.c radiolink.c pm.c sensors_bmi088_bmp388.c \
-	motors.c tof.c _spi.c flow.c sensors_bmi270_bmp384.c
+	tof.c _spi.c flow.c sensors_bmi270_bmp384.c motors_pwm.c motors_dshot.c
 
 VPATH += Core/drivers/Bosch/Src
 C_SOURCES += bmi08a.c bmi08g.c bmp3.c bmi2.c bmi270.c
@@ -39,7 +39,8 @@ C_SOURCES += vl53l1_api_calibration.c vl53l1_api_core.c vl53l1_api_debug.c vl53l
 VPATH += Core/modules/Src
 C_SOURCES += worker.c system.c mem.c crtp.c console.c comm.c ledseq.c crtp_link.c log.c crtp_platform.c param.c \
 	sysload.c commander.c crtp_commander.c crtp_commander_rpyt.c crtp_commander_generic.c stabilizer.c controller.c controller_pid_attitude.c \
-	controller_pid.c controller_pid_position.c estimator.c supervisor.c estimator_kalman.c sensors.c power_distribution.c self_test.c
+	controller_pid.c controller_pid_position.c estimator.c supervisor.c estimator_kalman.c sensors.c power_distribution.c self_test.c \
+	motors.c
 
 # CMSIS DSP
 VPATH += Drivers/CMSIS/DSP/Source/FastMathFunctions

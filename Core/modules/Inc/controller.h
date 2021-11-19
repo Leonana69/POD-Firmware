@@ -41,7 +41,6 @@ void controllerUpdate(control_t *control, setpoint_t *setpoint,
                                          const sensorData_t *sensors,
                                          const state_t *state,
                                          const uint32_t tick);
-ControllerType controllerGetType();
 const char* controllerGetName();
 
 #endif //__CONTROLLER_H__

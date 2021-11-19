@@ -48,26 +48,19 @@ typedef enum {
 void sensorsInit();
 bool sensorsTest();
 bool sensorsAreCalibrated();
-
-// For legacy control
 void sensorsAcquire(sensorData_t *sensors);
 
-/**
- * This function should block and unlock at 1KhZ
- */
+/*! This function should block and unlock at 1KhZ */
 void sensorsWaitDataReady();
 
-// Allows individual sensor measurement
+/*! Allows individual sensor measurement */
 bool sensorsReadGyro(Axis3f *gyro);
 bool sensorsReadAccel(Axis3f *accel);
 bool sensorsReadBaro(baro_t *baro);
 
-SensorsType sensorsGetType();
 const char* sensorsGetName();
 
-/**
- * Set acc mode, one of accModes enum
- */
+/*! Set acc mode, one of accModes enum */
 void sensorsSetAccelMode(AccelModes mode);
 void sensorsAvailableCallback();
 
