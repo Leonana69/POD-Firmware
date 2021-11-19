@@ -11,6 +11,8 @@ struct {
 	uint32_t channel;
 } static MotorTim[4];
 
+#define MOTORS_TIM_BITS 8
+
 static bool isInit = false;
 
 static void motorsBeep(uint8_t id, uint16_t cycle, uint16_t ratio, bool enable);

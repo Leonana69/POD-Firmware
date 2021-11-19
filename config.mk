@@ -1,6 +1,7 @@
 ######################################
 # guojun's define
 ######################################
+
 DEBUG = 0
 BUILD_DIR = bin
 OPENOCD				?= openocd

@@ -4,8 +4,6 @@
 #include "motors_dshot.h"
 #include "debug.h"
 
-static MotorsType currentMotors = MOTORS_TYPE;
-
 typedef struct {
 	void (*init)();
 	bool (*test)();
@@ -13,24 +11,23 @@ typedef struct {
 	const char* name;
 } Motors;
 
-static Motors motorsFunctions[] = {
-  { .init = motorsPwmInit, .test = motorsPwmTest, .setRatio = motorsPwmSetRatio, .name = "PWM" },
-  { .init = motorsDshotInit, .test = motorsDshotTest, .setRatio = motorsDshotSetRatio, .name = "DSHOT" },
+static Motors motorsFunctions = {
+#if (MOTORS_TYPE == MOTORS_PWM)
+  .init = motorsPwmInit, .test = motorsPwmTest, .setRatio = motorsPwmSetRatio, .name = "PWM",
+#elif (MOTORS_TYPE == MOTORS_DSHOT)
+  .init = motorsDshotInit, .test = motorsDshotTest, .setRatio = motorsDshotSetRatio, .name = "DSHOT",
+#endif
 };
 
 void motorsInit() {
-	motorsFunctions[currentMotors].init();
-	DEBUG_PRINT("Using %s (%d) motors.\n", motorsGetName(), currentMotors);
+	motorsFunctions.init();
+	DEBUG_PRINT("Using %s (%d) motors.\n", motorsFunctions.name, MOTORS_TYPE);
 }
 
 bool motorsTest() {
-	return motorsFunctions[currentMotors].test();
+	return motorsFunctions.test();
 }
 
 void motorsSetRatio(uint8_t id, uint16_t thrust) {
-	motorsFunctions[currentMotors].setRatio(id, thrust);
-}
-
-const char* motorsGetName() {
-	return motorsFunctions[currentMotors].name;
+	motorsFunctions.setRatio(id, thrust);
 }

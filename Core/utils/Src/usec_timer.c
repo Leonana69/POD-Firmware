@@ -44,8 +44,6 @@ void usecTimerInit() {
 
   usecTimerHighCount = 0;
 
-  // TODO: debug mode
-  // DBGMCU_APB1PeriphConfig(DBGMCU_TIM7_STOP, ENABLE);
   isInit = true;
 }
 
@@ -54,7 +52,7 @@ uint64_t usecTimerStamp() {
   uint32_t high0;
   __atomic_load(&usecTimerHighCount, &high0, __ATOMIC_SEQ_CST);
   
-  uint32_t low = __HAL_TIM_GET_COUNTER(&usecTim);
+  uint32_t low = __HAL_TIM_GET_COUNTER(&USEC_TIM);
   uint32_t high;
   __atomic_load(&usecTimerHighCount, &high, __ATOMIC_SEQ_CST);
 
@@ -63,7 +61,7 @@ uint64_t usecTimerStamp() {
     return (((uint64_t)high) << 16) + low;
   }
   // There was an increment, but we don't expect another one soon
-  return (((uint64_t)high) << 16) + __HAL_TIM_GET_COUNTER(&usecTim);
+  return (((uint64_t)high) << 16) + __HAL_TIM_GET_COUNTER(&USEC_TIM);
 }
 
 void usecInc() {

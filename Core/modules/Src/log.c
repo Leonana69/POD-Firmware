@@ -815,7 +815,7 @@ void logRunBlock(void *arg) {
     // No need to block here, since logging is not guaranteed
     if (!crtpSendPacket(&pk)) {
       if (blk->droppedPackets++ % 100 == 0) {
-        DEBUG_PRINT("WARNING: LOG packets drop detected (%lu packets lost)\n",
+        DEBUG_PRINT("WARNING: LOG packets drop detected (%ld packets lost)\n",
                     blk->droppedPackets);
       }
     }

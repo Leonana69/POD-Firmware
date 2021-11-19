@@ -58,7 +58,7 @@ int nrfUartPutchar(int ch) {
 
 void nrfUartSendDataDmaBlocking(uint32_t size, uint8_t *data) {      
 	osMutexAcquire(nrfUartBusMutex, osWaitForever);
-	while (HAL_DMA_GetState(&nrfUartTxDmaHandle) != HAL_DMA_STATE_READY);
+	// while (HAL_DMA_GetState(&nrfUartTxDmaHandle) != HAL_DMA_STATE_READY);
 	memcpy(nrfUartTxDmaBuffer, data, size);
 	HAL_UART_Transmit_DMA(&nrfUart, nrfUartTxDmaBuffer, size);
 	osSemaphoreAcquire(nrfUartWaitSemaphore, osWaitForever);

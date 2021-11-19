@@ -29,16 +29,14 @@
 #include "stabilizer_types.h"
 #include <stdbool.h>
 
+/*! do not use enum here */
+#define SENSORS_BMI088_BMP388 0
+#define SENSORS_BMI270_BMP384 1
+
 typedef enum {
   ACCEL_MODE_PROPTEST,
   ACCEL_MODE_FLIGHT
 } AccelModes;
-
-typedef enum {
-  SENSORS_BMI088_BMP388,
-  SENSORS_BMI270_BMP384,
-  SENSORS_COUNT,
-} SensorsType;
 
 typedef enum {
 	SENSOR_INTF_I2C,
@@ -57,8 +55,6 @@ void sensorsWaitDataReady();
 bool sensorsReadGyro(Axis3f *gyro);
 bool sensorsReadAccel(Axis3f *accel);
 bool sensorsReadBaro(baro_t *baro);
-
-const char* sensorsGetName();
 
 /*! Set acc mode, one of accModes enum */
 void sensorsSetAccelMode(AccelModes mode);

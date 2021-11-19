@@ -31,19 +31,8 @@
 #include "debug.h"
 #include "config.h"
 
-// https://gcc.gnu.org/onlinedocs/cpp/Stringizing.html
-#define xstr(s) str(s)
-#define str(s) #s
-
-#if (SENSORS_TYPE == SENSORS_BMI088_BMP388)
-  #include "sensors_bmi088_bmp388.h"
-#endif
-
-#if (SENSORS_TYPE == SENSORS_BMI270_BMP384)
-  #include "sensors_bmi270_bmp384.h"
-#endif
-
-static SensorsType currentSensors = SENSORS_TYPE;
+#include "sensors_bmi088_bmp388.h"
+#include "sensors_bmi270_bmp384.h"
 
 typedef struct {
   void (*init)(SensorsInterfaceType);
@@ -59,81 +48,72 @@ typedef struct {
 	const char *name;
 } Sensors;
 
-static const Sensors sensorsFunctions[SENSORS_COUNT] = {
+static const Sensors sensorsFunctions = {
 #if (SENSORS_TYPE == SENSORS_BMI088_BMP388)
-  {
-    .init = sensorsBmi088Bmp388Init,
-    .test = sensorsBmi088Bmp388Test,
-    .areCalibrated = sensorsBmi088Bmp388AreCalibrated,
-    .acquire = sensorsBmi088Bmp388Acquire,
-    .waitDataReady = sensorsBmi088Bmp388WaitDataReady,
-    .readGyro = sensorsBmi088Bmp388ReadGyro,
-    .readAccel = sensorsBmi088Bmp388ReadAccel,
-    .readBaro = sensorsBmi088Bmp388ReadBaro,
-    .setAccelMode = sensorsBmi088Bmp388SetAccelMode,
-    .dataAvailableCallback = sensorsBmi088Bmp388DataAvailableCallback,
-		.name = "BMI088BMP388",
-  },
-#endif
-#if (SENSORS_TYPE == SENSORS_BMI270_BMP384)
-  {
-    .init = sensorsBmi270Bmp384Init,
-    .test = sensorsBmi270Bmp384Test,
-    .areCalibrated = sensorsBmi270Bmp384AreCalibrated,
-    .acquire = sensorsBmi270Bmp384Acquire,
-    .waitDataReady = sensorsBmi270Bmp384WaitDataReady,
-    .readGyro = sensorsBmi270Bmp384ReadGyro,
-    .readAccel = sensorsBmi270Bmp384ReadAccel,
-    .readBaro = sensorsBmi270Bmp384ReadBaro,
-    .setAccelMode = sensorsBmi270Bmp384SetAccelMode,
-    .dataAvailableCallback = sensorsBmi270Bmp384DataAvailableCallback,
-		.name = "BMI270BMP384",
-  },
+  .init = sensorsBmi088Bmp388Init,
+  .test = sensorsBmi088Bmp388Test,
+  .areCalibrated = sensorsBmi088Bmp388AreCalibrated,
+  .acquire = sensorsBmi088Bmp388Acquire,
+  .waitDataReady = sensorsBmi088Bmp388WaitDataReady,
+  .readGyro = sensorsBmi088Bmp388ReadGyro,
+  .readAccel = sensorsBmi088Bmp388ReadAccel,
+  .readBaro = sensorsBmi088Bmp388ReadBaro,
+  .setAccelMode = sensorsBmi088Bmp388SetAccelMode,
+  .dataAvailableCallback = sensorsBmi088Bmp388DataAvailableCallback,
+  .name = "BMI088BMP388",
+#elif (SENSORS_TYPE == SENSORS_BMI270_BMP384)
+  .init = sensorsBmi270Bmp384Init,
+  .test = sensorsBmi270Bmp384Test,
+  .areCalibrated = sensorsBmi270Bmp384AreCalibrated,
+  .acquire = sensorsBmi270Bmp384Acquire,
+  .waitDataReady = sensorsBmi270Bmp384WaitDataReady,
+  .readGyro = sensorsBmi270Bmp384ReadGyro,
+  .readAccel = sensorsBmi270Bmp384ReadAccel,
+  .readBaro = sensorsBmi270Bmp384ReadBaro,
+  .setAccelMode = sensorsBmi270Bmp384SetAccelMode,
+  .dataAvailableCallback = sensorsBmi270Bmp384DataAvailableCallback,
+  .name = "BMI270BMP384",
 #endif
 };
 
 void sensorsInit() {
-  DEBUG_PRINT("Using %s (%d) sensors.\n", sensorsGetName(), currentSensors);
-  sensorsFunctions[currentSensors].init(SENSORS_INTERFACE);
+  DEBUG_PRINT("Using %s (%d) sensors.\n", sensorsFunctions.name, SENSORS_TYPE);
+  sensorsFunctions.init(SENSORS_INTERFACE);
 }
 
 bool sensorsTest() {
-  return sensorsFunctions[currentSensors].test();
+  return sensorsFunctions.test();
 }
 
 bool sensorsAreCalibrated() {
-  return sensorsFunctions[currentSensors].areCalibrated();
+  return sensorsFunctions.areCalibrated();
 }
 
 void sensorsAcquire(sensorData_t *sensors) {
-  sensorsFunctions[currentSensors].acquire(sensors);
+  sensorsFunctions.acquire(sensors);
 }
 
 void sensorsWaitDataReady() {
-  sensorsFunctions[currentSensors].waitDataReady();
+  sensorsFunctions.waitDataReady();
 }
 
 bool sensorsReadGyro(Axis3f *gyro) {
-  return sensorsFunctions[currentSensors].readGyro(gyro);
+  return sensorsFunctions.readGyro(gyro);
 }
 
 bool sensorsReadAccel(Axis3f *acc) {
-  return sensorsFunctions[currentSensors].readAccel(acc);
+  return sensorsFunctions.readAccel(acc);
 }
 
 bool sensorsReadBaro(baro_t *baro) {
-  return sensorsFunctions[currentSensors].readBaro(baro);
+  return sensorsFunctions.readBaro(baro);
 }
 
 void sensorsSetAccelMode(AccelModes mode) {
-  sensorsFunctions[currentSensors].setAccelMode(mode);
-}
-
-const char* sensorsGetName() {
-  return sensorsFunctions[currentSensors].name;
+  sensorsFunctions.setAccelMode(mode);
 }
 
 void sensorsAvailableCallback() {
-  sensorsFunctions[currentSensors].dataAvailableCallback();
+  sensorsFunctions.dataAvailableCallback();
 }
 

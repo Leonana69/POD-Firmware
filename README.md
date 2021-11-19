@@ -6,7 +6,7 @@ This project is based on the crazyflie-firmware. It uses STM32CubeMX to generate
 
 ## STM32CubeMX Setup
 
-1. Active TIM7 as usecTim
+1. Active TIM7 as USEC_TIM
     - Prescaler: 84 (ABP1 timer clock / 1000000)
     - Counter Mode: up
     - Counter Period: 0xFFFF (65535)

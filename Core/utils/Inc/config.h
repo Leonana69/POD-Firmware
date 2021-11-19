@@ -47,30 +47,7 @@
 
 #define WATCHDOG_RESET_PERIOD_MS 80
 
-// #define DEBUG_PRINT_ON_UART
-
-#define MIN_THRUST  1000
-#define MAX_THRUST  60000
-#define MOTORS_IDLE_THRUST 0
-#define POD_MASS (0.036f)
-
-#define CONTROLLER_TYPE CONTROLLER_PID
-#define ESTIMATOR_TYPE  ESTIMATOR_KALMAN
-
-/*! @brief Sensors config
- * SENSORS_TYPE:  SENSORS_BMI088_BMP388
- *                SENSORS_BMI270_BMP384
- * SENSORS_INTERFACE: SENSOR_INTF_I2C
- *                    SENSOR_INTF_SPI
- */
-#define SENSORS_TYPE SENSORS_BMI088_BMP388
-#define SENSORS_INTERFACE SENSOR_INTF_I2C
-
-/*! @brief Motor config
- * MOTOR_TYPE:  MOTOR_PWM
- *              MOTOR_DSHOT
- */
-#define MOTORS_TYPE MOTORS_PWM
+#define POD
 
 //The radio channel. From 0 to 125
 #define RADIO_CHANNEL 80
@@ -80,61 +57,150 @@
 #define RADIO_RATE_1M 1
 #define RADIO_RATE_2M 2
 
-/*
- * Peripheral
- */
+#ifdef POD
+  #define DEBUG_PRINT_ON_UART
+  #define MIN_THRUST  1000
+  #define MAX_THRUST  60000
+  #define MOTORS_IDLE_THRUST 0
+  #define POD_MASS (0.036f)
 
-// ****** UART ******
-// #define uartMain        huart6
-#define debugUart       huart3
-#define nrfUart         huart6
+  #define CONTROLLER_TYPE CONTROLLER_PID
+  #define ESTIMATOR_TYPE  ESTIMATOR_KALMAN
+  /*! @brief Sensors config
+   * SENSORS_TYPE:  SENSORS_BMI088_BMP388
+   *                SENSORS_BMI270_BMP384
+   * SENSORS_INTERFACE: SENSOR_INTF_I2C
+   *                    SENSOR_INTF_SPI
+   */
+  #define SENSORS_TYPE SENSORS_BMI270_BMP384
+  #define SENSORS_INTERFACE SENSOR_INTF_I2C
+  /*! @brief Motor config
+   * MOTOR_TYPE:  MOTORS_PWM
+   *              MOTORS_DSHOT
+   */
+  #define MOTORS_TYPE MOTORS_DSHOT
+  /*! TIM */
+  #define USEC_TIM         htim7
 
-// ****** TIM ******
-#define usecTim         htim7
-#define MOTORS_TIM_BITS 8
-#define MOTOR1_TIM       htim2
-#define MOTOR1_CHANNEL   TIM_CHANNEL_2
-#define MOTOR2_TIM       htim2
-#define MOTOR2_CHANNEL   TIM_CHANNEL_4
-#define MOTOR3_TIM       htim2
-#define MOTOR3_CHANNEL   TIM_CHANNEL_1
-#define MOTOR4_TIM       htim4
-#define MOTOR4_CHANNEL   TIM_CHANNEL_4
+  #define MOTOR1_TIM       htim2
+  #define MOTOR1_CHANNEL   TIM_CHANNEL_2
+  #define MOTOR2_TIM       htim2
+  #define MOTOR2_CHANNEL   TIM_CHANNEL_3
+  #define MOTOR3_TIM       htim2
+  #define MOTOR3_CHANNEL   TIM_CHANNEL_1
+  #define MOTOR4_TIM       htim4
+  #define MOTOR4_CHANNEL   TIM_CHANNEL_3
 
-// ****** I2C ******
-#define eepromI2CHandle hi2c1
-#define sensorsI2CHandle hi2c3
-#define tofI2CHandle hi2c1
+  #define MOTOR1_TIM_DMA_CC TIM_DMA_CC2
+  #define MOTOR2_TIM_DMA_CC TIM_DMA_CC3
+  #define MOTOR3_TIM_DMA_CC TIM_DMA_CC1
+  #define MOTOR4_TIM_DMA_CC TIM_DMA_CC3
 
-// SPI
-#define PMW3901SpiHandle hspi1
-#define sensorSpiHandle hspi2
+  /*! GPIO */
+  #define NRF_FC_GPIO_Port  GPIOA
+  #define NRF_FC_Pin        GPIO_PIN_4
+
+  #define GREEN_L_Pin       GPIO_PIN_0
+  #define GREEN_L_GPIO_Port GPIOC
+  #define RED_L_Pin         GPIO_PIN_1
+  #define RED_L_GPIO_Port   GPIOC
+  #define GREEN_R_Pin       GPIO_PIN_2
+  #define GREEN_R_GPIO_Port GPIOC
+  #define RED_R_Pin         GPIO_PIN_3
+  #define RED_R_GPIO_Port   GPIOC
+  #define BLUE_L_Pin        GPIO_PIN_2
+  #define BLUE_L_GPIO_Port  GPIOD
+
+  #define PMW3901_CS_Pin GPIO_PIN_4
+  #define PMW3901_CS_GPIO_Port GPIOB
+
+  #define SENSOR_CS_Pin GPIO_PIN_13
+  #define SENSOR_CS_GPIO_Port GPIOC
+
+  /*! I2C */
+  #define eepromI2CHandle hi2c1
+  #define sensorsI2CHandle hi2c3
+  #define tofI2CHandle hi2c1
+
+  /*! SPI */
+  #define PMW3901SpiHandle hspi1
+  #define sensorSpiHandle hspi2
+
+  /*! UART */
+  #define debugUart       huart3
+  #define nrfUart         huart6
+#else
+  #define MIN_THRUST  1000
+  #define MAX_THRUST  60000
+  #define MOTORS_IDLE_THRUST 0
+  #define POD_MASS (0.036f)
+
+  #define CONTROLLER_TYPE CONTROLLER_PID
+  #define ESTIMATOR_TYPE  ESTIMATOR_KALMAN
+  /*! @brief Sensors config
+   * SENSORS_TYPE:  SENSORS_BMI088_BMP388
+   *                SENSORS_BMI270_BMP384
+   * SENSORS_INTERFACE: SENSOR_INTF_I2C
+   *                    SENSOR_INTF_SPI
+   */
+  #define SENSORS_TYPE SENSORS_BMI088_BMP388
+  #define SENSORS_INTERFACE SENSOR_INTF_I2C
+  /*! @brief Motor config
+   * MOTOR_TYPE:  MOTORS_PWM
+   *              MOTORS_DSHOT
+   */
+  #define MOTORS_TYPE MOTORS_PWM
+  /*! TIM */
+  #define USEC_TIM         htim7
+
+  #define MOTOR1_TIM       htim2
+  #define MOTOR1_CHANNEL   TIM_CHANNEL_2
+  #define MOTOR2_TIM       htim2
+  #define MOTOR2_CHANNEL   TIM_CHANNEL_4
+  #define MOTOR3_TIM       htim2
+  #define MOTOR3_CHANNEL   TIM_CHANNEL_1
+  #define MOTOR4_TIM       htim4
+  #define MOTOR4_CHANNEL   TIM_CHANNEL_4
+
+  /*! GPIO */
+  #define NRF_FC_GPIO_Port  GPIOA
+  #define NRF_FC_Pin        GPIO_PIN_4
+
+  #define GREEN_L_Pin       GPIO_PIN_0
+  #define GREEN_L_GPIO_Port GPIOC
+  #define RED_L_Pin         GPIO_PIN_1
+  #define RED_L_GPIO_Port   GPIOC
+  #define GREEN_R_Pin       GPIO_PIN_2
+  #define GREEN_R_GPIO_Port GPIOC
+  #define RED_R_Pin         GPIO_PIN_3
+  #define RED_R_GPIO_Port   GPIOC
+  #define BLUE_L_Pin        GPIO_PIN_2
+  #define BLUE_L_GPIO_Port  GPIOD
+
+  #define PMW3901_CS_Pin GPIO_PIN_4
+  #define PMW3901_CS_GPIO_Port GPIOB
+
+  #define SENSOR_CS_Pin GPIO_PIN_13
+  #define SENSOR_CS_GPIO_Port GPIOC
+
+  /*! I2C */
+  #define eepromI2CHandle hi2c1
+  #define sensorsI2CHandle hi2c3
+  #define tofI2CHandle hi2c1
+
+  /*! SPI */
+  #define PMW3901SpiHandle hspi1
+  #define sensorSpiHandle hspi2
+
+  /*! UART */
+  #define debugUart       huart3
+  #define nrfUart         huart6
+#endif
+
+
 
 // ****** DMA ******
 #define nrfUartTxDmaHandle hdma_usart6_tx
-/*
- * GPIO
- */
-#define NRF_FC_GPIO_Port  GPIOA
-#define NRF_FC_Pin        GPIO_PIN_4
-#define NRF_TX_GPIO_Port  GPIOC
-#define NRF_TX_Pin        GPIO_PIN_7
-
-#define GREEN_L_Pin       GPIO_PIN_0
-#define GREEN_L_GPIO_Port GPIOC
-#define RED_L_Pin         GPIO_PIN_1
-#define RED_L_GPIO_Port   GPIOC
-#define GREEN_R_Pin       GPIO_PIN_2
-#define GREEN_R_GPIO_Port GPIOC
-#define RED_R_Pin         GPIO_PIN_3
-#define RED_R_GPIO_Port   GPIOC
-#define BLUE_L_Pin        GPIO_PIN_2
-#define BLUE_L_GPIO_Port  GPIOD
-
-#define PMW3901_CS_Pin GPIO_PIN_4
-#define PMW3901_CS_GPIO_Port GPIOB
-#define SENSOR_CS_Pin GPIO_PIN_13
-#define SENSOR_CS_GPIO_Port GPIOC
 
 /*
  * FreeRTOS
