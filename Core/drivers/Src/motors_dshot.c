@@ -10,33 +10,23 @@
 struct {
 	TIM_HandleTypeDef* tim;
 	uint32_t channel;
-	uint8_t TIM_DMA_ID;
+	uint8_t TIM_DMA_ID_CC;
 	uint32_t TIM_DMA_CC;
 } static MotorTim[4];
 
 static bool isInit = false;
 
-
-static void dshot_dma_tc_callback(DMA_HandleTypeDef *hdma)
-{
+static void dshot_dma_tc_callback(DMA_HandleTypeDef *hdma) {
 	TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
 
 	if (hdma == htim->hdma[TIM_DMA_ID_CC1])
-	{
 		__HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC1);
-	}
 	else if(hdma == htim->hdma[TIM_DMA_ID_CC2])
-	{
 		__HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC2);
-	}
 	else if(hdma == htim->hdma[TIM_DMA_ID_CC3])
-	{
 		__HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC3);
-	}
 	else if(hdma == htim->hdma[TIM_DMA_ID_CC4])
-	{
 		__HAL_TIM_DISABLE_DMA(htim, TIM_DMA_CC4);
-	}
 }
 
 #define DSHOT150_PRESCALER 27
@@ -63,10 +53,10 @@ void motorsDshotInit() {
 	MotorTim[3].TIM_DMA_CC = MOTOR4_TIM_DMA_CC;
 	
 	for (int i = 0; i < NBR_OF_MOTORS; i++) {
-		MotorTim[i].TIM_DMA_ID = MotorTim[i].channel / 4 + 1;
+		MotorTim[i].TIM_DMA_ID_CC = MotorTim[i].channel / 4 + 1;
 		__HAL_TIM_SET_PRESCALER(MotorTim[i].tim, DSHOT300_PRESCALER);
 		__HAL_TIM_SET_AUTORELOAD(MotorTim[i].tim, DSHOT_DMA_BUFFER_SIZE - 1);
-		MotorTim[i].tim->hdma[MotorTim[i].TIM_DMA_ID]->XferCpltCallback = dshot_dma_tc_callback;
+		MotorTim[i].tim->hdma[MotorTim[i].TIM_DMA_ID_CC]->XferCpltCallback = dshot_dma_tc_callback;
 		HAL_TIM_PWM_Start(MotorTim[i].tim, MotorTim[i].channel);
 	}
 	isInit = true;
@@ -76,7 +66,7 @@ bool motorsDshotTest() {
 	return isInit;
 }
 
-static uint32_t motor1_dmabuffer[DSHOT_DMA_BUFFER_SIZE];
+static uint32_t motorDmaBuffer[NBR_OF_MOTORS][DSHOT_DMA_BUFFER_SIZE];
 
 static uint16_t dshot_prepare_packet(uint16_t value) {
 	uint16_t packet;
@@ -117,26 +107,29 @@ static void dshot_prepare_dmabuffer(uint32_t* motor_dmabuffer, uint16_t value) {
 void motorsDshotSetRatio(uint8_t id, uint16_t thrust) {
 	if (!isInit)
 		return;
-	dshot_prepare_dmabuffer(motor1_dmabuffer, thrust);
 
-	switch (MotorTim[id].TIM_DMA_ID) {
+	uint32_t value = thrust * 2048 / 65536;
+	thrust = value & 0xFFFF;
+	dshot_prepare_dmabuffer(motorDmaBuffer[id], thrust);
+
+	switch (MotorTim[id].TIM_DMA_ID_CC) {
 		case 1:
-			HAL_DMA_Start_IT(MotorTim[id].tim->hdma[TIM_DMA_ID_CC1], (uint32_t)motor1_dmabuffer,
+			HAL_DMA_Start_IT(MotorTim[id].tim->hdma[TIM_DMA_ID_CC1], (uint32_t)motorDmaBuffer[id],
 											 (uint32_t)&MotorTim[id].tim->Instance->CCR1, DSHOT_DMA_BUFFER_SIZE);
 			__HAL_TIM_ENABLE_DMA(MotorTim[id].tim, TIM_DMA_CC1);
 			break;
 		case 2:
-			HAL_DMA_Start_IT(MotorTim[id].tim->hdma[TIM_DMA_ID_CC2], (uint32_t)motor1_dmabuffer,
+			HAL_DMA_Start_IT(MotorTim[id].tim->hdma[TIM_DMA_ID_CC2], (uint32_t)motorDmaBuffer[id],
 											 (uint32_t)&MotorTim[id].tim->Instance->CCR2, DSHOT_DMA_BUFFER_SIZE);
 			__HAL_TIM_ENABLE_DMA(MotorTim[id].tim, TIM_DMA_CC2);
 			break;
 		case 3:
-			HAL_DMA_Start_IT(MotorTim[id].tim->hdma[TIM_DMA_ID_CC3], (uint32_t)motor1_dmabuffer,
+			HAL_DMA_Start_IT(MotorTim[id].tim->hdma[TIM_DMA_ID_CC3], (uint32_t)motorDmaBuffer[id],
 											 (uint32_t)&MotorTim[id].tim->Instance->CCR3, DSHOT_DMA_BUFFER_SIZE);
 			__HAL_TIM_ENABLE_DMA(MotorTim[id].tim, TIM_DMA_CC3);
 			break;
 		case 4:
-			HAL_DMA_Start_IT(MotorTim[id].tim->hdma[TIM_DMA_ID_CC4], (uint32_t)motor1_dmabuffer,
+			HAL_DMA_Start_IT(MotorTim[id].tim->hdma[TIM_DMA_ID_CC4], (uint32_t)motorDmaBuffer[id],
 											 (uint32_t)&MotorTim[id].tim->Instance->CCR4, DSHOT_DMA_BUFFER_SIZE);
 			__HAL_TIM_ENABLE_DMA(MotorTim[id].tim, TIM_DMA_CC4);
 			break;
