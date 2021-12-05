@@ -85,10 +85,10 @@ int8_t i2cSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *int
 
 /*! @brief Sensor I2C write function */
 int8_t i2cSensorsWrite(uint8_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr) {
-	static uint8_t sBuffer[33];
+	static uint8_t sBuffer[32];
 	HAL_StatusTypeDef status;
 	uint16_t DevAddress = *(uint8_t*)intfPtr << 1;
-	memset(sBuffer, 0, 33);
+	memset(sBuffer, 0, 32);
 	sBuffer[0] = regAddr;
 	memcpy(sBuffer + 1, regData, len);
 	status = HAL_I2C_Master_Transmit(sensorI2C.hi2c, DevAddress, sBuffer, len + 1, 1000);

@@ -247,7 +247,7 @@ void DMA1_Stream3_IRQHandler(void)
   /* USER CODE END DMA1_Stream3_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_spi2_rx);
   /* USER CODE BEGIN DMA1_Stream3_IRQn 1 */
-  sensorSpiRxDmaIsr();
+  sensorsSpiRxDmaIsr();
   /* USER CODE END DMA1_Stream3_IRQn 1 */
 }
 

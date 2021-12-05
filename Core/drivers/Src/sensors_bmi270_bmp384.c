@@ -31,6 +31,7 @@
 #include "sensors_bmi270_bmp384.h"
 
 #include "_i2c.h"
+#include "_spi.h"
 #include "cal.h"
 
 #include "system.h"
@@ -202,6 +203,7 @@ static void sensorsTask(void *param) {
    * this is only required by the z-ranger, since the
    * configuration will be done after system start-up */
   uint32_t lastWakeTime = osKernelGetTickCount();
+  // static int cnt = 0;
   while (1) {
     lastWakeTime += 1;
 		osDelayUntil(lastWakeTime);
@@ -211,6 +213,13 @@ static void sensorsTask(void *param) {
     /*! get data from chosen sensors */
 		bmi2_get_sensor_data(&bmi270Data[0], 1, &bmi2Dev);
 		bmi2_get_sensor_data(&bmi270Data[1], 1, &bmi2Dev);
+
+
+    // if (cnt++ == 1000) {
+    //   cnt = 0;
+    //   DEBUG_PRINT("%d %d %d %d %d %d\n", bmi270Data[ACCEL].sens_data.acc.x, bmi270Data[ACCEL].sens_data.acc.y, bmi270Data[ACCEL].sens_data.acc.z,
+		// bmi270Data[GYRO].sens_data.gyr.x, bmi270Data[GYRO].sens_data.gyr.y, bmi270Data[GYRO].sens_data.gyr.z);
+    // }
 
     /*! calibrate if necessary */
     if (!gyroBiasFound)
@@ -280,15 +289,22 @@ static void sensorsDeviceInit(void) {
 	/*! BMI270 */
 	bmi2Dev.intf_ptr = &intfAddr;
 	bmi2Dev.delay_us = &sensorsUsDelay;
-	bmi2Dev.read_write_len = 32;
+	bmi2Dev.read_write_len = 31;
   bmi2Dev.config_file_ptr = NULL;
 	if (currentInterface == SENSOR_INTF_I2C) {
 		bmi2Dev.intf = BMI2_I2C_INTF;
     bmi2Dev.read = &i2cSensorsRead;
 		bmi2Dev.write = &i2cSensorsWrite;
-	} else {
+	} else if (currentInterface == SENSOR_INTF_SPI) {
 		bmi2Dev.intf = BMI2_SPI_INTF;
-		// TODO: spi read write
+		bmi2Dev.read = &spiSensorsRead;
+    bmi2Dev.write = &spiSensorsWrite;
+    SENSOR_DIS_CS();
+    bmi2Dev.delay_us(50000, NULL);
+    SENSOR_EN_CS();
+    bmi2Dev.delay_us(50000, NULL);
+    SENSOR_DIS_CS();
+    bmi2Dev.delay_us(50000, NULL);
 	}
 	rslt = bmi270_init(&bmi2Dev);
   rslt |= bmi2_get_regs(BMI2_CHIP_ID_ADDR, &chipId, 1, &bmi2Dev);

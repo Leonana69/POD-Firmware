@@ -73,7 +73,7 @@
    *                    SENSOR_INTF_SPI
    */
   #define SENSORS_TYPE SENSORS_BMI270_BMP384
-  #define SENSORS_INTERFACE SENSOR_INTF_I2C
+  #define SENSORS_INTERFACE SENSOR_INTF_SPI
   /*! @brief Motor config
    * MOTOR_TYPE:  MOTORS_PWM
    *              MOTORS_DSHOT

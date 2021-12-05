@@ -31,7 +31,7 @@ void pmw3901SpiTxDmaIsr();
 
 #define SENSOR_EN_CS() HAL_GPIO_WritePin(SENSOR_CS_GPIO_Port, SENSOR_CS_Pin, GPIO_PIN_RESET)
 #define SENSOR_DIS_CS() HAL_GPIO_WritePin(SENSOR_CS_GPIO_Port, SENSOR_CS_Pin, GPIO_PIN_SET)
-void sensorSpiRxDmaIsr();
+void sensorsSpiRxDmaIsr();
 int8_t spiSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr);
 int8_t spiSensorsWrite(uint8_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr);
 

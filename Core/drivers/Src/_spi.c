@@ -38,28 +38,30 @@ bool spiWriteDma(SPIDrv *dev, uint8_t *data, uint16_t len) {
 	return status == HAL_OK;
 }
 
-void sensorSpiRxDmaIsr() {
-	osSemaphoreRelease(sensorSPI.spiTxDmaSemaphore);
+void sensorsSpiRxDmaIsr() {
+	osSemaphoreRelease(sensorSPI.spiRxDmaSemaphore);
 }
 
 int8_t spiSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr) {
 	HAL_StatusTypeDef status;
 	SENSOR_EN_CS();
 	HAL_SPI_Transmit(sensorSPI.hspi, &regAddr, 1, 1000);
-	status = HAL_SPI_Receive_DMA(sensorSPI.hspi, regData, len);
-	osSemaphoreAcquire(sensorSPI.spiRxDmaSemaphore, osWaitForever);
+	// HAL_Delay(1); // remove
+	status = HAL_SPI_Receive(sensorSPI.hspi, regData, len, 100);
+	// DEBUG_PRINT("wait\n");
+	// osSemaphoreAcquire(sensorSPI.spiRxDmaSemaphore, osWaitForever);
 	SENSOR_DIS_CS();
 	return -status;
 }
 
 int8_t spiSensorsWrite(uint8_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr) {
-	static uint8_t sBuffer[33];
+	static uint8_t sBuffer[32];
 	HAL_StatusTypeDef status;
-	memset(sBuffer, 0, 33);
+	memset(sBuffer, 0, 32);
 	sBuffer[0] = regAddr;
 	memcpy(sBuffer + 1, regData, len);
 	SENSOR_EN_CS();
-	status = HAL_SPI_Transmit(sensorSPI.hspi, sBuffer, len + 1, 1000);
+	status = HAL_SPI_Transmit(sensorSPI.hspi, sBuffer, len + 1, 100);
 	SENSOR_DIS_CS();
 	return -status;
 }
