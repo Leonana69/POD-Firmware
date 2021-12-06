@@ -30,6 +30,7 @@
 #include "cfassert.h"
 #include "commander.h"
 #include "crtp.h"
+#include "stabilizer.h"
 
 
 static bool isInit = false;
@@ -110,6 +111,8 @@ const static metaCommandDecoder_t metaCommandDecoders[] = {
 static void commanderCrtpCB(CRTPPacket* pk) {
   static setpoint_t setpoint;
   uint8_t metaCmd;
+
+  stabilizerSetEmergencyStopTimeout(300);
 
   if (pk->port == CRTP_PORT_SETPOINT && pk->channel == 0) {
     crtpCommanderRpytDecodeSetpoint(&setpoint, pk);

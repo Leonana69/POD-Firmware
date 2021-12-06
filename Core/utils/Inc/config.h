@@ -58,7 +58,7 @@
 #define RADIO_RATE_2M 2
 
 #ifdef POD
-  #define DEBUG_PRINT_ON_UART
+  // #define DEBUG_PRINT_ON_UART
   #define MIN_THRUST  1000
   #define MAX_THRUST  60000
   #define MOTORS_IDLE_THRUST 0

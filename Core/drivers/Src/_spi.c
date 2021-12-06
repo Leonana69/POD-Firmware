@@ -45,10 +45,8 @@ void sensorsSpiRxDmaIsr() {
 int8_t spiSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr) {
 	HAL_StatusTypeDef status;
 	SENSOR_EN_CS();
-	HAL_SPI_Transmit(sensorSPI.hspi, &regAddr, 1, 1000);
-	// HAL_Delay(1); // remove
+	HAL_SPI_Transmit(sensorSPI.hspi, &regAddr, 1, 100);
 	status = HAL_SPI_Receive(sensorSPI.hspi, regData, len, 100);
-	// DEBUG_PRINT("wait\n");
 	// osSemaphoreAcquire(sensorSPI.spiRxDmaSemaphore, osWaitForever);
 	SENSOR_DIS_CS();
 	return -status;

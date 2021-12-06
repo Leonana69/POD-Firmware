@@ -176,7 +176,7 @@ bool stabilizerTest(void) {
 
 static void checkEmergencyStopTimeout() {
   if (emergencyStopTimeout >= 0)
-	  emergencyStop = (emergencyStopTimeout-- <= 0);
+	  emergencyStop = (--emergencyStopTimeout < 0);
 }
 
 /* The stabilizer loop runs at 1kHz (stock) or 500Hz (kalman). It is the
