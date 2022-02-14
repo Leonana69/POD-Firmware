@@ -307,7 +307,7 @@ static void sensorsDeviceInit(void) {
 	rslt = bmi270_init(&bmi2Dev);
   rslt |= bmi2_get_regs(BMI2_CHIP_ID_ADDR, &chipId, 1, &bmi2Dev);
 	if (rslt != BMI2_OK || chipId != BMI270_CHIP_ID)
-		DEBUG_PRINT("BMI270 Init [FAILED].\n");
+		DEBUG_PRINT("BMI270 Init [FAILED]: %d, 0x%x.\n", rslt, chipId);
 	else {
 		DEBUG_PRINT("BMI270 Init [OK].\n");
     bmi270Config[ACCEL].type = BMI2_ACCEL;
