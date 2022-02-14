@@ -10,7 +10,7 @@ OPENOCD_TARGET    	?= target/stm32f4x.cfg
 OPENOCD_CMDS		?=
 LOAD_ADDRESS		?= 0x8004000
 PROG				?= $(BUILD_DIR)/$(TARGET)
-
+PLATFORM 			?= POD
 ######################################
 # guojun's C source
 ######################################
@@ -26,7 +26,12 @@ C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c 
 # drivers
 VPATH += Core/drivers/Src
 C_SOURCES += _usart.c _tim.c _i2c.c led.c eeprom.c syslink.c radiolink.c pm.c sensors_bmi088_bmp388.c \
-	tof.c _spi.c flow.c sensors_bmi270_bmp384.c motors_pwm.c motors_dshot.c
+	tof.c _spi.c flow.c sensors_bmi270_bmp384.c motors_pwm.c
+
+ifeq ($(PLATFORM), POD)
+C_SOURCES += motors_dshot.c
+CFLAGS += -DPOD
+endif
 
 VPATH += Core/drivers/Bosch/Src
 C_SOURCES += bmi08a.c bmi08g.c bmp3.c bmi2.c bmi270.c

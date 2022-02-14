@@ -47,8 +47,6 @@
 
 #define WATCHDOG_RESET_PERIOD_MS 80
 
-#define POD
-
 //The radio channel. From 0 to 125
 #define RADIO_CHANNEL 80
 #define RADIO_DATARATE RADIO_RATE_2M

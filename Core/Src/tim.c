@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under Ultimate Liberty license
@@ -267,7 +267,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* tim_pwmHandle)
     hdma_tim4_ch3.Init.Mode = DMA_NORMAL;
     hdma_tim4_ch3.Init.Priority = DMA_PRIORITY_HIGH;
     hdma_tim4_ch3.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
-    hdma_tim4_ch3.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_1QUARTERFULL;
+    hdma_tim4_ch3.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
     hdma_tim4_ch3.Init.MemBurst = DMA_MBURST_SINGLE;
     hdma_tim4_ch3.Init.PeriphBurst = DMA_PBURST_SINGLE;
     if (HAL_DMA_Init(&hdma_tim4_ch3) != HAL_OK)
