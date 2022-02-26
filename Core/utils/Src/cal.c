@@ -1,5 +1,4 @@
 #include "cal.h"
-#include <math.h>
 
 // TODO: add descriptions
 uint8_t calculate_cksum(void* data, size_t len) {

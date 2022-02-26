@@ -30,7 +30,6 @@
 
 // TODO: remove this
 // #include "nvicconf.h"
-#include "stm32fxxx.h"
 
 #include "_tim.h"
 #include "config.h"

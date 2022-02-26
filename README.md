@@ -77,8 +77,7 @@ This project is based on the crazyflie-firmware. It uses STM32CubeMX to generate
         - Channel4: PWM Generation CH4 on PB9
     - The HAL_TIM_PWM_START needs to be called to enable the output.
 
-11. Comment the #define __FPU_PRESENT in Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h
-    - This line will cause redefinition of __FPU_PRESENT, so you need to comment it each time after you generating the code.
+11. 
 
 12. Enable SPI1 and GPIO PB4
     - Mode: Full-Duplex Master

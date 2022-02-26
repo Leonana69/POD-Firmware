@@ -10,7 +10,7 @@ OPENOCD_TARGET    	?= target/stm32f4x.cfg
 OPENOCD_CMDS		?=
 LOAD_ADDRESS		?= 0x8004000
 PROG				?= $(BUILD_DIR)/$(TARGET)
-PLATFORM 			?= POD
+PLATFORM 			?= PODD
 ######################################
 # guojun's C source
 ######################################
@@ -60,21 +60,20 @@ C_SOURCES += arm_common_tables.c
 # guojun's C includes
 ######################################
 C_INCLUDES += \
--ICore/Inc \
+-IDrivers/CMSIS/DSP/Include \
 -ICore/drivers/Inc \
 -ICore/utils/Inc \
 -ICore/modules/Inc \
 -ICore/drivers/Bosch/Inc \
 -ICore/drivers/Vl53l1/Inc \
--ICore/drivers/Vl53l1_Platform/Inc \
--IDrivers/CMSIS/DSP/Include
+-ICore/drivers/Vl53l1_Platform/Inc
 
 ######################################
 # guojun's CFLAGS
 ######################################
-CFLAGS += -DSTM32F4XX -DSTM32F405xx
-CFLAGS += -DSTM32F40_41xxx -DARM_MATH_CM4
-CFLAGS += -D__FPU_PRESENT=1
+CFLAGS += -DSTM32F4XX -DSTM32F40_41xxx
+CFLAGS += -DARM_MATH_CM4
+CFLAGS += -D__FPU_PRESENT=1U
 # CFLAGS += -Wno-unused
 
 # default action: build all

@@ -25,7 +25,6 @@
  */
 
 #include <stdbool.h>
-#include "stm32fxxx.h"
 
 #ifndef __CFASSERT_H__
 #define __CFASSERT_H__
