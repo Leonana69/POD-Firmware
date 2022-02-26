@@ -163,7 +163,7 @@ void radiolinkSyslinkDispatch(SyslinkPacket *slp) {
     memcpy(&p2pp.data[0], &slp->data[2], slp->length - 2);
     p2pp.size = slp->length;
     if (p2p_callback)
-        p2p_callback(&p2pp);
+      p2p_callback(&p2pp);
   }
 
   isConnected = radiolinkIsConnected();

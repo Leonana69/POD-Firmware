@@ -34,7 +34,6 @@
 #include "log.h"
 #include "debug.h"
 
-
 static bool isInit;
 
 static int nopFunc(void);

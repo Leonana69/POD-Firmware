@@ -30,7 +30,6 @@
 #include "usec_timer.h"
 #define PROTOCOL_VERSION 4
 #ifdef STM32F4XX
-
   #define CONFIG_BLOCK_ADDRESS    (2048 * (64 - 1))
   #define MCU_ID_ADDRESS          0x1FFF7A10
   #define MCU_FLASH_SIZE_ADDRESS  0x1FFF7A22
@@ -289,12 +288,12 @@
 #define TOF_TASK_PRI            2
 
 // Task stack sizes
-#define SYSTEM_TASK_STACKSIZE         (2* configMINIMAL_STACK_SIZE)
+#define SYSTEM_TASK_STACKSIZE         (2 * configMINIMAL_STACK_SIZE)
 #define LEDSEQCMD_TASK_STACKSIZE      configMINIMAL_STACK_SIZE
 #define ADC_TASK_STACKSIZE            configMINIMAL_STACK_SIZE
 #define PM_TASK_STACKSIZE             configMINIMAL_STACK_SIZE
 #define CRTP_TX_TASK_STACKSIZE        configMINIMAL_STACK_SIZE
-#define CRTP_RX_TASK_STACKSIZE        (2* configMINIMAL_STACK_SIZE)
+#define CRTP_RX_TASK_STACKSIZE        (2 * configMINIMAL_STACK_SIZE)
 #define CRTP_RXTX_TASK_STACKSIZE      configMINIMAL_STACK_SIZE
 #define LOG_TASK_STACKSIZE            (2 * configMINIMAL_STACK_SIZE)
 #define MEM_TASK_STACKSIZE            (2 * configMINIMAL_STACK_SIZE)
