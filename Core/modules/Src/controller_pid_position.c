@@ -16,21 +16,21 @@ static CascadePidObject cpidZ;
 static CascadePidParam paramX = {
 	.val = {
 		.kp = 2.0,
-		.ki = 0.0,
+		.ki = 0.5,
 		.kd = 0.0,
 		.rate = POSITION_RATE,
-		.iLimit = 0.0,
-		.oLimit = 1.1,
+		.iLimit = 1.0,
+		.oLimit = 2.0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	},
 	.rate = {
 		.kp = 25.0,
-		.ki = 1.0,
+		.ki = 2.0,
 		.kd = 0.0,
 		.rate = POSITION_RATE,
-		.iLimit = 0.0,
-		.oLimit = 22.0,
+		.iLimit = 25.0,
+		.oLimit = 25.0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	}
@@ -39,21 +39,21 @@ static CascadePidParam paramX = {
 static CascadePidParam paramY = {
 	.val = {
 		.kp = 2.0,
-		.ki = 0.0,
+		.ki = 0.5,
 		.kd = 0.0,
 		.rate = POSITION_RATE,
-		.iLimit = 0.0,
-		.oLimit = 1.1,
+		.iLimit = 1.0,
+		.oLimit = 2.0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	},
 	.rate = {
 		.kp = 25.0,
-		.ki = 1.0,
+		.ki = 2.0,
 		.kd = 0.0,
 		.rate = POSITION_RATE,
-		.iLimit = 0.0,
-		.oLimit = 22.0,
+		.iLimit = 25.0,
+		.oLimit = 25.0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	}
@@ -65,17 +65,17 @@ static CascadePidParam paramZ = {
 		.ki = 0.5,
 		.kd = 0.0,
 		.rate = POSITION_RATE,
-		.iLimit = 0.0,
-		.oLimit = 1.1,
+		.iLimit = 1.0,
+		.oLimit = 0.0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	},
 	.rate = {
 		.kp = 25.0,
 		.ki = 15.0,
-		.kd = 0.0,
+		.kd = 1.0,
 		.rate = POSITION_RATE,
-		.iLimit = 0.0,
+		.iLimit = 30.0,
 		.oLimit = INT16_MAX / THRUST_SCALE,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
@@ -121,10 +121,9 @@ void controllerPidPositionUpdate(float* thrust, attitude_t *attitude,
 
 	static int cnt = 0;
 	if (cnt++ == 50) {
-		cnt= 0;
-		DEBUG_PRINT_CONSOLE("a%.2f,%.2f\n", state->velocity.x, attitude->pitch);
+		cnt = 0;
+		DEBUG_PRINT_CONSOLE("%.2f %.2f\n", state->velocity.x, attitude->pitch);
 	}
-
 
 	float accZ = pidUpdate(&cpidZ.rate, state->velocity.z, setpoint->velocity.z, true);
 
