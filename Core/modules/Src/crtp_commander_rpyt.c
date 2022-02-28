@@ -66,7 +66,6 @@ static RPYType stabilizationModeYaw   = RATE;  // Current stabilization type of 
 
 static YawModeType yawMode = DEFAULT_YAW_MODE; // Yaw mode configuration
 
-static bool thrustLocked = true;
 static bool altHoldMode = false;
 static bool posHoldMode = false;
 static bool posSetMode = false;
@@ -109,16 +108,10 @@ static void yawModeUpdate(setpoint_t *setpoint) {
 void crtpCommanderRpytDecodeSetpoint(setpoint_t *setpoint, CRTPPacket *pk) {
   struct CommanderCrtpLegacyValues *values = (struct CommanderCrtpLegacyValues*)pk->data;
 
-  if (commanderGetActivePriority() == COMMANDER_PRIORITY_DISABLE)
-    thrustLocked = true;
-
-  if (values->thrust == 0)
-    thrustLocked = false;
-
   // Thrust
   uint16_t rawThrust = values->thrust;
 
-  if (thrustLocked || (rawThrust < MIN_THRUST))
+  if (rawThrust < MIN_THRUST)
     setpoint->thrust = 0;
   else
     setpoint->thrust = fminf(rawThrust, MAX_THRUST);

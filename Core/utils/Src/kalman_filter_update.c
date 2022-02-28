@@ -36,7 +36,6 @@ void kalmanCoreUpdateWithFlow(kalmanCoreData_t* this, const flowMeasurement_t *f
   // ~~~ Camera constants ~~~
   // The angle of aperture is guessed from the raw data register and thankfully look to be symmetric
   float pixelNbr = 30.0;                      // [pixels] (same in x and y)
-  //float thetapix = DEG_TO_RAD * 4.0f;   // [rad]    (same in x and y)
   float thetapix = radians(4.2f);
   //~~~ Body rates ~~~
   // TODO check if this is feasible or if some filtering has to be done

@@ -187,6 +187,7 @@ static void checkEmergencyStopTimeout() {
 static void stabilizerTask() {
   /*! Wait for the system to be fully started */
   systemWaitStart();
+  // static int cnt = 0;
 
   uint32_t tick = 1;
   DEBUG_PRINT("Wait for sensor calibration...\n");
@@ -205,6 +206,10 @@ static void stabilizerTask() {
 
     if (ENABLE_SELF_TEST || selfTestPassed()) {
       estimatorUpdate(&state, tick);
+      // if (cnt++ == 1000) {
+      //   cnt = 0;
+      //   DEBUG_PRINT_CONSOLE("%.2f,%.2f\n", state.velocity.x, state.velocity.y);
+      // }
       compressState();
       commanderGetSetpoint(&setpoint, &state);
       compressSetpoint();

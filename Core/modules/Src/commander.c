@@ -41,19 +41,14 @@ static uint32_t lastUpdate;
 static bool enableHighLevel = false;
 
 STATIC_MEM_MUTEX_ALLOC(setpointMutex);
-STATIC_MEM_MUTEX_ALLOC(priorityMutex);
 
 const static setpoint_t nullSetpoint;
-const static int priorityDisable = COMMANDER_PRIORITY_DISABLE;
 static setpoint_t currentSetpoint;
-static int currentPriority;
 
 /* Public functions */
 void commanderInit() {
 	STATIC_MUTEX_CREATE(setpointMutex);
-	STATIC_MUTEX_CREATE(priorityMutex);
 	currentSetpoint = nullSetpoint;
-	currentPriority = priorityDisable;
 
   crtpCommanderInit();
 	// TODO: fix high level
@@ -63,22 +58,17 @@ void commanderInit() {
   isInit = true;
 }
 
-void commanderSetSetpoint(setpoint_t *setpoint, int priority) {
-  if (priority >= currentPriority) {
-		osMutexAcquire(setpointMutex, osWaitForever);
-		osMutexAcquire(priorityMutex, osWaitForever);
+void commanderSetSetpoint(setpoint_t *setpoint) {
+  osMutexAcquire(setpointMutex, osWaitForever);
 
-    setpoint->timestamp = osKernelGetTickCount();
-		memcpy(&currentSetpoint, setpoint, sizeof(setpoint_t));
-		currentPriority = priority;
-		
-		osMutexRelease(priorityMutex);
-		osMutexRelease(setpointMutex);
-    // Send the high-level planner to idle so it will forget its current state
-    // and start over if we switch from low-level to high-level in the future.
-		// TODO: fix high level
-    // crtpCommanderHighLevelStop();
-  }
+  setpoint->timestamp = osKernelGetTickCount();
+  memcpy(&currentSetpoint, setpoint, sizeof(setpoint_t));
+ 
+  osMutexRelease(setpointMutex);
+  // Send the high-level planner to idle so it will forget its current state
+  // and start over if we switch from low-level to high-level in the future.
+  // TODO: fix high level
+  // crtpCommanderHighLevelStop();
 }
 
 void commanderNotifySetpointsStop(int remainValidMillisecs) {
@@ -110,18 +100,19 @@ void commanderGetSetpoint(setpoint_t *setpoint, const state_t *state) {
     //   memcpy(setpoint, &nullSetpoint, sizeof(nullSetpoint));
     // }
   } else if ((currentTime - setpoint->timestamp) > COMMANDER_WDT_TIMEOUT_STABILIZE) {
-		osMutexAcquire(priorityMutex, osWaitForever);
-		currentPriority = priorityDisable;
-		osMutexRelease(priorityMutex);
     // Keep Z as it is
     setpoint->mode.x = modeDisable;
     setpoint->mode.y = modeDisable;
+    
     setpoint->mode.roll = modeAbs;
     setpoint->mode.pitch = modeAbs;
     setpoint->mode.yaw = modeVelocity;
     setpoint->attitude.roll = 0;
     setpoint->attitude.pitch = 0;
     setpoint->attitudeRate.yaw = 0;
+
+    // guojun: clear setpoint
+    memset(setpoint, 0, sizeof(setpoint_t));
   }
   // This copying is not strictly necessary because stabilizer.c already keeps
   // a static state_t containing the most recent state estimate. However, it is
@@ -135,14 +126,6 @@ bool commanderTest() {
 
 uint32_t commanderGetInactivityTime() {
   return osKernelGetTickCount() - lastUpdate;
-}
-
-int commanderGetActivePriority() {
-  int priority;
-	osMutexAcquire(priorityMutex, osWaitForever);
-	priority = currentPriority;
-	osMutexRelease(priorityMutex);
-  return priority;
 }
 
 /**

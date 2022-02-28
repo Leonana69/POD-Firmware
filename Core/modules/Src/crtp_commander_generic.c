@@ -35,6 +35,7 @@
 #include "crtp.h"
 #include "cal.h"
 #include "cfassert.h"
+#include "debug.h"
 
 /* The generic commander format contains a packet type and data that has to be
  * decoded into a setpoint_t structure. The aim is to make it future-proof

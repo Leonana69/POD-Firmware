@@ -100,23 +100,31 @@ void controllerPidPositionUpdate(float* thrust, attitude_t *attitude,
 	float vy = setpoint->velocity.y;
 
 	if (setpoint->mode.x == modeAbs) {
-    setpoint->velocity.x = pidUpdate(&cpidX.val, state->position.x, setpoint->position.x, true);
-  } else if (setpoint->velocity_body)
-    setpoint->velocity.x = vx * cosYaw - vy * sinYaw;
+		setpoint->velocity.x = pidUpdate(&cpidX.val, state->position.x, setpoint->position.x, true);
+	} else if (setpoint->velocity_body)
+		setpoint->velocity.x = vx * cosYaw - vy * sinYaw;
 
-  if (setpoint->mode.y == modeAbs) {
-    setpoint->velocity.y = pidUpdate(&cpidY.val, state->position.y, setpoint->position.y, true);
-  } else if (setpoint->velocity_body)
-    setpoint->velocity.y = vy * cosYaw + vx * sinYaw;
+	if (setpoint->mode.y == modeAbs) {
+		setpoint->velocity.y = pidUpdate(&cpidY.val, state->position.y, setpoint->position.y, true);
+	} else if (setpoint->velocity_body)
+		setpoint->velocity.y = vy * cosYaw + vx * sinYaw;
 
-  if (setpoint->mode.z == modeAbs) {
-    setpoint->velocity.z = pidUpdate(&cpidZ.val, state->position.z, setpoint->position.z, true);
-  }
+	if (setpoint->mode.z == modeAbs) {
+		setpoint->velocity.z = pidUpdate(&cpidZ.val, state->position.z, setpoint->position.z, true);
+	}
 
 	float accX = pidUpdate(&cpidX.rate, state->velocity.x, setpoint->velocity.x, true);
 	float accY = pidUpdate(&cpidY.rate, state->velocity.y, setpoint->velocity.y, true);
-	attitude->roll = fConstrain(-accY * cosYaw + accX * sinYaw, -20.0, 20.0);
-	attitude->pitch = fConstrain(-accX * cosYaw - accY * sinYaw, -20.0, 20.0);
+	// pitch+ <-> x-, roll+ <-> y-
+	attitude->pitch = -fConstrain(accX * cosYaw + accY * sinYaw, -20.0, 20.0);
+	attitude->roll = -fConstrain(accY * cosYaw - accX * sinYaw, -20.0, 20.0);
+
+	static int cnt = 0;
+	if (cnt++ == 50) {
+		cnt= 0;
+		DEBUG_PRINT_CONSOLE("a%.2f,%.2f\n", state->velocity.x, attitude->pitch);
+	}
+
 
 	float accZ = pidUpdate(&cpidZ.rate, state->velocity.z, setpoint->velocity.z, true);
 

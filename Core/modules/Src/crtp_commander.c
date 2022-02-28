@@ -116,12 +116,12 @@ static void commanderCrtpCB(CRTPPacket* pk) {
 
   if (pk->port == CRTP_PORT_SETPOINT && pk->channel == 0) {
     crtpCommanderRpytDecodeSetpoint(&setpoint, pk);
-    commanderSetSetpoint(&setpoint, COMMANDER_PRIORITY_CRTP);
+    commanderSetSetpoint(&setpoint);
   } else if (pk->port == CRTP_PORT_SETPOINT_GENERIC) {
     switch (pk->channel) {
     case SET_SETPOINT_CHANNEL:
       crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
-      commanderSetSetpoint(&setpoint, COMMANDER_PRIORITY_CRTP);
+      commanderSetSetpoint(&setpoint);
       break;
     case META_COMMAND_CHANNEL:
         metaCmd = pk->data[0];

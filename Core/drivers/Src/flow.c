@@ -13,7 +13,7 @@
 
 #define PMW_RATE RATE_50_HZ
 #define DELTA_LIMIT 150
-#define FLOW_STDDEV 2.0f
+#define FLOW_STDDEV 1.0f
 
 static bool isInit = false;
 static SPIDrv *SPIx;
@@ -51,13 +51,13 @@ void flowTask() {
     pmw3901ReadMotion(&motionData);
     int16_t dx = -motionData.deltaY;
     int16_t dy = -motionData.deltaX;
+
     if (abs(dx) < DELTA_LIMIT && abs(dy) < DELTA_LIMIT && motionData.motion == 0xB0) {
       flowData.stdDevX = FLOW_STDDEV;
       flowData.stdDevY = FLOW_STDDEV;
       flowData.dt = 1.0f / PMW_RATE;
-      flowData.dpixelx = (float)dx;
-      flowData.dpixely = (float)dy;
-
+      flowData.dpixelx = (float) dx;
+      flowData.dpixely = (float) dy;
       estimatorEnqueueFlow(&flowData);
     }
   }
