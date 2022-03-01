@@ -56,8 +56,10 @@
 
 #ifdef POD
   // #define DEBUG_PRINT_ON_UART
+  #define BASE_THRUST 20000
   #define MIN_THRUST  1000
   #define MAX_THRUST  60000
+  #define THRUST_SCALE 1000
   #define MOTORS_IDLE_THRUST 0
   #define POD_MASS (0.036f)
 
@@ -116,7 +118,7 @@
 
   /*! I2C */
   #define eepromI2CHandle hi2c1
-  #define sensorsI2CHandle hi2c3
+  #define sensorI2CHandle hi2c3
   #define tofI2CHandle hi2c1
 
   /*! SPI */
@@ -126,9 +128,11 @@
   /*! UART */
   #define debugUart       huart3
   #define nrfUart         huart6
-#else
+#else // cf2
+  #define BASE_THRUST 36000
   #define MIN_THRUST  1000
   #define MAX_THRUST  60000
+  #define THRUST_SCALE 1000
   #define MOTORS_IDLE_THRUST 0
   #define POD_MASS (0.036f)
 
@@ -182,7 +186,7 @@
 
   /*! I2C */
   #define eepromI2CHandle hi2c1
-  #define sensorsI2CHandle hi2c3
+  #define sensorI2CHandle hi2c3
   #define tofI2CHandle hi2c1
 
   /*! SPI */

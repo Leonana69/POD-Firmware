@@ -135,8 +135,8 @@ PARAM_GROUP_STOP(powerDist)
 /*! @brief Motor output related log variables. */
 LOG_GROUP_START(motor)
 /*! @brief Motor power (PWM value) for M1, M2, M3, M4 [0 - UINT16_MAX] */
-LOG_ADD_CORE(LOG_UINT32, m1, &motorPower.m1)
-LOG_ADD_CORE(LOG_UINT32, m2, &motorPower.m2)
-LOG_ADD_CORE(LOG_UINT32, m3, &motorPower.m3)
-LOG_ADD_CORE(LOG_UINT32, m4, &motorPower.m4)
+LOG_ADD_CORE(LOG_UINT16, m1, &motorPower.m1)
+LOG_ADD_CORE(LOG_UINT16, m2, &motorPower.m2)
+LOG_ADD_CORE(LOG_UINT16, m3, &motorPower.m3)
+LOG_ADD_CORE(LOG_UINT16, m4, &motorPower.m4)
 LOG_GROUP_STOP(motor)

@@ -8,9 +8,6 @@ static CascadePidObject cpidX;
 static CascadePidObject cpidY;
 static CascadePidObject cpidZ;
 
-#define THRUST_SCALE 1000.0
-#define THRUST_BASE 36000.0
-#define THRUST_MIN	22000.0
 // TODO: add IMPROVED_BARO_Z_HOLD
 
 static CascadePidParam paramX = {
@@ -20,7 +17,7 @@ static CascadePidParam paramX = {
 		.kd = 0.0,
 		.rate = POSITION_RATE,
 		.iLimit = 1.0,
-		.oLimit = 2.0,
+		.oLimit = 0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	},
@@ -30,7 +27,7 @@ static CascadePidParam paramX = {
 		.kd = 0.0,
 		.rate = POSITION_RATE,
 		.iLimit = 25.0,
-		.oLimit = 25.0,
+		.oLimit = 20.0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	}
@@ -43,7 +40,7 @@ static CascadePidParam paramY = {
 		.kd = 0.0,
 		.rate = POSITION_RATE,
 		.iLimit = 1.0,
-		.oLimit = 2.0,
+		.oLimit = 0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	},
@@ -53,7 +50,7 @@ static CascadePidParam paramY = {
 		.kd = 0.0,
 		.rate = POSITION_RATE,
 		.iLimit = 25.0,
-		.oLimit = 25.0,
+		.oLimit = 20.0,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	}
@@ -116,20 +113,23 @@ void controllerPidPositionUpdate(float* thrust, attitude_t *attitude,
 	float accX = pidUpdate(&cpidX.rate, state->velocity.x, setpoint->velocity.x, true);
 	float accY = pidUpdate(&cpidY.rate, state->velocity.y, setpoint->velocity.y, true);
 	// pitch+ <-> x-, roll+ <-> y-
-	attitude->pitch = -fConstrain(accX * cosYaw + accY * sinYaw, -20.0, 20.0);
-	attitude->roll = -fConstrain(accY * cosYaw - accX * sinYaw, -20.0, 20.0);
+	// attitude->pitch = -fConstrain(accX * cosYaw + accY * sinYaw, -20.0, 20.0);
+	// attitude->roll = -fConstrain(accY * cosYaw - accX * sinYaw, -20.0, 20.0);
+	attitude->pitch = -(accX * cosYaw + accY * sinYaw);
+	attitude->roll = -(accY * cosYaw - accX * sinYaw);
 
-	static int cnt = 0;
-	if (cnt++ == 50) {
-		cnt = 0;
-		DEBUG_PRINT_CONSOLE("%.2f %.2f\n", state->velocity.x, attitude->pitch);
-	}
+	// static int cnt = 0;
+	// if (cnt++ == 50) {
+	// 	cnt = 0;
+	// 	DEBUG_PRINT_CONSOLE("%.2f %.2f %.2f %.2f\n", state->attitude.roll, 
+	// 	state->attitude.pitch, state->position.x, state->position.y);
+	// }
 
 	float accZ = pidUpdate(&cpidZ.rate, state->velocity.z, setpoint->velocity.z, true);
 
-	*thrust = accZ * THRUST_SCALE + THRUST_BASE;
-	if (*thrust < THRUST_MIN)
-		*thrust = THRUST_MIN;
+	*thrust = accZ * THRUST_SCALE + BASE_THRUST;
+	if (*thrust < MIN_THRUST)
+		*thrust = MIN_THRUST;
 }
 
 void controllerPidPositionValReset(uint8_t xyz) {

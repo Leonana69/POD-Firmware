@@ -74,6 +74,7 @@ C_INCLUDES += \
 CFLAGS += -DSTM32F4XX -DSTM32F40_41xxx
 CFLAGS += -DARM_MATH_CM4
 CFLAGS += -D__FPU_PRESENT=1U
+# CFLAGS += -DDEBUG_PRINT_ON_UART
 # CFLAGS += -Wno-unused
 
 # default action: build all

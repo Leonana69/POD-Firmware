@@ -12,7 +12,7 @@ I2CDrv tofI2C;
 
 void _I2C_Init() {
 	eepromI2C.hi2c = &eepromI2CHandle;
-	sensorI2C.hi2c = &sensorsI2CHandle;
+	sensorI2C.hi2c = &sensorI2CHandle;
 	tofI2C.hi2c = &tofI2CHandle;
 	eepromI2C.i2cRxDmaSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("EEPROMI2C", &eepromI2C.i2cRxDmaSemaphoreBuffer, sizeof(eepromI2C.i2cRxDmaSemaphoreBuffer)));
 	sensorI2C.i2cRxDmaSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("SENSORI2C", &sensorI2C.i2cRxDmaSemaphoreBuffer, sizeof(sensorI2C.i2cRxDmaSemaphoreBuffer)));
