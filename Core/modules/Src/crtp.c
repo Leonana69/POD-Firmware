@@ -33,6 +33,7 @@
 #include "static_mem.h"
 #include "log.h"
 #include "debug.h"
+#include "optimization.h"
 
 static bool isInit;
 
@@ -64,8 +65,8 @@ static struct {
 static osMessageQueueId_t txQueue;
 static osMessageQueueId_t queues[CRTP_NBR_OF_PORTS];
 
-static void crtpTxTask(void *param);
-static void crtpRxTask(void *param);
+static void crtpTxTask();
+static void crtpRxTask();
 
 static volatile CrtpCallback callbacks[CRTP_NBR_OF_PORTS];
 static void updateStats();
@@ -116,11 +117,11 @@ int crtpGetFreeTxQueuePackets(void) {
   return osMessageQueueGetSpace(txQueue);
 }
 
-void crtpTxTask(void *param) {
+void crtpTxTask() {
   CRTPPacket p;
 
   while (1) {
-    if (link != &nopLink) {
+    if (likely(link != &nopLink)) {
       if (osMessageQueueGet(txQueue, &p, 0, osWaitForever) == osOK) {
         /*! Keep testing, if the link changes to USB it will go though */
         while (link->sendPacket(&p) == false)
@@ -133,11 +134,11 @@ void crtpTxTask(void *param) {
   }
 }
 
-void crtpRxTask(void *param) {
+void crtpRxTask() {
   CRTPPacket p;
 
   while (1) {
-    if (link != &nopLink) {
+    if (likely(link != &nopLink)) {
       if (!link->receivePacket(&p)) {
         if (queues[p.port])
           /*! Block, since we should never drop a packet */

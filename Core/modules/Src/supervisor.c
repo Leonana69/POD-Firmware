@@ -31,105 +31,80 @@
 #include "pm.h"
 #include "stabilizer.h"
 #include "supervisor.h"
+#include "debug.h"
+#include "motors.h"
 
 /* Minimum summed motor PWM that means we are flying */
-#define SUPERVISOR_FLIGHT_THRESHOLD 1000
-
+#define SUPERVISOR_FLIGHT_THRESHOLD 4000
 /* Number of times in a row we need to see a condition before acting upon it */
 #define SUPERVISOR_HYSTERESIS_THRESHOLD 30
 
-static bool canFly;
 static bool isFlying;
 static bool isTumbled;
 
 bool supervisorCanFly() {
-  return canFly;
+	return (!isTumbled) && (!pmIsChargerConnected());
 }
 
 bool supervisorIsFlying() {
-  return isFlying;
+	return isFlying;
 }
 
 bool supervisorIsTumbled() {
-  return isTumbled;
+	return isTumbled;
 }
 
-//
-// We cannot fly if the Crazyflie is tumbled and we cannot fly if the Crazyflie
-// is connected to a charger.
-//
-static bool canFlyCheck() {
-  return (!isTumbled) && (!pmIsChargerConnected());
-}
-
-//
-// We say we are flying if the sum of the ratio of all motors are above
-// a certain threshold.
-//
 static bool isFlyingCheck() {
-  int sumRatio = 0;
-  for (int i = 0; i < 4; ++i) {
-		// sumRatio += motorsGetRatio(i);
-	}
-  return sumRatio > SUPERVISOR_FLIGHT_THRESHOLD;
+	int sumRatio = 0;
+	for (int i = 0; i < 4; ++i)
+		sumRatio += motorsGetValue(i);
+
+	return sumRatio > SUPERVISOR_FLIGHT_THRESHOLD;
 }
 
-//
-// We say we are tumbled when the accelerometer reports negative values.
-//
-// Once a tumbled situation is identified, we can use this for instance to cut
-// the thrust to the motors, avoiding the Crazyflie from running propellers at
-// significant thrust when accidentally crashing into walls or the ground.
-//
 static bool isTumbledCheck(const sensorData_t *data) {
-  const float tolerance = -0.5;
-  static uint32_t hysteresis = 0;
-  //
-  // We need a SUPERVISOR_HYSTERESIS_THRESHOLD amount of readings that indicate
-  // that we are tumbled before we act on it. This is to reduce false positives.
-  //
-  if (data->accel.z <= tolerance) {
-    hysteresis++;
-    if (hysteresis > SUPERVISOR_HYSTERESIS_THRESHOLD)
-      return true;
-  } else {
-    hysteresis = 0;
-  }
-
+	const float tolerance = 0.2;
+	static uint32_t hysteresis = 0;
+	// We need a SUPERVISOR_HYSTERESIS_THRESHOLD amount of readings that indicate
+	// that we are tumbled before we act on it. This is to reduce false positives.
+	if (data->accel.z <= tolerance) {
+		hysteresis++;
+	if (hysteresis > SUPERVISOR_HYSTERESIS_THRESHOLD)
+		return true;
+	} else
+		hysteresis = 0;
   return false;
 }
 
 void supervisorUpdate(const sensorData_t *data) {
-  isFlying = isFlyingCheck();
+	isFlying = isFlyingCheck();
+	isTumbled = isTumbledCheck(data);
 
-  isTumbled = isTumbledCheck(data);
-  if (isTumbled && isFlying) {
-    stabilizerSetEmergencyStop();
-  }
-  canFly = canFlyCheck();
+	if (isTumbled && isFlying)
+		stabilizerSetEmergencyStop();
 }
 
 bool supervisorKalmanIsStateWithinBounds(const kalmanCoreData_t* this) {
-  // TODO: set as define
-  float maxPosition = 100; //meters
-  float maxVelocity = 10; //meters per second
-  for (int i = 0; i < 3; i++) {
-    if (maxPosition > 0.0f) {
-      if (this->S[KC_STATE_X + i] > maxPosition) {
-        return false;
-      } else if (this->S[KC_STATE_X + i] < -maxPosition) {
-        return false;
-      }
-    }
+	// TODO: set as define
+	float maxPosition = 100; //meters
+	float maxVelocity = 10; //meters per second
+	for (int i = 0; i < 3; i++) {
+		if (maxPosition > 0.0f) {
+			if (this->S[KC_STATE_X + i] > maxPosition) {
+				return false;
+			} else if (this->S[KC_STATE_X + i] < -maxPosition) {
+				return false;
+			}
+		}
 
-    if (maxVelocity > 0.0f) {
-      if (this->S[KC_STATE_PX + i] > maxVelocity) {
-        return false;
-      } else if (this->S[KC_STATE_PX + i] < -maxVelocity) {
-        return false;
-      }
-    }
-  }
+		if (maxVelocity > 0.0f) {
+			if (this->S[KC_STATE_PX + i] > maxVelocity) {
+				return false;
+			} else if (this->S[KC_STATE_PX + i] < -maxVelocity) {
+				return false;
+			}
+		}
+	}
 
   return true;
 }
@@ -138,16 +113,6 @@ bool supervisorKalmanIsStateWithinBounds(const kalmanCoreData_t* this) {
  *  System loggable variables to check different system states.
  */
 LOG_GROUP_START(spv)
-/**
- * @brief If nonzero if system is ready to fly.
- */
-LOG_ADD_CORE(LOG_UINT8, canfly, &canFly)
-/**
- * @brief Nonzero if the system thinks it is flying
- */
 LOG_ADD_CORE(LOG_UINT8, isFlying, &isFlying)
-/**
- * @brief Nonzero if the system thinks it is tumbled/crashed
- */
 LOG_ADD_CORE(LOG_UINT8, isTumbled, &isTumbled)
 LOG_GROUP_STOP(spv)

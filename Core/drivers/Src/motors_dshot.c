@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "motors.h"
 #include "dma.h"
+#include "optimization.h"
 
 struct {
 	TIM_HandleTypeDef* tim;
@@ -14,6 +15,7 @@ struct {
 	uint32_t TIM_DMA_CC;
 } static MotorTim[4];
 
+static uint16_t thrustValue[4];
 static bool isInit = false;
 
 static void dshot_dma_tc_callback(DMA_HandleTypeDef *hdma) {
@@ -105,8 +107,11 @@ static void dshot_prepare_dmabuffer(uint32_t* motor_dmabuffer, uint16_t value) {
 }
 
 void motorsDshotSetRatio(uint8_t id, uint16_t thrust) {
-	if (!isInit)
+	if (unlikely(!isInit))
 		return;
+
+	ASSERT(id < NBR_OF_MOTORS);
+	thrustValue[id] = thrust;
 
 	uint32_t value = thrust * 2048 / 65536;
 	thrust = value & 0xFFFF;
@@ -136,4 +141,8 @@ void motorsDshotSetRatio(uint8_t id, uint16_t thrust) {
 		default:
 			break;
 	}
+}
+
+uint16_t motorsDshotGetValue(uint8_t id) {
+	return thrustValue[id];
 }

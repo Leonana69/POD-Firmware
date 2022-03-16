@@ -5,6 +5,7 @@
 #include "cfassert.h"
 #include "debug.h"
 #include "motors.h"
+#include "optimization.h"
 
 struct {
 	TIM_HandleTypeDef* tim;
@@ -13,8 +14,8 @@ struct {
 
 #define MOTORS_TIM_BITS 8
 
+static uint16_t thrustValue[4];
 static bool isInit = false;
-
 static void motorsBeep(uint8_t id, uint16_t cycle, uint16_t ratio, bool enable);
 
 void motorsPwmInit() {
@@ -65,10 +66,15 @@ static uint16_t motorsThrustToPulse(uint16_t thrust) {
   return ((thrust) >> (16 - MOTORS_TIM_BITS) & ((1 << MOTORS_TIM_BITS) - 1));
 }
 
-void motorsPwmSetRatio(uint8_t id, uint16_t ithrust) {
-	if (isInit) {
-		ASSERT(id < NBR_OF_MOTORS);
-		uint16_t ratio = ithrust;
-		__HAL_TIM_SET_COMPARE(MotorTim[id].tim, MotorTim[id].channel, motorsThrustToPulse(ratio));
-	}
+void motorsPwmSetRatio(uint8_t id, uint16_t thrust) {
+	if (unlikely(!isInit))
+		return;
+	ASSERT(id < NBR_OF_MOTORS);
+	uint16_t ratio = thrust;
+	thrustValue[id] = thrust;
+	__HAL_TIM_SET_COMPARE(MotorTim[id].tim, MotorTim[id].channel, motorsThrustToPulse(ratio));
+}
+
+uint16_t motorsPwmGetValue(uint8_t id) {
+	return thrustValue[id];
 }

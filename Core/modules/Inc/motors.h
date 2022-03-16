@@ -18,5 +18,6 @@
 void motorsInit();
 bool motorsTest();
 void motorsSetRatio(uint8_t id, uint16_t thrust);
+uint16_t motorsGetValue(uint8_t id);
 
 #endif //__MOTORS_H__

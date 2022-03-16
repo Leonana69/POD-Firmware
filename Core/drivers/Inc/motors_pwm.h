@@ -7,5 +7,6 @@
 void motorsPwmInit();
 bool motorsPwmTest();
 void motorsPwmSetRatio(uint8_t id, uint16_t thrust);
+uint16_t motorsPwmGetValue(uint8_t id);
 
 #endif //__MOTORS_PWM_H__
