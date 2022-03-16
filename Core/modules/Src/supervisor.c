@@ -39,11 +39,12 @@
 /* Number of times in a row we need to see a condition before acting upon it */
 #define SUPERVISOR_HYSTERESIS_THRESHOLD 30
 
-static bool isFlying;
-static bool isTumbled;
+static bool isFlying = false;
+static bool isTumbled = false;
+static bool isLocked = true;
 
 bool supervisorCanFly() {
-	return (!isTumbled) && (!pmIsChargerConnected());
+	return (!isLocked) && (!isTumbled);
 }
 
 bool supervisorIsFlying() {
@@ -52,6 +53,14 @@ bool supervisorIsFlying() {
 
 bool supervisorIsTumbled() {
 	return isTumbled;
+}
+
+void supervisorUnlockDrone() {
+	isLocked = false;
+}
+
+void supervisorLockDrone() {
+	isLocked = true;
 }
 
 static bool isFlyingCheck() {
@@ -67,7 +76,7 @@ static bool isTumbledCheck(const sensorData_t *data) {
 	static uint32_t hysteresis = 0;
 	// We need a SUPERVISOR_HYSTERESIS_THRESHOLD amount of readings that indicate
 	// that we are tumbled before we act on it. This is to reduce false positives.
-	if (data->accel.z <= tolerance) {
+	if (data->accel.z < tolerance) {
 		hysteresis++;
 	if (hysteresis > SUPERVISOR_HYSTERESIS_THRESHOLD)
 		return true;

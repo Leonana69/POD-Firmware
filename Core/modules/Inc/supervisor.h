@@ -36,6 +36,9 @@ bool supervisorCanFly();
 bool supervisorIsFlying();
 bool supervisorIsTumbled();
 
+void supervisorUnlockDrone();
+void supervisorLockDrone();
+
 bool supervisorKalmanIsStateWithinBounds(const kalmanCoreData_t *this);
 
 #endif //__SUPERVISOR_H__

@@ -31,12 +31,13 @@
 #include "static_mem.h"
 #include "debug.h"
 #include "param.h"
+#include "supervisor.h"
 
 typedef enum {
-  linkEcho   = 0x00,
+  linkEcho = 0x00,
   linkSource = 0x01,
-  linkSink   = 0x02,
-} LinkNbr;
+  linkUnlockDrone = 0x02,
+} LinkChannel;
 
 static bool isInit = false;
 static uint16_t echoDelay = 0;
@@ -66,9 +67,8 @@ static void crtpSrvTask(void* prm) {
     crtpReceivePacketBlock(CRTP_PORT_LINK, &p);
     switch (p.channel) {
       case linkEcho:
-        if (echoDelay > 0) {
+        if (echoDelay > 0)
           osDelay(echoDelay);
-        }
         crtpSendPacketBlock(&p);
         break;
       case linkSource:
@@ -77,8 +77,9 @@ static void crtpSrvTask(void* prm) {
         strcpy((char*)p.data, "Bitcraze Crazyflie");
         crtpSendPacketBlock(&p);
         break;
-      case linkSink:
-        /* Ignore packet */
+      case linkUnlockDrone:
+        DEBUG_PRINT_CONSOLE("Drone Unlocked!\n");
+        supervisorUnlockDrone();
         break;
       default:
         break;

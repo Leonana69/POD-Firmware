@@ -207,10 +207,13 @@ static void stabilizerTask() {
 
 		checkEmergencyStopTimeout();
 
-		if (unlikely(emergencyStop))
-			powerStop();
-		else
+		if (likely(supervisorCanFly() && !emergencyStop)) {
 			powerDistributionUpdate(&control);
+		} else {
+			emergencyStop = false;
+			supervisorLockDrone();
+			powerStop();
+		}
 
 		calcSensorToOutputLatency(&sensorData);
 		tick++;
