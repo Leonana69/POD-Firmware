@@ -29,7 +29,6 @@
 #include "crtp.h"
 #include "console.h"
 #include "crtp_link.h"
-#include "crtp_platform.h"
 #include "param.h"
 #include "log.h"
 #include "_usart.h"
@@ -54,7 +53,6 @@ void commInit(void) {
   crtpSetLink(radiolinkGetLink());
 
   crtpLinkInit();
-  crtpPlatformInit();
   logInit();
   paramInit();
 
@@ -70,7 +68,6 @@ bool commTest(void) {
   pass &= radiolinkTest();
   // pass &= usblinkTest();
   pass &= crtpLinkTest();
-  pass &= crtpPlatformTest();
   pass &= logTest();
   pass &= paramTest();
   return pass;
