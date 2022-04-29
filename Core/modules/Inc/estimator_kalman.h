@@ -57,8 +57,9 @@
 #include <stdint.h>
 #include "stabilizer_types.h"
 
-void estimatorKalmanInit(void);
-bool estimatorKalmanTest(void);
+void estimatorKalmanInit();
+bool estimatorKalmanTest();
+void estimatorKalmanReset();
 void estimatorKalmanUpdate(state_t *state, const uint32_t tick);
 
 void estimatorKalmanGetEstimatedPos(point_t* pos);

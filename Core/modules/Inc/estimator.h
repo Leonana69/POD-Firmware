@@ -68,6 +68,7 @@ typedef struct {
 
 void estimatorInit();
 bool estimatorTest();
+void estimatorReset();
 void estimatorUpdate(state_t *state, const uint32_t tick);
 
 const char* estimatorGetName();

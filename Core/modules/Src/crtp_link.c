@@ -32,6 +32,7 @@
 #include "debug.h"
 #include "param.h"
 #include "supervisor.h"
+#include "estimator.h"
 
 typedef enum {
   linkEcho = 0x00,
@@ -80,6 +81,7 @@ static void crtpSrvTask(void* prm) {
       case linkUnlockDrone:
         DEBUG_PRINT_CONSOLE("Drone Unlocked!\n");
         supervisorUnlockDrone();
+        estimatorReset();
         break;
       default:
         break;

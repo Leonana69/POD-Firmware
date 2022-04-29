@@ -40,6 +40,7 @@ STATIC_MEM_QUEUE_ALLOC(measurementsQueue, MEASUREMENTS_QUEUE_SIZE, sizeof(measur
 typedef struct {
   void (*init)(void);
   bool (*test)(void);
+  void (*reset)(void);
   void (*update)(state_t *state, const uint32_t tick);
   const char* name;
 } Estimator;
@@ -50,13 +51,13 @@ static Estimator estimatorFunctions[] = {
 	{
 		.init = estimatorKalmanInit,
 		.test = estimatorKalmanTest,
+    .reset = estimatorKalmanReset,
 		.update = estimatorKalmanUpdate,
 		.name = "KALMAN",
 	},
 #ifdef OOT_ESTIMATOR
 	{
 		.init = estimatorOutOfTreeInit,
-		.deinit = NOT_IMPLEMENTED,
 		.test = estimatorOutOfTreeTest,
 		.update = estimatorOutOfTree,
 		.name = "OutOfTree",
@@ -71,7 +72,7 @@ void estimatorInit() {
   STATIC_MEM_QUEUE_CREATE(measurementsQueue);
 }
 
-bool estimatorTest(void) {
+bool estimatorTest() {
   return estimatorFunctions[currentEstimator].test();
 }
 
@@ -81,6 +82,10 @@ void estimatorUpdate(state_t *state, const uint32_t tick) {
 
 const char* estimatorGetName() {
   return estimatorFunctions[currentEstimator].name;
+}
+
+void estimatorReset() {
+  estimatorFunctions[currentEstimator].reset();
 }
 
 void estimatorEnqueue(const measurement_t *measurement) {

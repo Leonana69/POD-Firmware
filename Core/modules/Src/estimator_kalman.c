@@ -147,7 +147,6 @@ static const bool useBaroUpdate = false;
 #endif
 
 static void kalmanTask();
-static void estimatorKalmanReset();
 static bool predictStateForward(uint32_t osTick, float dt);
 static bool updateQueuedMeasurements(const uint32_t tick);
 
