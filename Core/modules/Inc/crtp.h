@@ -37,40 +37,48 @@
 #define CRTP_IS_NULL_PACKET(P) ((P.header & 0xF3) == 0xF3)
 
 typedef enum {
-  CRTP_PORT_CONSOLE          = 0x00,
-  CRTP_PORT_PARAM            = 0x02,
-  CRTP_PORT_SETPOINT         = 0x03,
-  CRTP_PORT_MEM              = 0x04,
-  CRTP_PORT_LOG              = 0x05,
-  CRTP_PORT_LOCALIZATION     = 0x06,
-  CRTP_PORT_SETPOINT_GENERIC = 0x07,
-  CRTP_PORT_SETPOINT_HL      = 0x08,
-  CRTP_PORT_PLATFORM         = 0x0D,
-  CRTP_PORT_LINK             = 0x0F,
+	CRTP_PORT_CONSOLE          = 0x00,
+	CRTP_PORT_PARAM            = 0x02,
+	CRTP_PORT_SETPOINT         = 0x03,
+	CRTP_PORT_MEM              = 0x04,
+	CRTP_PORT_LOG              = 0x05,
+	CRTP_PORT_LOCALIZATION     = 0x06,
+	CRTP_PORT_SETPOINT_GENERIC = 0x07,
+	CRTP_PORT_SETPOINT_HL      = 0x08,
+	CRTP_PORT_PLATFORM         = 0x0D,
+	CRTP_PORT_LINK             = 0x0F,
 } CRTPPort;
 
+typedef enum {
+	CRTP_LINK_RADIO = 0,
+	CRTP_LINK_USB	= 1,
+	CRTP_LINK_NUMBER,
+} CRTPLink;
+
+#define CRTP_LINK_RECEIVE_TIMEOUT 50
+
 typedef struct _CRTPPacket {
-  uint8_t size;                         //< Size of data
-  union {
-    struct {
-      union {
-        uint8_t header;                 //< Header selecting channel and port
-        struct {
+	uint8_t size;
+	union {
+		struct {
+			union {
+				uint8_t header;
+				struct {
 #ifndef CRTP_HEADER_COMPAT
-          uint8_t channel     : 2;      //< Selected channel within port
-          uint8_t reserved    : 2;
-          uint8_t port        : 4;      //< Selected port
+					uint8_t channel     : 2;
+					uint8_t reserved    : 2;
+					uint8_t port        : 4;
 #else
-          uint8_t channel  : 2;
-          uint8_t port     : 4;
-          uint8_t reserved : 2;
+					uint8_t channel  : 2;
+					uint8_t port     : 4;
+					uint8_t reserved : 2;
 #endif
-        };
-      };
-      uint8_t data[CRTP_MAX_DATA_SIZE]; // < Data
-    };
-    uint8_t raw[CRTP_MAX_DATA_SIZE + 1];  //< The full packet "raw"
-  };
+				};
+			};
+			uint8_t data[CRTP_MAX_DATA_SIZE];
+		};
+		uint8_t raw[CRTP_MAX_DATA_SIZE + 1];
+	};
 } __attribute__((packed)) CRTPPacket;
 
 typedef void (*CrtpCallback)(CRTPPacket *);
@@ -163,11 +171,11 @@ struct crtpLinkOperations {
   int (*setEnable)(bool enable);
   int (*sendPacket)(CRTPPacket *pk);
   int (*receivePacket)(CRTPPacket *pk);
-  bool (*isConnected)(void);
-  int (*reset)(void);
+  bool (*isConnected)();
+  int (*reset)();
 };
 
-void crtpSetLink(struct crtpLinkOperations * lk);
+void crtpSetLink(CRTPLink type, struct crtpLinkOperations *lk);
 
 /**
  * Check if the connection timeout has been reached, otherwise
@@ -175,7 +183,7 @@ void crtpSetLink(struct crtpLinkOperations * lk);
  *
  * @return true if conencted, otherwise false
  */
-bool crtpIsConnected(void);
+bool crtpIsConnected(CRTPLink type);
 
 /**
  * Reset the CRTP communication by flushing all the queues that
@@ -183,6 +191,6 @@ bool crtpIsConnected(void);
  *
  * @return 0 for success
  */
-int crtpReset(void);
+int crtpReset();
 
 #endif /*CRTP_H_*/

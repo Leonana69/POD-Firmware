@@ -35,6 +35,7 @@
 #include "radiolink.h"
 #include "crtp_platform.h"
 #include "syslink.h"
+#include "usblink.h"
 // #include "crtp_localization_service.h"
 
 #include "debug.h"
@@ -48,9 +49,9 @@ void commInit(void) {
 	crtpInit();
   consoleInit();
   radiolinkInit();
-  // usblinkInit();
-  // TODO: add choice between usb and radio
-  crtpSetLink(radiolinkGetLink());
+  usblinkInit();
+  crtpSetLink(CRTP_LINK_RADIO, radiolinkGetLink());
+  crtpSetLink(CRTP_LINK_USB, usblinkGetLink());
   crtpPlatformInit();
   crtpLinkInit();
   logInit();
@@ -67,7 +68,7 @@ bool commTest(void) {
   pass &= consoleTest();
   pass &= radiolinkTest();
   pass &= crtpPlatformTest();
-  // pass &= usblinkTest();
+  pass &= usblinkTest();
   pass &= crtpLinkTest();
   pass &= logTest();
   pass &= paramTest();

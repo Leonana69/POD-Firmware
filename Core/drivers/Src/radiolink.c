@@ -39,19 +39,19 @@
 #include "cfassert.h"
 #include "debug.h"
 
-#define RADIOLINK_TX_QUEUE_SIZE 	(1)
-#define RADIOLINK_CRTP_QUEUE_SIZE (5)
-#define RADIO_ACTIVITY_TIMEOUT_MS (1000)
+#define RADIOLINK_TX_QUEUE_SIZE		(1)
+#define RADIOLINK_CRTP_QUEUE_SIZE	(5)
+#define RADIO_ACTIVITY_TIMEOUT_MS	(1000)
 
-#define RADIOLINK_P2P_QUEUE_SIZE (5)
+#define RADIOLINK_P2P_QUEUE_SIZE	(5)
 
 STATIC_MEM_QUEUE_ALLOC(txQueue, RADIOLINK_TX_QUEUE_SIZE, sizeof(SyslinkPacket));
-STATIC_MEM_QUEUE_ALLOC(crtpPacketDelivery, RADIOLINK_CRTP_QUEUE_SIZE, sizeof(CRTPPacket));
+STATIC_MEM_QUEUE_ALLOC(crtpPacketDeliveryRadio, RADIOLINK_CRTP_QUEUE_SIZE, sizeof(CRTPPacket));
 
 static bool isInit;
 
-static int radiolinkSendCRTPPacket(CRTPPacket *p);
 static int radiolinkSetEnable(bool enable);
+static int radiolinkSendCRTPPacket(CRTPPacket *p);
 static int radiolinkReceiveCRTPPacket(CRTPPacket *p);
 
 //Local RSSI variable used to enable logging of RSSI values from Radio
@@ -62,158 +62,157 @@ static uint32_t lastPacketTick;
 static volatile P2PCallback p2p_callback;
 
 static bool radiolinkIsConnected(void) {
-  return (osKernelGetTickCount() - lastPacketTick) < RADIO_ACTIVITY_TIMEOUT_MS;
+	return (osKernelGetTickCount() - lastPacketTick) < RADIO_ACTIVITY_TIMEOUT_MS;
 }
 
 static struct crtpLinkOperations radiolinkOp = {
-  .setEnable         = radiolinkSetEnable,
-  .sendPacket        = radiolinkSendCRTPPacket,
-  .receivePacket     = radiolinkReceiveCRTPPacket,
-  .isConnected       = radiolinkIsConnected
+	.setEnable         = radiolinkSetEnable,
+	.sendPacket        = radiolinkSendCRTPPacket,
+	.receivePacket     = radiolinkReceiveCRTPPacket,
+	.isConnected       = radiolinkIsConnected
 };
 
 void radiolinkInit(void) {
-  if (isInit)
-    return;
+	if (isInit)
+		return;
 
-  STATIC_MEM_QUEUE_CREATE(txQueue);
-  STATIC_MEM_QUEUE_CREATE(crtpPacketDelivery);
+	STATIC_MEM_QUEUE_CREATE(txQueue);
+	STATIC_MEM_QUEUE_CREATE(crtpPacketDeliveryRadio);
 
-  ASSERT(crtpPacketDelivery);
-  syslinkInit();
+	syslinkInit();
 
-  radiolinkSetChannel(configblockGetRadioChannel());
-  osDelay(3); // there shuold be an interval, otherwise it won't get the response from nrf
-  radiolinkSetDatarate(configblockGetRadioSpeed());
-  osDelay(2);
-  radiolinkSetAddress(configblockGetRadioAddress());
-  isInit = true;
+	radiolinkSetChannel(configblockGetRadioChannel());
+	osDelay(3); // there shuold be an interval, otherwise it won't get the response from nrf
+	radiolinkSetDatarate(configblockGetRadioSpeed());
+	osDelay(2);
+	radiolinkSetAddress(configblockGetRadioAddress());
+	isInit = true;
 }
 
 bool radiolinkTest(void) {
-  return syslinkTest();
+	return syslinkTest();
 }
 
 void radiolinkSetChannel(uint8_t channel) {
-  SyslinkPacket slp;
+	SyslinkPacket slp;
 
-  slp.type = SYSLINK_RADIO_CHANNEL;
-  slp.length = 1;
-  slp.data[0] = channel;
-  syslinkSendPacket(&slp);
+	slp.type = SYSLINK_RADIO_CHANNEL;
+	slp.length = 1;
+	slp.data[0] = channel;
+	syslinkSendPacket(&slp);
 }
 
 void radiolinkSetDatarate(uint8_t datarate) {
-  SyslinkPacket slp;
+	SyslinkPacket slp;
 
-  slp.type = SYSLINK_RADIO_DATARATE;
-  slp.length = 1;
-  slp.data[0] = datarate;
-  syslinkSendPacket(&slp);
+	slp.type = SYSLINK_RADIO_DATARATE;
+	slp.length = 1;
+	slp.data[0] = datarate;
+	syslinkSendPacket(&slp);
 }
 
 void radiolinkSetAddress(uint64_t address) {
-  SyslinkPacket slp;
+	SyslinkPacket slp;
 
-  slp.type = SYSLINK_RADIO_ADDRESS;
-  slp.length = 5;
-  memcpy(&slp.data[0], &address, 5);
-  syslinkSendPacket(&slp);
+	slp.type = SYSLINK_RADIO_ADDRESS;
+	slp.length = 5;
+	memcpy(&slp.data[0], &address, 5);
+	syslinkSendPacket(&slp);
 }
 
 void radiolinkSetPowerDbm(int8_t powerDbm) {
-  SyslinkPacket slp;
+	SyslinkPacket slp;
 
-  slp.type = SYSLINK_RADIO_POWER;
-  slp.length = 1;
-  slp.data[0] = powerDbm;
-  syslinkSendPacket(&slp);
+	slp.type = SYSLINK_RADIO_POWER;
+	slp.length = 1;
+	slp.data[0] = powerDbm;
+	syslinkSendPacket(&slp);
 }
 
 void radiolinkSyslinkDispatch(SyslinkPacket *slp) {
-  static SyslinkPacket txPacket;
-  if (slp->type == SYSLINK_RADIO_RAW || slp->type == SYSLINK_RADIO_RAW_BROADCAST) {
-    lastPacketTick = osKernelGetTickCount();
-  }
+	static SyslinkPacket txPacket;
+	if (slp->type == SYSLINK_RADIO_RAW || slp->type == SYSLINK_RADIO_RAW_BROADCAST) {
+		lastPacketTick = osKernelGetTickCount();
+	}
 
-  if (slp->type == SYSLINK_RADIO_RAW) {
-    slp->length--; // Decrease to get CRTP size.
-    // Assert that we are not dopping any packets
-    ASSERT(osMessageQueuePut(crtpPacketDelivery, &slp->length, 0, 0) == osOK);
-    ledseqRun(&seq_linkUp);
-    // If a radio packet is received, one can be sent
-    if (osMessageQueueGet(txQueue, &txPacket, 0, 0) == osOK) {
-      ledseqRun(&seq_linkDown);
-      syslinkSendPacket(&txPacket);
-    }
-  } else if (slp->type == SYSLINK_RADIO_RAW_BROADCAST) {
-    slp->length--; // Decrease to get CRTP size.
-    // broadcasts are best effort, so no need to handle the case where the queue is full
-    osMessageQueuePut(crtpPacketDelivery, &slp->length, 0, 0);
-    ledseqRun(&seq_linkUp);
-    // no ack for broadcasts
-  } else if (slp->type == SYSLINK_RADIO_RSSI) {
-    //Extract RSSI sample sent from radio
-    memcpy(&rssi, slp->data, sizeof(uint8_t)); //rssi will not change on disconnect
-  } else if (slp->type == SYSLINK_RADIO_P2P_BROADCAST) {
-    ledseqRun(&seq_linkUp);
-    P2PPacket p2pp;
-    p2pp.port = slp->data[0];
-    p2pp.rssi = slp->data[1];
-    memcpy(&p2pp.data[0], &slp->data[2], slp->length - 2);
-    p2pp.size = slp->length;
-    if (p2p_callback)
-      p2p_callback(&p2pp);
-  }
+	if (slp->type == SYSLINK_RADIO_RAW) {
+		slp->length--; // Decrease to get CRTP size.
+		// Assert that we are not dopping any packets
+		ASSERT(osMessageQueuePut(crtpPacketDeliveryRadio, &slp->length, 0, 0) == osOK);
+		ledseqRun(&seq_linkUp);
+		// If a radio packet is received, one can be sent
+		if (osMessageQueueGet(txQueue, &txPacket, NULL, 0) == osOK) {
+			ledseqRun(&seq_linkDown);
+			syslinkSendPacket(&txPacket);
+		}
+	} else if (slp->type == SYSLINK_RADIO_RAW_BROADCAST) {
+		slp->length--; // Decrease to get CRTP size.
+		// broadcasts are best effort, so no need to handle the case where the queue is full
+		osMessageQueuePut(crtpPacketDeliveryRadio, &slp->length, 0, 0);
+		ledseqRun(&seq_linkUp);
+		// no ack for broadcasts
+	} else if (slp->type == SYSLINK_RADIO_RSSI) {
+		//Extract RSSI sample sent from radio
+		memcpy(&rssi, slp->data, sizeof(uint8_t)); //rssi will not change on disconnect
+	} else if (slp->type == SYSLINK_RADIO_P2P_BROADCAST) {
+		ledseqRun(&seq_linkUp);
+		P2PPacket p2pp;
+		p2pp.port = slp->data[0];
+		p2pp.rssi = slp->data[1];
+		memcpy(&p2pp.data[0], &slp->data[2], slp->length - 2);
+		p2pp.size = slp->length;
+		if (p2p_callback)
+			p2p_callback(&p2pp);
+	}
 
-  isConnected = radiolinkIsConnected();
+	isConnected = radiolinkIsConnected();
 }
 
 static int radiolinkReceiveCRTPPacket(CRTPPacket *p) {
-  if (osMessageQueueGet(crtpPacketDelivery, p, 0, 100) == osOK)
-    return 0;
-  return -1;
+	if (osMessageQueueGet(crtpPacketDeliveryRadio, p, NULL, CRTP_LINK_RECEIVE_TIMEOUT) == osOK)
+		return 0;
+	return -1;
 }
 
 void p2pRegisterCB(P2PCallback cb) {
-    p2p_callback = cb;
+	p2p_callback = cb;
 }
 
 static int radiolinkSendCRTPPacket(CRTPPacket *p) {
-  static SyslinkPacket slp;
+	static SyslinkPacket slp;
 
-  ASSERT(p->size <= CRTP_MAX_DATA_SIZE);
+	ASSERT(p->size <= CRTP_MAX_DATA_SIZE);
 
-  slp.type = SYSLINK_RADIO_RAW;
-  slp.length = p->size + 1;
-  memcpy(slp.data, &p->header, p->size + 1);
-  if (osMessageQueuePut(txQueue, &slp, 0, 100) == osOK)
-    return 1;
+	slp.type = SYSLINK_RADIO_RAW;
+	slp.length = p->size + 1;
+	memcpy(slp.data, &p->header, p->size + 1);
+	if (osMessageQueuePut(txQueue, &slp, 0, 100) == osOK)
+		return 1;
 
-  return 0;
+	return 0;
 }
 
 bool radiolinkSendP2PPacketBroadcast(P2PPacket *p) {
-  static SyslinkPacket slp;
+	static SyslinkPacket slp;
 
-  ASSERT(p->size <= P2P_MAX_DATA_SIZE);
+	ASSERT(p->size <= P2P_MAX_DATA_SIZE);
 
-  slp.type = SYSLINK_RADIO_P2P_BROADCAST;
-  slp.length = p->size + 1;
-  memcpy(slp.data, p->raw, p->size + 1);
+	slp.type = SYSLINK_RADIO_P2P_BROADCAST;
+	slp.length = p->size + 1;
+	memcpy(slp.data, p->raw, p->size + 1);
 
-  syslinkSendPacket(&slp);
-  ledseqRun(&seq_linkDown);
+	syslinkSendPacket(&slp);
+	ledseqRun(&seq_linkDown);
 
-  return true;
+	return true;
 }
 
 struct crtpLinkOperations * radiolinkGetLink() {
-  return &radiolinkOp;
+	return &radiolinkOp;
 }
 
 static int radiolinkSetEnable(bool enable) {
-  return 0;
+	return 0;
 }
 
 LOG_GROUP_START(radio)

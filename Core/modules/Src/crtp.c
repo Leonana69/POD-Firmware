@@ -44,7 +44,7 @@ static struct crtpLinkOperations nopLink = {
 	.receivePacket = (void*) nopFunc,
 };
 
-static struct crtpLinkOperations *link = &nopLink;
+static struct crtpLinkOperations *link[CRTP_LINK_NUMBER] = { &nopLink, &nopLink };
 
 #define STATS_INTERVAL 500
 static struct {
@@ -120,13 +120,13 @@ int crtpGetFreeTxQueuePackets(void) {
 void crtpTxTask() {
 	CRTPPacket p;
 
-	while (link == &nopLink)
+	while (link[CRTP_LINK_RADIO] == &nopLink || link[CRTP_LINK_USB] == &nopLink)
 		osDelay(100);
 
 	while (1) {
 		if (osMessageQueueGet(txQueue, &p, 0, osWaitForever) == osOK) {
-			/*! Keep testing, if the link changes to USB it will go though */
-			while (link->sendPacket(&p) == false)
+			/*! Keep testing, if the link[CRTP_LINK_RADIO] changes to USB it will go though */
+			while (link[CRTP_LINK_RADIO]->sendPacket(&p) == false)
 				osDelay(10);
 			stats.txCount++;
 			updateStats();
@@ -137,11 +137,12 @@ void crtpTxTask() {
 void crtpRxTask() {
 	CRTPPacket p;
 
-	while (link == &nopLink)
+	while (link[CRTP_LINK_RADIO] == &nopLink || link[CRTP_LINK_USB] == &nopLink)
 		osDelay(100);
 
 	while (1) {
-		if (!link->receivePacket(&p)) {
+		DEBUG_PRINT_CONSOLE("W%lld\n", usecTimerStamp());
+		if (!link[CRTP_LINK_RADIO]->receivePacket(&p)) {
 			if (queues[p.port])
 				/*! Block, since we should never drop a packet */
 				osMessageQueuePut(queues[p.port], &p, 0, osWaitForever);
@@ -151,6 +152,22 @@ void crtpRxTask() {
 
 			stats.rxCount++;
 			updateStats();
+		}
+
+		// DEBUG_PRINT_CONSOLE("B %lld\n", usecTimerStamp());
+		if (!link[CRTP_LINK_USB]->receivePacket(&p)) {
+			DEBUG_PRINT_CONSOLE("$ USB\n");
+			// if (queues[p.port])
+			// 	/*! Block, since we should never drop a packet */
+			// 	osMessageQueuePut(queues[p.port], &p, 0, osWaitForever);
+
+			// if (callbacks[p.port])
+			// 	callbacks[p.port](&p);
+
+			// stats.rxCount++;
+			// updateStats();
+		} else {
+			DEBUG_PRINT_CONSOLE("NU\n");
 		}
 	}
 }
@@ -176,31 +193,25 @@ int crtpSendPacketBlock(CRTPPacket *p) {
 	return osMessageQueuePut(txQueue, p, 0, osWaitForever);
 }
 
-int crtpReset(void) {
+int crtpReset() {
 	osMessageQueueReset(txQueue);
-	if (link->reset) {
-		link->reset();
-	}
-
+	for (int i = 0; i < CRTP_LINK_NUMBER; i++)
+		if (link[i]->reset)
+			link[i]->reset();
 	return 0;
 }
 
-bool crtpIsConnected(void) {
-	if (link->isConnected)
-		return link->isConnected();
+bool crtpIsConnected(CRTPLink type) {
+	if (link[type]->isConnected)
+		return link[type]->isConnected();
 	return true;
 }
 
-void crtpSetLink(struct crtpLinkOperations * lk) {
-	if (link)
-		link->setEnable(false);
+void crtpSetLink(CRTPLink type, struct crtpLinkOperations *lk) {
+	ASSERT(lk);
 
-	if (lk)
-		link = lk;
-	else
-		link = &nopLink;
-
-	link->setEnable(true);
+	link[type] = lk;
+	link[type]->setEnable(true);
 }
 
 static void clearStats() {

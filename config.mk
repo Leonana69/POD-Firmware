@@ -26,7 +26,7 @@ C_SOURCES += usec_timer.c eprintf.c cfassert.c static_mem.c configblock.c cal.c 
 # drivers
 VPATH += Core/drivers/Src
 C_SOURCES += _usart.c _tim.c _i2c.c led.c eeprom.c syslink.c radiolink.c pm.c sensors_bmi088_bmp388.c \
-	tof.c _spi.c flow.c sensors_bmi270_bmp384.c motors_pwm.c
+	tof.c _spi.c flow.c sensors_bmi270_bmp384.c motors_pwm.c usblink.c
 
 ifeq ($(PLATFORM), POD)
 C_SOURCES += motors_dshot.c

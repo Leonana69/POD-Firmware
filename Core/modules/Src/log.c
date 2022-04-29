@@ -808,7 +808,7 @@ void logRunBlock(void *arg) {
 
   // Check if the connection is still up, oherwise disable
   // all the logging and flush all the CRTP queues.
-  if (!crtpIsConnected()) {
+  if (!crtpIsConnected(CRTP_LINK_RADIO)) {
     logReset();
     crtpReset();
   } else {
