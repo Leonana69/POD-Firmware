@@ -33,6 +33,7 @@
 
 void stabilizerInit();
 bool stabilizerTest();
+void stabilizerReset();
 
 /**
  * Enable emergency stop, will shut-off energy to the motors.

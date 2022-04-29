@@ -10,14 +10,20 @@
 static ControllerType currentController = CONTROLLER_TYPE;
 
 typedef struct {
-  void (*init)(void);
-  bool (*test)(void);
+  void (*init)();
+  bool (*test)();
+  void (*reset)();
   void (*update)(control_t *control, setpoint_t *setpoint, const sensorData_t *sensors, const state_t *state, const uint32_t tick);
   const char* name;
 } Controller;
 
 static Controller controllerFunctions[] = {
-  { .init = controllerPidInit, .test = controllerPidTest, .update = controllerPidUpdate, .name = "PID" },
+  {
+    .init = controllerPidInit,
+    .test = controllerPidTest,
+    .reset = controllerPidReset,
+    .update = controllerPidUpdate,
+    .name = "PID" },
   // { .init = controllerMellingerInit, .test = controllerMellingerTest, .update = controllerMellinger, .name = "Mellinger" },
   // { .init = controllerINDIInit, .test = controllerINDITest, .update = controllerINDI, .name = "INDI" },
 };
@@ -29,6 +35,10 @@ void controllerInit() {
 
 bool controllerTest() {
   return controllerFunctions[currentController].test();
+}
+
+void controllerReset() {
+  controllerFunctions[currentController].reset();
 }
 
 void controllerUpdate(control_t *control, setpoint_t *setpoint, const sensorData_t *sensors, const state_t *state, const uint32_t tick) {

@@ -28,7 +28,7 @@ static float r_pitch;
 static float r_yaw;
 static float accelz;
 
-void controllerPidInit(void) {
+void controllerPidInit() {
 	if (isInit)
 		return;
   controllerPidAttitudeInit();
@@ -36,8 +36,14 @@ void controllerPidInit(void) {
 	isInit = true;
 }
 
-bool controllerPidTest(void) {
+bool controllerPidTest() {
   return isInit;
+}
+
+void controllerPidReset() {
+  controllerPidAttitudeResetAll();
+  controllerPidPositionResetAll(false);
+  attitudeTarget.yaw = 0;
 }
 
 void controllerPidUpdate(control_t *control, setpoint_t *setpoint,
@@ -110,6 +116,7 @@ void controllerPidUpdate(control_t *control, setpoint_t *setpoint,
     attitudeTarget.yaw = state->attitude.yaw;
   }
 
+  /** For logging purpose */
 	cmd_thrust = control->thrust;
 	cmd_roll = control->roll;
 	cmd_pitch = control->pitch;

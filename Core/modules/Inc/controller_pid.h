@@ -30,6 +30,7 @@
 
 void controllerPidInit();
 bool controllerPidTest();
+void controllerPidReset();
 void controllerPidUpdate(control_t *control, setpoint_t *setpoint,
                                          const sensorData_t *sensors,
                                          const state_t *state,

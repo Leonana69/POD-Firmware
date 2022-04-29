@@ -139,8 +139,7 @@ void StartDefaultTask(void *argument)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
-  for(;;)
-  {
+  for (;;) {
     osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */

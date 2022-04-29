@@ -31,6 +31,7 @@
 #include "commander.h"
 #include "crtp.h"
 #include "stabilizer.h"
+#include "debug.h"
 
 
 static bool isInit = false;
@@ -49,6 +50,11 @@ void crtpCommanderInit() {
 bool crtpCommanderTest() {
 	return isInit;
 }
+
+enum crtpCommanderChannel {
+  DEFAULT_CHANNEL = 0,
+  KEEP_ALIVE_CHANNEL = 1,
+};
 
 enum crtpSetpointGenericChannel {
   SET_SETPOINT_CHANNEL = 0,
@@ -114,14 +120,29 @@ static void commanderCrtpCB(CRTPPacket* pk) {
 
   stabilizerSetEmergencyStopTimeout(300);
 
-  if (pk->port == CRTP_PORT_SETPOINT && pk->channel == 0) {
-    crtpCommanderRpytDecodeSetpoint(&setpoint, pk);
+  static int cnt = 0;
+
+  if (pk->port == CRTP_PORT_SETPOINT) {
+    switch (pk->channel) {
+      default:
+      case DEFAULT_CHANNEL:
+        crtpCommanderRpytDecodeSetpoint(&setpoint, pk);
+        break;
+      case KEEP_ALIVE_CHANNEL:
+        DEBUG_PRINT_CONSOLE("k:%.2f\n", setpoint.position.z);
+        break;
+    }
+    
     commanderSetSetpoint(&setpoint);
   } else if (pk->port == CRTP_PORT_SETPOINT_GENERIC) {
     switch (pk->channel) {
     case SET_SETPOINT_CHANNEL:
       crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
       commanderSetSetpoint(&setpoint);
+      if (cnt++ == 10) {
+        cnt = 0;
+        DEBUG_PRINT_CONSOLE("%.2f\n", setpoint.position.z);
+      }
       break;
     case META_COMMAND_CHANNEL:
         metaCmd = pk->data[0];

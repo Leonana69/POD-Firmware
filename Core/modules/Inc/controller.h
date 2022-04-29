@@ -37,6 +37,7 @@ typedef enum {
 
 void controllerInit();
 bool controllerTest();
+void controllerReset();
 void controllerUpdate(control_t *control, setpoint_t *setpoint,
                                          const sensorData_t *sensors,
                                          const state_t *state,

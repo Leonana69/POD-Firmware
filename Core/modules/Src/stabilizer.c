@@ -162,7 +162,7 @@ void stabilizerInit() {
 	isInit = true;
 }
 
-bool stabilizerTest(void) {
+bool stabilizerTest() {
 	bool pass = true;
 
 	pass &= estimatorTest();
@@ -170,6 +170,11 @@ bool stabilizerTest(void) {
 	pass &= sensorsTest();
 	pass &= powerDistributionTest();
 	return pass;
+}
+
+void stabilizerReset() {
+	controllerReset();
+	estimatorReset();
 }
 
 /* The stabilizer loop runs at 1kHz (stock) or 500Hz (kalman). It is the
@@ -195,6 +200,7 @@ static void stabilizerTask() {
 		/*! The sensor should unlock at 1kHz */
 		sensorsWaitDataReady();
 		sensorsAcquire(&sensorData);
+
 		/*! Update the drone flight state */
 		supervisorUpdate(&sensorData);
 

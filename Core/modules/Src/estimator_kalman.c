@@ -123,19 +123,8 @@ static Axis3f accelLatest;
 static Axis3f gyroLatest;
 static bool quadIsFlying = false;
 
-
 // Data used to enable the task and stabilizer loop to run with minimal locking
 static state_t taskEstimatorState; // The estimator state produced by the task, copied to the stabilzer when needed.
-
-// Statistics
-// #define ONE_SECOND 1000
-// static STATS_CNT_RATE_DEFINE(updateCounter, ONE_SECOND);
-// static STATS_CNT_RATE_DEFINE(predictionCounter, ONE_SECOND);
-// static STATS_CNT_RATE_DEFINE(finalizeCounter, ONE_SECOND);
-// static STATS_CNT_RATE_DEFINE(measurementAppendedCounter, ONE_SECOND);
-// static STATS_CNT_RATE_DEFINE(measurementNotAppendedCounter, ONE_SECOND);
-
-// static rateSupervisor_t rateSupervisorContext;
 
 #define WARNING_HOLD_BACK_TIME 2000
 static uint32_t warningBlockTime = 0;
