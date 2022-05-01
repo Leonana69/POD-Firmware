@@ -71,21 +71,6 @@ void commanderSetSetpoint(setpoint_t *setpoint) {
   // crtpCommanderHighLevelStop();
 }
 
-void commanderNotifySetpointsStop(int remainValidMillisecs) {
-  uint32_t currentTime = osKernelGetTickCount();
-  int timeSetback = min(
-    COMMANDER_WDT_TIMEOUT_SHUTDOWN - (remainValidMillisecs),
-    currentTime
-  );
-
-	osMutexAcquire(setpointMutex, osWaitForever);
-	currentSetpoint.timestamp = currentTime - timeSetback;
-	osMutexRelease(setpointMutex);
-
-	// TODO: enable high level
-  // crtpCommanderHighLevelTellState(&lastState);
-}
-
 void commanderGetSetpoint(setpoint_t *setpoint, const state_t *state) {
 	memcpy(setpoint, &currentSetpoint, sizeof(setpoint_t));
   lastUpdate = setpoint->timestamp;

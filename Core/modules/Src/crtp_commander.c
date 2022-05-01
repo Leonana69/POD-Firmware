@@ -33,32 +33,29 @@
 #include "stabilizer.h"
 #include "debug.h"
 
-
 static bool isInit = false;
-
-static void commanderCrtpCB(CRTPPacket* pk);
+static setpoint_t setpoint;
+static void commanderSetpointCrtpCB(CRTPPacket* pk);
+static void commanderGenericCrtpCB(CRTPPacket* pk);
 
 void crtpCommanderInit() {
-  if (isInit)
-    return;
+	if (isInit)
+		return;
 
-  crtpRegisterPortCB(CRTP_PORT_SETPOINT, commanderCrtpCB);
-  crtpRegisterPortCB(CRTP_PORT_SETPOINT_GENERIC, commanderCrtpCB);
-  isInit = true;
+	crtpRegisterPortCB(CRTP_PORT_SETPOINT, commanderSetpointCrtpCB);
+	crtpRegisterPortCB(CRTP_PORT_SETPOINT_GENERIC, commanderGenericCrtpCB);
+	isInit = true;
 }
 
 bool crtpCommanderTest() {
 	return isInit;
 }
 
-enum crtpCommanderChannel {
-  DEFAULT_CHANNEL = 0,
-  KEEP_ALIVE_CHANNEL = 1,
-};
-
 enum crtpSetpointGenericChannel {
-  SET_SETPOINT_CHANNEL = 0,
-  META_COMMAND_CHANNEL = 1,
+	SET_SETPOINT_CHANNEL = 0,
+	SET_SETPOINT_USB_CHANNEL = 1,
+	KEEP_ALIVE_CHANNEL = 2,
+	CONFIG_USB_CHANNEL = 3,
 };
 
 /* Channel 1 of the generic commander port is used for "meta-commands"
@@ -76,83 +73,47 @@ enum crtpSetpointGenericChannel {
  * The maximum data size is 29 bytes.
  */
 
-/* To add a new packet:
- *   1 - Add a new type in the metaCommand_e enum.
- *   2 - Implement a decoder function with good documentation about the data
- *       structure and the intent of the packet.
- *   3 - Add the decoder function to the metaCommandDecoders array.
- *   4 - Create a new params group for your handler if necessary
- *   5 - Pull-request your change :-)
- */
+/* Decoder switch */
 
-/* ---===== 1 - metaCommand_e enum =====--- */
-enum metaCommand_e {
-  metaNotifySetpointsStop = 0,
-  nMetaCommands,
-};
-
-typedef void (*metaCommandDecoder_t)(const void *data, size_t datalen);
-
-/* ---===== 2 - Decoding functions =====--- */
-
-/* notifySetpointsStop meta-command. See commander.h function
- * commanderNotifySetpointsStop() for description and motivation.
- */
-struct notifySetpointsStopPacket {
-  uint32_t remainValidMillisecs;
-} __attribute__((packed));
-
-void notifySetpointsStopDecoder(const void *data, size_t datalen) {
-  ASSERT(datalen == sizeof(struct notifySetpointsStopPacket));
-  const struct notifySetpointsStopPacket *values = data;
-  commanderNotifySetpointsStop(values->remainValidMillisecs);
+void commanderSetpointCrtpCB(CRTPPacket* pk) {
+	if (pk->channel == 0) {
+		stabilizerSetEmergencyStopTimeout(300);
+		crtpCommanderRpytDecodeSetpoint(&setpoint, pk);
+		commanderSetSetpoint(&setpoint);
+	}
 }
 
- /* ---===== packetDecoders array =====--- */
-const static metaCommandDecoder_t metaCommandDecoders[] = {
-  [metaNotifySetpointsStop] = notifySetpointsStopDecoder,
-};
+void commanderGenericCrtpCB(CRTPPacket* pk) {
+	stabilizerSetEmergencyStopTimeout(300);
 
-/* Decoder switch */
-static void commanderCrtpCB(CRTPPacket* pk) {
-  static setpoint_t setpoint;
-  uint8_t metaCmd;
+	static int cnt = 0;
+	static bool enableUsbControl = false;
 
-  stabilizerSetEmergencyStopTimeout(300);
+	switch (pk->channel) {
+	case SET_SETPOINT_CHANNEL:
+		crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
+		break;
 
-  static int cnt = 0;
-
-  if (pk->port == CRTP_PORT_SETPOINT) {
-    switch (pk->channel) {
-      default:
-      case DEFAULT_CHANNEL:
-        crtpCommanderRpytDecodeSetpoint(&setpoint, pk);
-        break;
-      case KEEP_ALIVE_CHANNEL:
-        // debug
-        if ((cnt++ % 10) == 0)
-          DEBUG_PRINT_CONSOLE("k:%.2f\n", setpoint.position.z);
-        break;
-    }
-    
-    commanderSetSetpoint(&setpoint);
-  } else if (pk->port == CRTP_PORT_SETPOINT_GENERIC) {
-    switch (pk->channel) {
-    case SET_SETPOINT_CHANNEL:
-      crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
-      commanderSetSetpoint(&setpoint);
-      // debug
-      if (cnt > 30)
-        DEBUG_PRINT_CONSOLE("s:%.2f\n", setpoint.position.z);
-      break;
-    case META_COMMAND_CHANNEL:
-        metaCmd = pk->data[0];
-        if (metaCmd < nMetaCommands && (metaCommandDecoders[metaCmd] != NULL))
-          metaCommandDecoders[metaCmd](pk->data + 1, pk->size - 1);
-      break;
-    default:
-      /* Do nothing */
-      break;
-    }
-  }
+	case SET_SETPOINT_USB_CHANNEL:
+		if (enableUsbControl) {
+			crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
+			DEBUG_PRINT_CONSOLE("s:%.2f\n", setpoint.position.z);
+		}
+		break;
+	
+	case KEEP_ALIVE_CHANNEL:
+		// debug
+		if ((cnt++ % 10) == 0)
+		DEBUG_PRINT_CONSOLE("k:%.2f\n", setpoint.position.z);
+		break;
+	case CONFIG_USB_CHANNEL:
+		enableUsbControl = (bool) pk->data[0];
+		DEBUG_PRINT_CONSOLE("su:%d\n", pk->data[0]);
+		break;
+	default:
+		/*! Do nothing */
+		DEBUG_PRINT_CONSOLE("Invalid commander type!\n");
+		break;
+	}
+	commanderSetSetpoint(&setpoint);
 }

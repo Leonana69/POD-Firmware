@@ -72,17 +72,15 @@ static bool isFlyingCheck() {
 }
 
 static bool isTumbledCheck(const sensorData_t *data) {
-	const float tolerance = 0.2;
+	const float tolerance = -0.1;
 	static uint32_t hysteresis = 0;
 	// We need a SUPERVISOR_HYSTERESIS_THRESHOLD amount of readings that indicate
 	// that we are tumbled before we act on it. This is to reduce false positives.
 	if (data->accel.z < tolerance) {
-		hysteresis++;
-	if (hysteresis > SUPERVISOR_HYSTERESIS_THRESHOLD)
-		return true;
-	} else
-		hysteresis = 0;
-  return false;
+		if (hysteresis++ > SUPERVISOR_HYSTERESIS_THRESHOLD)
+			return true;
+	} else hysteresis = 0;
+	return false;
 }
 
 void supervisorUpdate(const sensorData_t *data) {
