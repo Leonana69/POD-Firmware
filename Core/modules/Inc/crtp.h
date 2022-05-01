@@ -55,7 +55,7 @@ typedef enum {
 	CRTP_LINK_NUMBER,
 } CRTPLink;
 
-#define CRTP_LINK_RECEIVE_TIMEOUT 50
+#define CRTP_LINK_RECEIVE_TIMEOUT 100
 
 typedef struct _CRTPPacket {
 	uint8_t size;

@@ -129,7 +129,9 @@ static void commanderCrtpCB(CRTPPacket* pk) {
         crtpCommanderRpytDecodeSetpoint(&setpoint, pk);
         break;
       case KEEP_ALIVE_CHANNEL:
-        DEBUG_PRINT_CONSOLE("k:%.2f\n", setpoint.position.z);
+        // debug
+        if ((cnt++ % 10) == 0)
+          DEBUG_PRINT_CONSOLE("k:%.2f\n", setpoint.position.z);
         break;
     }
     
@@ -139,10 +141,9 @@ static void commanderCrtpCB(CRTPPacket* pk) {
     case SET_SETPOINT_CHANNEL:
       crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
       commanderSetSetpoint(&setpoint);
-      if (cnt++ == 10) {
-        cnt = 0;
-        DEBUG_PRINT_CONSOLE("%.2f\n", setpoint.position.z);
-      }
+      // debug
+      if (cnt > 30)
+        DEBUG_PRINT_CONSOLE("s:%.2f\n", setpoint.position.z);
       break;
     case META_COMMAND_CHANNEL:
         metaCmd = pk->data[0];

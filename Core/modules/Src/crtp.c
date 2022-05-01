@@ -59,29 +59,33 @@ static struct {
 } stats;
 
 #define CRTP_NBR_OF_PORTS 16
-#define CRTP_TX_QUEUE_SIZE 120
-#define CRTP_RX_QUEUE_SIZE 16
+#define CRTP_RADIO_TX_QUEUE_SIZE 120
+#define CRTP_RADIO_RX_QUEUE_SIZE 16
+#define CRTP_USB_RX_QUEUE_SIZE 8
+#define CRTP_USB_TX_QUEUE_SIZE 4
 
 static osMessageQueueId_t txQueue;
 static osMessageQueueId_t queues[CRTP_NBR_OF_PORTS];
 
-static void crtpTxTask();
-static void crtpRxTask();
-
 static volatile CrtpCallback callbacks[CRTP_NBR_OF_PORTS];
 static void updateStats();
 
-STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(crtpTxTask, CRTP_TX_TASK_STACKSIZE);
-STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(crtpRxTask, CRTP_RX_TASK_STACKSIZE);
+static void crtpRadioTxTask();
+static void crtpRadioRxTask();
+static void crtpUsbRxTask();
+STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(crtpRadioTxTask, CRTP_RADIO_TX_TASK_STACKSIZE);
+STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(crtpRadioRxTask, CRTP_RADIO_RX_TASK_STACKSIZE);
+STATIC_MEM_TASK_ALLOC_STACK_NO_DMA_CCM_SAFE(crtpUsbRxTask, CRTP_USB_RX_TASK_STACKSIZE);
 
 void crtpInit(void) {
 	if (isInit)
 		return;
 
-	txQueue = osMessageQueueNew(CRTP_TX_QUEUE_SIZE, sizeof(CRTPPacket), NULL);
+	txQueue = osMessageQueueNew(CRTP_RADIO_TX_QUEUE_SIZE, sizeof(CRTPPacket), NULL);
 
-	STATIC_MEM_TASK_CREATE(crtpTxTask, crtpTxTask, CRTP_TX_TASK_NAME, NULL, CRTP_TX_TASK_PRI);
-	STATIC_MEM_TASK_CREATE(crtpRxTask, crtpRxTask, CRTP_RX_TASK_NAME, NULL, CRTP_RX_TASK_PRI);
+	STATIC_MEM_TASK_CREATE(crtpRadioTxTask, crtpRadioTxTask, CRTP_RADIO_TX_TASK_NAME, NULL, CRTP_TX_TASK_PRI);
+	STATIC_MEM_TASK_CREATE(crtpRadioRxTask, crtpRadioRxTask, CRTP_RADIO_RX_TASK_NAME, NULL, CRTP_RX_TASK_PRI);
+	STATIC_MEM_TASK_CREATE(crtpUsbRxTask, crtpUsbRxTask, CRTP_USB_RX_TASK_NAME, NULL, CRTP_RX_TASK_PRI);
 
 	isInit = true;
 }
@@ -92,7 +96,7 @@ bool crtpTest(void) {
 
 void crtpInitTaskQueue(CRTPPort portId) {
 	ASSERT(queues[portId] == NULL);
-	queues[portId] = osMessageQueueNew(CRTP_RX_QUEUE_SIZE, sizeof(CRTPPacket), NULL);
+	queues[portId] = osMessageQueueNew(CRTP_RADIO_RX_QUEUE_SIZE, sizeof(CRTPPacket), NULL);
 }
 
 int crtpReceivePacket(CRTPPort portId, CRTPPacket *p) {
@@ -117,7 +121,7 @@ int crtpGetFreeTxQueuePackets(void) {
 	return osMessageQueueGetSpace(txQueue);
 }
 
-void crtpTxTask() {
+void crtpRadioTxTask() {
 	CRTPPacket p;
 
 	while (link[CRTP_LINK_RADIO] == &nopLink || link[CRTP_LINK_USB] == &nopLink)
@@ -134,14 +138,11 @@ void crtpTxTask() {
 	}
 }
 
-void crtpRxTask() {
+void crtpRadioRxTask() {
 	CRTPPacket p;
-
-	while (link[CRTP_LINK_RADIO] == &nopLink || link[CRTP_LINK_USB] == &nopLink)
-		osDelay(100);
+	while (link[CRTP_LINK_RADIO] == &nopLink) osDelay(100);
 
 	while (1) {
-		DEBUG_PRINT_CONSOLE("W%lld\n", usecTimerStamp());
 		if (!link[CRTP_LINK_RADIO]->receivePacket(&p)) {
 			if (queues[p.port])
 				/*! Block, since we should never drop a packet */
@@ -153,21 +154,23 @@ void crtpRxTask() {
 			stats.rxCount++;
 			updateStats();
 		}
+	}
+}
 
-		// DEBUG_PRINT_CONSOLE("B %lld\n", usecTimerStamp());
+void crtpUsbRxTask() {
+	CRTPPacket p;
+	while (link[CRTP_LINK_USB] == &nopLink) osDelay(100);
+
+	while (1) {
 		if (!link[CRTP_LINK_USB]->receivePacket(&p)) {
-			DEBUG_PRINT_CONSOLE("$ USB\n");
+			// DEBUG_PRINT_CONSOLE("$ USB\n");
 			// if (queues[p.port])
 			// 	/*! Block, since we should never drop a packet */
 			// 	osMessageQueuePut(queues[p.port], &p, 0, osWaitForever);
+			// DEBUG_PRINT_CONSOLE("R:%d\n", p.port);
 
-			// if (callbacks[p.port])
-			// 	callbacks[p.port](&p);
-
-			// stats.rxCount++;
-			// updateStats();
-		} else {
-			DEBUG_PRINT_CONSOLE("NU\n");
+			if (callbacks[p.port])
+				callbacks[p.port](&p);
 		}
 	}
 }
