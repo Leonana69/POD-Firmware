@@ -84,7 +84,8 @@ void commanderSetpointCrtpCB(CRTPPacket* pk) {
 }
 
 void commanderGenericCrtpCB(CRTPPacket* pk) {
-	stabilizerSetEmergencyStopTimeout(300);
+	if (pk->channel != SET_SETPOINT_USB_CHANNEL)
+		stabilizerSetEmergencyStopTimeout(300);
 
 	static int cnt = 0;
 	static bool enableUsbControl = false;
@@ -97,14 +98,14 @@ void commanderGenericCrtpCB(CRTPPacket* pk) {
 	case SET_SETPOINT_USB_CHANNEL:
 		if (enableUsbControl) {
 			crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
-			DEBUG_PRINT_CONSOLE("s:%.2f\n", setpoint.position.z);
+			DEBUG_PRINT_CONSOLE("s:%.2f,%.1f\n", setpoint.velocity.x, setpoint.position.z);
 		}
 		break;
 	
 	case KEEP_ALIVE_CHANNEL:
 		// debug
 		if ((cnt++ % 10) == 0)
-		DEBUG_PRINT_CONSOLE("k:%.2f\n", setpoint.position.z);
+		DEBUG_PRINT_CONSOLE("k:%.2f,%.1f\n", setpoint.velocity.x, setpoint.position.z);
 		break;
 	case CONFIG_USB_CHANNEL:
 		enableUsbControl = (bool) pk->data[0];

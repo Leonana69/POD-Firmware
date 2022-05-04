@@ -56,7 +56,7 @@
 
 #ifdef POD
   // #define DEBUG_PRINT_ON_UART
-  #define BASE_THRUST 30000
+  #define BASE_THRUST 40000
   #define MIN_THRUST  1000
   #define MAX_THRUST  65000
   #define THRUST_SCALE 1000
