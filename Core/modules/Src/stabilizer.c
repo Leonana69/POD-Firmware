@@ -196,6 +196,7 @@ static void stabilizerTask() {
 	if (ENABLE_SELF_TEST && !selfTestPassed())
 		selfTestRun(&sensorData);
 
+	int cnt = 0;
 	while (1) {
 		/*! The sensor should unlock at 1kHz */
 		sensorsWaitDataReady();
@@ -223,6 +224,11 @@ static void stabilizerTask() {
 
 		calcSensorToOutputLatency(&sensorData);
 		tick++;
+
+		if (cnt++ % 500 == 0) {
+			cnt = 0;
+			DEBUG_PRINT("%d %d %d %d\n", (int)control.pitch, (int)control.roll, (int)control.yaw, (int)control.thrust);
+		}
 		// TODO: check the rate
 		// STATS_CNT_RATE_EVENT(&stabilizerRate);
 		// if (!rateSupervisorValidate(&rateSupervisorContext, osKernelGetTickCount())) {

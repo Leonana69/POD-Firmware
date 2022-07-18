@@ -72,7 +72,7 @@ static bool isFlyingCheck() {
 }
 
 static bool isTumbledCheck(const sensorData_t *data) {
-	const float tolerance = 0.1;
+	const float tolerance = -0.5;
 	static uint32_t hysteresis = 0;
 	// We need a SUPERVISOR_HYSTERESIS_THRESHOLD amount of readings that indicate
 	// that we are tumbled before we act on it. This is to reduce false positives.
@@ -87,8 +87,11 @@ void supervisorUpdate(const sensorData_t *data) {
 	isFlying = isFlyingCheck();
 	isTumbled = isTumbledCheck(data);
 
-	if (isTumbled && isFlying)
+	if (isTumbled && isFlying) {
 		stabilizerSetEmergencyStop();
+		DEBUG_PRINT_CONSOLE("SV: Stop.\n");
+	}
+		
 }
 
 bool supervisorKalmanIsStateWithinBounds(const kalmanCoreData_t* this) {

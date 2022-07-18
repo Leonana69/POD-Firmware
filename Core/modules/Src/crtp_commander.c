@@ -76,8 +76,11 @@ enum crtpSetpointGenericChannel {
 /* Decoder switch */
 
 void commanderSetpointCrtpCB(CRTPPacket* pk) {
-	if (pk->channel == 0) {
+	if (pk->channel == SET_SETPOINT_CHANNEL) {
 		stabilizerSetEmergencyStopTimeout(300);
+		crtpCommanderRpytDecodeSetpoint(&setpoint, pk);
+		commanderSetSetpoint(&setpoint);
+	} else if (pk->channel == SET_SETPOINT_USB_CHANNEL) {
 		crtpCommanderRpytDecodeSetpoint(&setpoint, pk);
 		commanderSetSetpoint(&setpoint);
 	}
@@ -98,7 +101,9 @@ void commanderGenericCrtpCB(CRTPPacket* pk) {
 	case SET_SETPOINT_USB_CHANNEL:
 		if (enableUsbControl) {
 			crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
-			DEBUG_PRINT_CONSOLE("s:%.2f,%.1f\n", setpoint.velocity.x, setpoint.position.z);
+			// aman and maansi's project
+			DEBUG_PRINT_CONSOLE("s:%.2f,%.1f\n", setpoint.velocity.x, setpoint.attitudeRate.yaw);
+			setpoint.attitudeRate.yaw = 0;
 		}
 		break;
 	
