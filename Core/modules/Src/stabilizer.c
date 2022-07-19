@@ -51,8 +51,6 @@ static bool isInit = false;
 static bool emergencyStop = false;
 static int emergencyStopTimeout = EMERGENCY_STOP_TIMEOUT_DISABLED;
 
-static uint32_t inToOutLatency;
-
 // State variables for the stabilizer
 static setpoint_t setpoint;
 static sensorData_t sensorData;
@@ -104,11 +102,6 @@ STATIC_MEM_TASK_ALLOC(stabilizerTask, STABILIZER_TASK_STACKSIZE);
 static void stabilizerTask();
 static void checkEmergencyStopTimeout();
 
-static void calcSensorToOutputLatency(const sensorData_t *sensorData) {
-	uint64_t outTimestamp = osKernelGetTickCount() * 1000 / osKernelGetTickFreq();
-	inToOutLatency = outTimestamp - sensorData->interruptTimestamp;
-}
-
 static void compressState() {
 	stateCompressed.x = state.position.x * 1000.0f;
 	stateCompressed.y = state.position.y * 1000.0f;
@@ -158,6 +151,7 @@ void stabilizerInit() {
 	controllerInit();
 	sensorsInit();
 	powerDistributionInit();
+	stabilizerReset();
 	STATIC_MEM_TASK_CREATE(stabilizerTask, stabilizerTask, STABILIZER_TASK_NAME, NULL, STABILIZER_TASK_PRI);
 	isInit = true;
 }
@@ -173,6 +167,9 @@ bool stabilizerTest() {
 }
 
 void stabilizerReset() {
+	memset(&sensorData, 0, sizeof(sensorData_t));
+	memset(&state, 0, sizeof(state_t));
+	memset(&control, 0, sizeof(control_t));
 	controllerReset();
 	estimatorReset();
 }
@@ -181,7 +178,6 @@ void stabilizerReset() {
  * responsibility of the different functions to run slower by skipping call
  * (ie. returning without modifying the output structure).
  */
-
 static void stabilizerTask() {
 	/*! Wait for the system to be fully started */
 	uint32_t tick = 1;
@@ -190,7 +186,6 @@ static void stabilizerTask() {
 	DEBUG_PRINT("Wait for sensor calibration...\n");
 	while (!sensorsAreCalibrated()) osDelay(10);
 
-	// rateSupervisorInit(&rateSupervisorContext, osKernelGetTickCount(), 1000, 997, 1003, 1);
 	DEBUG_PRINT("Ready to fly.\n");
 
 	if (ENABLE_SELF_TEST && !selfTestPassed())
@@ -222,13 +217,15 @@ static void stabilizerTask() {
 			powerStop();
 		}
 
-		calcSensorToOutputLatency(&sensorData);
 		tick++;
 
-		if (cnt++ % 500 == 0) {
+		if (++cnt % 500 == 0) {
 			cnt = 0;
-			DEBUG_PRINT("%d %d %d %d\n", (int)control.pitch, (int)control.roll, (int)control.yaw, (int)control.thrust);
+			DEBUG_PRINT("%d %d %d %.1f %.1f %.1f\n",
+			(int)control.pitch, (int)control.roll, (int)control.yaw,
+			(double)state.attitude.pitch, (double)state.attitude.roll, (double)state.attitude.yaw);
 		}
+
 		// TODO: check the rate
 		// STATS_CNT_RATE_EVENT(&stabilizerRate);
 		// if (!rateSupervisorValidate(&rateSupervisorContext, osKernelGetTickCount())) {

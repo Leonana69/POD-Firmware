@@ -96,30 +96,27 @@ void commanderGenericCrtpCB(CRTPPacket* pk) {
 	switch (pk->channel) {
 	case SET_SETPOINT_CHANNEL:
 		crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
+		commanderSetSetpoint(&setpoint);
 		break;
-
 	case SET_SETPOINT_USB_CHANNEL:
 		if (enableUsbControl) {
 			crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
-			// aman and maansi's project
-			DEBUG_PRINT_CONSOLE("s:%.2f,%.1f\n", setpoint.velocity.x, setpoint.attitudeRate.yaw);
-			setpoint.attitudeRate.yaw = 0;
+			commanderSetSetpoint(&setpoint);
 		}
 		break;
-	
 	case KEEP_ALIVE_CHANNEL:
 		// debug
 		if ((cnt++ % 10) == 0)
-		DEBUG_PRINT_CONSOLE("k:%.2f,%.1f\n", setpoint.velocity.x, setpoint.position.z);
+		DEBUG_PRINT_CONSOLE("k:%.2f,%.1f\n", setpoint.velocity.x, setpoint.velocity.y);
+		commanderSetSetpoint(&setpoint);
 		break;
 	case CONFIG_USB_CHANNEL:
 		enableUsbControl = (bool) pk->data[0];
-		DEBUG_PRINT_CONSOLE("su:%d\n", pk->data[0]);
+		DEBUG_PRINT_CONSOLE("cuc:%d\n", pk->data[0]);
 		break;
 	default:
 		/*! Do nothing */
 		DEBUG_PRINT_CONSOLE("Invalid commander type!\n");
 		break;
 	}
-	commanderSetSetpoint(&setpoint);
 }
