@@ -123,22 +123,17 @@ void nrfUartHandleDataFromIsr(uint8_t c) {
 			}
 			break;
 		case waitForChksum1:
-			if (cksum[0] == c) {
+			if (cksum[0] == c)
 				rxState = waitForChksum2;
-			} else
+			else
 				rxState = waitForFirstStart; //Checksum error
 			break;
 		case waitForChksum2:
 			if (cksum[1] == c) {
 				// Post the packet to the queue if there's room
-				if (osMessageQueueGetSpace(syslinkPacketDelivery)) {
-					osMessageQueuePut(syslinkPacketDelivery, (void *)&slp, 0, 0);
-				} else {
+				if (osMessageQueuePut(syslinkPacketDelivery, (void *)&slp, 0, 0) != osOK) {
 					ASSERT(0); // Queue overflow
-				}
-			} else {
-				rxState = waitForFirstStart; //Checksum error
-				ASSERT(0);
+				}	
 			}
 			rxState = waitForFirstStart;
 			break;
