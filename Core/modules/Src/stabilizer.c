@@ -219,12 +219,12 @@ static void stabilizerTask() {
 
 		tick++;
 
-		if (++cnt % 500 == 0) {
-			cnt = 0;
-			DEBUG_PRINT("%d %d %d %.1f %.1f %.1f\n",
-			(int)control.pitch, (int)control.roll, (int)control.yaw,
-			(double)state.attitude.pitch, (double)state.attitude.roll, (double)state.attitude.yaw);
-		}
+		// if (++cnt % 500 == 0) {
+		// 	cnt = 0;
+		// 	DEBUG_PRINT("h%.1f x%.1f y%.1f ", state.position.z, state.position.x, state.position.y);
+		// 	DEBUG_PRINT("r%.1f p%.1f y%.1f\n", state.attitude.roll, state.attitude.pitch, state.attitude.yaw);
+			
+		// }
 
 		// TODO: check the rate
 		// STATS_CNT_RATE_EVENT(&stabilizerRate);
