@@ -32,9 +32,11 @@
 #include "crtp.h"
 #include "stabilizer.h"
 #include "debug.h"
+#include <math.h>
 
 static bool isInit = false;
 static setpoint_t setpoint;
+static float height;
 static void commanderSetpointCrtpCB(CRTPPacket* pk);
 static void commanderGenericCrtpCB(CRTPPacket* pk);
 
@@ -97,17 +99,23 @@ void commanderGenericCrtpCB(CRTPPacket* pk) {
 	case SET_SETPOINT_CHANNEL:
 		crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
 		commanderSetSetpoint(&setpoint);
+		height = setpoint.position.z;
 		break;
 	case SET_SETPOINT_USB_CHANNEL:
 		if (enableUsbControl) {
 			crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
+			DEBUG_PRINT_CONSOLE("s:%.1f,%.1f\n", setpoint.velocity.x, setpoint.velocity.y);
+			// avoid large change in height 
+			
+			if (fabsf(height - setpoint.position.z) > 0.3)
+				setpoint.position.z = height;
 			commanderSetSetpoint(&setpoint);
 		}
 		break;
 	case KEEP_ALIVE_CHANNEL:
 		// debug
 		if ((cnt++ % 10) == 0)
-		DEBUG_PRINT_CONSOLE("k:%.2f,%.1f\n", setpoint.velocity.x, setpoint.velocity.y);
+		DEBUG_PRINT_CONSOLE("k:%.1f,%.1f\n", setpoint.velocity.x, setpoint.velocity.y);
 		commanderSetSetpoint(&setpoint);
 		break;
 	case CONFIG_USB_CHANNEL:
