@@ -41,6 +41,9 @@ C_SOURCES += vl53l1_api_calibration.c vl53l1_api_core.c vl53l1_api_debug.c vl53l
 	vl53l1_api.c vl53l1_core_support.c vl53l1_core.c vl53l1_error_strings.c vl53l1_register_funcs.c vl53l1_silicon_core.c \
 	vl53l1_wait.c
 
+VPATH += Core/drivers/Opt3101
+C_SOURCES += opt3101.c
+
 # modules
 VPATH += Core/modules/Src
 C_SOURCES += worker.c system.c mem.c crtp.c console.c comm.c ledseq.c crtp_link.c log.c param.c \

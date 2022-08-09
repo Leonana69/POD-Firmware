@@ -68,16 +68,39 @@ static CascadePidParam paramZ = {
 		.cutoffFreq = 20.0,
 	},
 	.rate = {
-		.kp = 25.0,
-		.ki = 15.0,
+		.kp = 15.0,
+		.ki = 10.0,
 		.kd = 1.0,
 		.rate = POSITION_RATE,
-		.iLimit = 30.0,
+		.iLimit = 20.0,
 		.oLimit = INT16_MAX / THRUST_SCALE,
 		.enableDFilter = true,
 		.cutoffFreq = 20.0,
 	}
 };
+
+// static CascadePidParam paramZ = {
+// 	.val = {
+// 		.kp = 2.0,
+// 		.ki = 0.5,
+// 		.kd = 0.0,
+// 		.rate = POSITION_RATE,
+// 		.iLimit = 1.0,
+// 		.oLimit = 0.0,
+// 		.enableDFilter = true,
+// 		.cutoffFreq = 20.0,
+// 	},
+// 	.rate = {
+// 		.kp = 25.0,
+// 		.ki = 15.0,
+// 		.kd = 1.0,
+// 		.rate = POSITION_RATE,
+// 		.iLimit = 30.0,
+// 		.oLimit = INT16_MAX / THRUST_SCALE,
+// 		.enableDFilter = true,
+// 		.cutoffFreq = 20.0,
+// 	}
+// };
 
 void controllerPidPositionInit() {
 	pidInit(&cpidX.val, &paramX.val);

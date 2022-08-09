@@ -7,11 +7,10 @@
 static CascadePidObject roll;
 static CascadePidObject pitch;
 static CascadePidObject yaw;
-
 static CascadePidParam paramRoll = {
 	.val = {
-		.kp = 6.0,
-		.ki = 3.0,
+		.kp = 5.0,
+		.ki = 2.0,
 		.kd = 0.0,
 		.rate = ATTITUDE_RATE,
 		.iLimit = 20.0,
@@ -20,9 +19,9 @@ static CascadePidParam paramRoll = {
 		.cutoffFreq = 15.0,
 	},
 	.rate = {
-		.kp = 250.0,
-		.ki = 500.0,
-		.kd = 2.5,
+		.kp = 150.0,
+		.ki = 200.0,
+		.kd = 1.0,
 		.rate = ATTITUDE_RATE,
 		.iLimit = 33.0,
 		.oLimit = 0.0,
@@ -33,8 +32,8 @@ static CascadePidParam paramRoll = {
 
 static CascadePidParam paramPitch = {
 	.val = {
-		.kp = 6.0,
-		.ki = 3.0,
+		.kp = 5.0,
+		.ki = 2.0,
 		.kd = 0.0,
 		.rate = ATTITUDE_RATE,
 		.iLimit = 20.0,
@@ -43,9 +42,9 @@ static CascadePidParam paramPitch = {
 		.cutoffFreq = 15.0,
 	},
 	.rate = {
-		.kp = 250.0,
-		.ki = 500.0,
-		.kd = 2.5,
+		.kp = 150.0,
+		.ki = 200.0,
+		.kd = 1.0,
 		.rate = ATTITUDE_RATE,
 		.iLimit = 33.0,
 		.oLimit = 0.0,
@@ -66,16 +65,84 @@ static CascadePidParam paramYaw = {
 		.cutoffFreq = 15.0,
 	},
 	.rate = {
-		.kp = 120.0,
-		.ki = 17.0,
+		.kp = 100.0,
+		.ki = 20.0,
 		.kd = 0.0,
 		.rate = ATTITUDE_RATE,
-		.iLimit = 167.0,
+		.iLimit = 33.0,
 		.oLimit = 0.0,
 		.enableDFilter = false,
 		.cutoffFreq = 30.0,
 	}
 };
+// static CascadePidParam paramRoll = {
+// 	.val = {
+// 		.kp = 6.0,
+// 		.ki = 3.0,
+// 		.kd = 0.0,
+// 		.rate = ATTITUDE_RATE,
+// 		.iLimit = 20.0,
+// 		.oLimit = 0.0,
+// 		.enableDFilter = false,
+// 		.cutoffFreq = 15.0,
+// 	},
+// 	.rate = {
+// 		.kp = 250.0,
+// 		.ki = 500.0,
+// 		.kd = 2.5,
+// 		.rate = ATTITUDE_RATE,
+// 		.iLimit = 33.0,
+// 		.oLimit = 0.0,
+// 		.enableDFilter = false,
+// 		.cutoffFreq = 30.0,
+// 	}
+// };
+
+// static CascadePidParam paramPitch = {
+// 	.val = {
+// 		.kp = 6.0,
+// 		.ki = 3.0,
+// 		.kd = 0.0,
+// 		.rate = ATTITUDE_RATE,
+// 		.iLimit = 20.0,
+// 		.oLimit = 0.0,
+// 		.enableDFilter = false,
+// 		.cutoffFreq = 15.0,
+// 	},
+// 	.rate = {
+// 		.kp = 250.0,
+// 		.ki = 500.0,
+// 		.kd = 2.5,
+// 		.rate = ATTITUDE_RATE,
+// 		.iLimit = 33.0,
+// 		.oLimit = 0.0,
+// 		.enableDFilter = false,
+// 		.cutoffFreq = 30.0,
+// 	}
+// };
+
+// static CascadePidParam paramYaw = {
+// 	.val = {
+// 		.kp = 6.0,
+// 		.ki = 1.0,
+// 		.kd = 0.35,
+// 		.rate = ATTITUDE_RATE,
+// 		.iLimit = 360.0,
+// 		.oLimit = 0.0,
+// 		.enableDFilter = false,
+// 		.cutoffFreq = 15.0,
+// 	},
+// 	.rate = {
+// 		.kp = 120.0,
+// 		.ki = 17.0,
+// 		.kd = 0.0,
+// 		.rate = ATTITUDE_RATE,
+// 		.iLimit = 167.0,
+// 		.oLimit = 0.0,
+// 		.enableDFilter = false,
+// 		.cutoffFreq = 30.0,
+// 	}
+// };
 
 void controllerPidAttitudeInit() {
 	pidInit(&roll.val, &paramRoll.val);
