@@ -221,9 +221,8 @@ static void stabilizerTask() {
 
 		// if (++cnt % 500 == 0) {
 		// 	cnt = 0;
-		// 	DEBUG_PRINT("h%.1f x%.1f y%.1f ", state.position.z, state.position.x, state.position.y);
-		// 	DEBUG_PRINT("r%.1f p%.1f y%.1f\n", state.attitude.roll, state.attitude.pitch, state.attitude.yaw);
-			
+		// 	// DEBUG_PRINT("h%.1f x%.1f y%.1f ", state.position.z, state.position.x, state.position.y);
+		// 	// DEBUG_PRINT("r%.1f p%.1f y%.1f\n", state.attitude.roll, state.attitude.pitch, state.attitude.yaw);
 		// }
 
 		// TODO: check the rate

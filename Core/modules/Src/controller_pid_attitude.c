@@ -7,6 +7,7 @@
 static CascadePidObject roll;
 static CascadePidObject pitch;
 static CascadePidObject yaw;
+/** smaller pid value for high quality motors */
 static CascadePidParam paramRoll = {
 	.val = {
 		.kp = 5.0,

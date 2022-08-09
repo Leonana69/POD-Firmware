@@ -28,7 +28,7 @@ static uint16_t rangeLast;
 #define expPointA 2.5f
 #define expStdA 0.0025f
 #define RANGE_OUTLIER_LIMIT 5000
-static bool vl53l1Init();
+static int8_t vl53l1Init();
 static bool vl53l1Test();
 
 void tofInit() {
@@ -36,7 +36,7 @@ void tofInit() {
 		return;
 	I2Cx = &tofI2C;
 
-	if (vl53l1Init()) {
+	if (vl53l1Init() == 0) {
 		STATIC_MEM_TASK_CREATE(tofTask, tofTask, TOF_TASK_NAME, NULL, TOF_TASK_PRI);
 		isInit = true;
 	}
@@ -73,7 +73,7 @@ void tofTask() {
 }
 
 /*! vl53l1 platform functions */
-bool vl53l1Init() {
+int8_t vl53l1Init() {
 	VL53L1_Error status;
 	vl53l1Dev.i2c_slave_address = VL53L1_EWOK_I2C_DEV_ADDR_DEFAULT;
 	vl53l1Dev.comms_type = VL53L1_I2C;
@@ -81,20 +81,20 @@ bool vl53l1Init() {
 
 	if (HAL_I2C_IsDeviceReady(I2Cx->hi2c, vl53l1Dev.i2c_slave_address << 1, 3, 100) != HAL_OK) {
 		DEBUG_PRINT("VL53L1X not found.\n");
-		return false;
+		return -1;
 	}
 	vl53l1Present = true;
 
 	status = VL53L1_DataInit(&vl53l1Dev);
 	if (status != VL53L1_ERROR_NONE) {
-		DEBUG_PRINT("Data init [FAILED].\n");
-		return false;
+		DEBUG_PRINT("Data init [FAILED]\n");
+		return status;
 	}
 
 	status = VL53L1_StaticInit(&vl53l1Dev);
 	if (status != VL53L1_ERROR_NONE) {
-		DEBUG_PRINT("Static init [FAILED].\n");
-		return false;
+		DEBUG_PRINT("Static init [FAILED]\n");
+		return status;
 	}
 
 	VL53L1_StopMeasurement(&vl53l1Dev);
@@ -109,8 +109,8 @@ bool vl53l1Init() {
 	VL53L1_SetMeasurementTimingBudgetMicroSeconds(&vl53l1Dev, 10000);
 	VL53L1_StartMeasurement(&vl53l1Dev);
 
-	DEBUG_PRINT("VL53L1 Init [OK].\n");
-	return true;
+	DEBUG_PRINT("VL53L1 Init [OK]\n");
+	return 0;
 }
 
 bool vl53l1Test() {

@@ -61,6 +61,7 @@
 // #include "deck.h"
 // #include "extrx.h"
 #include "tof.h"
+#include "front_dis.h"
 #include "flow.h"
 #include "static_mem.h"
 #include "cfassert.h"
@@ -111,6 +112,7 @@ static void systemInit(void) {
   memInit();
   stabilizerInit();
   tofInit();
+  frontDisInit();
   flowInit();
 
   DEBUG_PRINT("----------------------------\n");
@@ -135,6 +137,7 @@ static bool systemTest() {
   pass &= memTest();
   pass &= stabilizerTest();
   pass &= tofTest();
+  pass &= frontDisTest();
   pass &= flowTest();
   return pass;
 }
