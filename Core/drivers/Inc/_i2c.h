@@ -24,11 +24,17 @@ bool i2cMemWrite16(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len
 bool i2cMemReadDma8(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
 bool i2cMemWrite8(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len, uint8_t *data);
 
-uint8_t i2cTofReadDma(I2CDrv *dev, uint32_t devAddr, uint32_t regAddr, uint16_t len, uint8_t *data);
-uint8_t i2cTofWrite(I2CDrv *dev, uint32_t devAddr, uint32_t regAddr, uint16_t len, uint8_t *data);
+// uint8_t i2cTofReadDma(I2CDrv *dev, uint32_t devAddr, uint32_t regAddr, uint16_t len, uint8_t *data);
+// uint8_t i2cTofWrite(I2CDrv *dev, uint32_t devAddr, uint32_t regAddr, uint16_t len, uint8_t *data);
+
+int8_t i2cTofWrite(uint16_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr);
+int8_t i2cTofRead(uint16_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr);
 
 int8_t i2cSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr);
 int8_t i2cSensorsWrite(uint8_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr);
+
+int8_t i2cFrontDisRead(uint16_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr);
+int8_t i2cFrontDisWrite(uint16_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr);
 
 void sensorsI2cRxDmaIsr();
 void eepromI2cRxDmaIsr();

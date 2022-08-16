@@ -150,7 +150,8 @@ void controllerPidPositionUpdate(float* thrust, attitude_t *attitude,
 
 	float accZ = pidUpdate(&cpidZ.rate, state->velocity.z, setpoint->velocity.z, true);
 
-	*thrust = accZ * THRUST_SCALE + BASE_THRUST;
+	// *thrust = accZ * THRUST_SCALE + BASE_THRUST;
+	*thrust = fminf(accZ * THRUST_SCALE + BASE_THRUST, MAX_THRUST);
 	if (*thrust < MIN_THRUST)
 		*thrust = MIN_THRUST;
 }

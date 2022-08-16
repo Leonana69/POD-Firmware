@@ -50,6 +50,11 @@ extern "C"
 /** @brief  Contains the current state and internal values of the API
  */
 
+typedef int8_t (*vl53l1_read_fptr_t)(uint16_t reg_addr, uint8_t *read_data, uint32_t len, void *intf_ptr);
+typedef int8_t (*vl53l1_write_fptr_t)(uint16_t reg_addr, const uint8_t *read_data, uint32_t len, void *intf_ptr);
+typedef uint16_t (*vl53l1_timestamp_fptr_t) ();
+typedef void (*vl53l1_delay_ms) (uint32_t);
+
 typedef struct {
 
 	VL53L1_DevData_t   Data;
@@ -64,6 +69,12 @@ typedef struct {
 
 	uint32_t  new_data_ready_poll_duration_ms;
 		/*!< New data ready poll duration in ms - for debug */
+	
+	vl53l1_read_fptr_t read;
+	vl53l1_write_fptr_t write;
+	vl53l1_delay_ms delay;
+	vl53l1_timestamp_fptr_t millis;
+
 } VL53L1_Dev_t;
 
 

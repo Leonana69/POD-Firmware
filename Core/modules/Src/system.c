@@ -112,8 +112,8 @@ static void systemInit(void) {
   memInit();
   stabilizerInit();
   tofInit();
-  frontDisInit();
   flowInit();
+  frontDisInit();
 
   DEBUG_PRINT("----------------------------\n");
   DEBUG_PRINT_CONSOLE("Console Init.\n");
@@ -137,8 +137,8 @@ static bool systemTest() {
   pass &= memTest();
   pass &= stabilizerTest();
   pass &= tofTest();
-  pass &= frontDisTest();
   pass &= flowTest();
+  pass &= frontDisTest();
   return pass;
 }
 

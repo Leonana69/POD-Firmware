@@ -46,23 +46,29 @@ bool i2cMemWrite8(I2CDrv *dev, uint32_t devAddr, uint32_t memAddr, uint16_t len,
 	return status == HAL_OK;
 }
 
-uint8_t i2cTofReadDma(I2CDrv *dev, uint32_t devAddr, uint32_t regAddr, uint16_t len, uint8_t *data) {
+/*! @brief Sensor I2C read function */
+int8_t i2cTofRead(uint16_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr) {
 	HAL_StatusTypeDef status;
-	static uint8_t buffer[2];
-	buffer[0] = regAddr >> 8;
-	buffer[1] = regAddr & 0xFF;
-	HAL_I2C_Master_Transmit(dev->hi2c, devAddr << 1, buffer, 2, 1000);
-	status = HAL_I2C_Master_Receive_DMA(dev->hi2c, devAddr << 1, data, len);
-	osSemaphoreAcquire(dev->i2cRxDmaSemaphore, osWaitForever);
-	return status;
+	uint16_t DevAddress = *(uint8_t*)intfPtr << 1;
+	uint8_t buffer[2] = { regAddr >> 8, regAddr & 0xff };
+	HAL_I2C_Master_Transmit(tofI2C.hi2c, DevAddress, buffer, 2, 1000);
+	status = HAL_I2C_Master_Receive_DMA(tofI2C.hi2c, DevAddress, regData, len);
+	osSemaphoreAcquire(eepromI2C.i2cRxDmaSemaphore, osWaitForever);
+
+	return -status;
 }
 
-uint8_t i2cTofWrite(I2CDrv *dev, uint32_t devAddr, uint32_t regAddr, uint16_t len, uint8_t *data) {
-	static uint8_t buffer[256];
-	buffer[0] = regAddr >> 8;
-	buffer[1] = regAddr & 0xFF;
-	memcpy(&buffer[2], data, len);
-	return HAL_I2C_Master_Transmit(dev->hi2c, devAddr << 1, buffer, len + 2, 1000);
+/*! @brief Sensor I2C write function */
+int8_t i2cTofWrite(uint16_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr) {
+	static uint8_t sBuffer[256];
+	HAL_StatusTypeDef status;
+	uint16_t DevAddress = *(uint8_t*)intfPtr << 1;
+	memset(sBuffer, 0, 256);
+	sBuffer[0] = regAddr >> 8;
+	sBuffer[1] = regAddr & 0xff;
+	memcpy(sBuffer + 2, regData, len);
+	status = HAL_I2C_Master_Transmit(tofI2C.hi2c, DevAddress, sBuffer, len + 2, 1000);
+	return -status;
 }
 
 void eepromI2cRxDmaIsr() {
@@ -85,13 +91,41 @@ int8_t i2cSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *int
 
 /*! @brief Sensor I2C write function */
 int8_t i2cSensorsWrite(uint8_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr) {
-	static uint8_t sBuffer[32];
+	static uint8_t sBuffer[256];
 	HAL_StatusTypeDef status;
 	uint16_t DevAddress = *(uint8_t*)intfPtr << 1;
-	memset(sBuffer, 0, 32);
+	memset(sBuffer, 0, 256);
 	sBuffer[0] = regAddr;
 	memcpy(sBuffer + 1, regData, len);
 	status = HAL_I2C_Master_Transmit(sensorI2C.hi2c, DevAddress, sBuffer, len + 1, 1000);
+	return -status;
+}
+
+/*! @brief Front dis sensor I2C read function */
+int8_t i2cFrontDisRead(uint16_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr) {
+	HAL_StatusTypeDef status;
+	uint16_t DevAddress = *(uint8_t*)intfPtr << 1;
+	uint8_t buffer[2] = { regAddr >> 8, regAddr & 0xff };
+	HAL_I2C_Master_Transmit(sensorI2C.hi2c, DevAddress, buffer, 2, 1000);
+	status = HAL_I2C_Master_Receive_DMA(sensorI2C.hi2c, DevAddress, regData, len);
+	osSemaphoreAcquire(sensorI2C.i2cRxDmaSemaphore, osWaitForever);
+	/**
+	 * HAL_StatusTypeDef: 0, 1, 2, 3
+	 * BMI08X_INTF_RET_TYPE: 0, -1, -2, ..., -9
+	 */
+	return -status;
+}
+
+/*! @brief Front dis sensor I2C write function */
+int8_t i2cFrontDisWrite(uint16_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr) {
+	static uint8_t sBuffer[256];
+	HAL_StatusTypeDef status;
+	uint16_t DevAddress = *(uint8_t*)intfPtr << 1;
+	memset(sBuffer, 0, 256);
+	sBuffer[0] = regAddr >> 8;
+	sBuffer[1] = regAddr & 0xff;
+	memcpy(sBuffer + 2, regData, len);
+	status = HAL_I2C_Master_Transmit(sensorI2C.hi2c, DevAddress, sBuffer, len + 2, 1000);
 	return -status;
 }
 

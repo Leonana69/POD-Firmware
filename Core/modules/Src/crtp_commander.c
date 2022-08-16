@@ -88,6 +88,8 @@ void commanderSetpointCrtpCB(CRTPPacket* pk) {
 	}
 }
 
+extern int16_t dis3ch[3];
+
 void commanderGenericCrtpCB(CRTPPacket* pk) {
 	if (pk->channel != SET_SETPOINT_USB_CHANNEL)
 		stabilizerSetEmergencyStopTimeout(300);
@@ -109,6 +111,14 @@ void commanderGenericCrtpCB(CRTPPacket* pk) {
 			
 			if (fabsf(height - setpoint.position.z) > 0.3)
 				setpoint.position.z = height;
+
+			// if (dis3ch[0] < 500 || dis3ch[1] < 500 || dis3ch[2] < 500) {
+			// 	if (setpoint.velocity.x > 0) {
+			// 		setpoint.velocity.x = 0;
+			// 		DEBUG_PRINT("### Stop forward\n");
+			// 	}
+			// }
+				
 			commanderSetSetpoint(&setpoint);
 		}
 		break;

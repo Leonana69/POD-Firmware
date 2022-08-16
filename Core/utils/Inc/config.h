@@ -56,9 +56,9 @@
 
 #ifdef POD
   // #define DEBUG_PRINT_ON_UART
-  #define BASE_THRUST 40000
+  #define BASE_THRUST 18000
   #define MIN_THRUST  1000
-  #define MAX_THRUST  65000
+  #define MAX_THRUST  35000
   #define THRUST_SCALE 1000
   #define MOTORS_IDLE_THRUST 0
   #define POD_MASS (0.9f)
@@ -73,6 +73,8 @@
    */
   #define SENSORS_TYPE SENSORS_BMI270_BMP384
   #define SENSORS_INTERFACE SENSOR_INTF_SPI
+
+  #define FRONT_DIS_TYPE FRONT_DIS_VL53L1X
   /*! @brief Motor config
    * MOTOR_TYPE:  MOTORS_PWM
    *              MOTORS_DSHOT
@@ -146,6 +148,8 @@
    */
   #define SENSORS_TYPE SENSORS_BMI088_BMP388
   #define SENSORS_INTERFACE SENSOR_INTF_I2C
+
+  #define FRONT_DIS_TYPE FRONT_DIS_NONE
   /*! @brief Motor config
    * MOTOR_TYPE:  MOTORS_PWM
    *              MOTORS_DSHOT
