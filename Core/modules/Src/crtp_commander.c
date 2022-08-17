@@ -88,7 +88,7 @@ void commanderSetpointCrtpCB(CRTPPacket* pk) {
 	}
 }
 
-extern int16_t dis3ch[3];
+extern uint16_t frontDis;
 
 void commanderGenericCrtpCB(CRTPPacket* pk) {
 	if (pk->channel != SET_SETPOINT_USB_CHANNEL)
@@ -104,37 +104,36 @@ void commanderGenericCrtpCB(CRTPPacket* pk) {
 		height = setpoint.position.z;
 		break;
 	case SET_SETPOINT_USB_CHANNEL:
-		if (enableUsbControl) {
+		if (enableUsbControl || 1) {
 			crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
-			DEBUG_PRINT_CONSOLE("s:%.1f,%.1f\n", setpoint.velocity.x, setpoint.velocity.y);
+			DEBUG_PRINT("s:%.1f,%.1f\n", setpoint.velocity.x, setpoint.velocity.y);
 			// avoid large change in height 
 			
 			if (fabsf(height - setpoint.position.z) > 0.3)
 				setpoint.position.z = height;
 
-			// if (dis3ch[0] < 500 || dis3ch[1] < 500 || dis3ch[2] < 500) {
-			// 	if (setpoint.velocity.x > 0) {
-			// 		setpoint.velocity.x = 0;
-			// 		DEBUG_PRINT("### Stop forward\n");
-			// 	}
-			// }
-				
+			if (frontDis > 0 && frontDis < 500) {
+				if (setpoint.velocity.x > 0) {
+					setpoint.velocity.x = 0;
+					DEBUG_PRINT("### Stop forward ###\n");
+				}
+			}
 			commanderSetSetpoint(&setpoint);
 		}
 		break;
 	case KEEP_ALIVE_CHANNEL:
 		// debug
 		if ((cnt++ % 10) == 0)
-		DEBUG_PRINT_CONSOLE("k:%.1f,%.1f\n", setpoint.velocity.x, setpoint.velocity.y);
+		DEBUG_PRINT("k:%.1f,%.1f\n", setpoint.velocity.x, setpoint.velocity.y);
 		commanderSetSetpoint(&setpoint);
 		break;
 	case CONFIG_USB_CHANNEL:
 		enableUsbControl = (bool) pk->data[0];
-		DEBUG_PRINT_CONSOLE("cuc:%d\n", pk->data[0]);
+		DEBUG_PRINT("cuc:%d\n", pk->data[0]);
 		break;
 	default:
 		/*! Do nothing */
-		DEBUG_PRINT_CONSOLE("Invalid commander type!\n");
+		DEBUG_PRINT("Invalid commander type!\n");
 		break;
 	}
 }

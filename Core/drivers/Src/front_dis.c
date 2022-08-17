@@ -25,7 +25,7 @@ static uint8_t opt3101_addr = OPT3101_CHIP_ADDR;
 int16_t dis3ch[3];
 #elif (FRONT_DIS_TYPE == FRONT_DIS_VL53L1X)
 static VL53L1_Dev_t vl53l1Dev;
-static uint16_t rangeLast;
+uint16_t frontDis = 0;
 #define FRONT_DIS_RATE RATE_25_HZ
 #endif
 
@@ -105,7 +105,6 @@ void frontDisTask() {
 	VL53L1_RangingMeasurementData_t vl53l1RangingData;
 #endif
 
-    int cnt = 0;
     while (1) {
     #if (FRONT_DIS_TYPE == FRONT_DIS_OPT3101)
         opt3101Sample(&opt3101);
@@ -119,13 +118,8 @@ void frontDisTask() {
 		osDelayUntil(lastWakeTime);
 		VL53L1_WaitMeasurementDataReady(&vl53l1Dev);
 		VL53L1_GetRangingMeasurementData(&vl53l1Dev, &vl53l1RangingData);
-		rangeLast = vl53l1RangingData.RangeMilliMeter;
+		frontDis = vl53l1RangingData.RangeMilliMeter;
 		VL53L1_ClearInterruptAndStartMeasurement(&vl53l1Dev);
-        if (cnt++ == 25) {
-            cnt = 0;
-            DEBUG_PRINT("%d\n", rangeLast);
-        }
-		
     #endif
     }
 }
