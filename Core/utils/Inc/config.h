@@ -213,7 +213,6 @@
 // Task names
 #define SYSTEM_TASK_NAME        "SYSTEM"
 #define LEDSEQCMD_TASK_NAME     "LEDSEQCMD"
-#define ADC_TASK_NAME           "ADC"
 #define PM_TASK_NAME            "PWRMGNT"
 #define CRTP_RADIO_TX_TASK_NAME "CRTP-R-TX"
 #define CRTP_RADIO_RX_TASK_NAME "CRTP-R-RX"
@@ -238,7 +237,6 @@
 #define USDWRITE_TASK_NAME      "USDWRITE"
 #define PCA9685_TASK_NAME       "PCA9685"
 #define CMD_HIGH_LEVEL_TASK_NAME "CMDHL"
-#define MULTIRANGER_TASK_NAME   "MR"
 #define BQ_OSD_TASK_NAME        "BQ_OSDTASK"
 #define GTGPS_DECK_TASK_NAME    "GTGPS"
 #define OA_DECK_TASK_NAME       "OA"
@@ -255,9 +253,7 @@
 // Task priorities
 #define STABILIZER_TASK_PRI     5
 #define SENSORS_TASK_PRI        4
-#define ADC_TASK_PRI            3
 #define FLOW_TASK_PRI           3
-#define MULTIRANGER_TASK_PRI    2
 #define SYSTEM_TASK_PRI         2
 #define CRTP_TX_TASK_PRI        2
 #define CRTP_RX_TASK_PRI        2
@@ -288,13 +284,12 @@
 #define CRTP_SRV_TASK_PRI       0
 #define PLATFORM_SRV_TASK_PRI   0
 
-#define TOF_TASK_PRI            4
+#define TOF_TASK_PRI            3
 #define FRONT_DIS_TASK_PRI      3
 
 // Task stack sizes
 #define SYSTEM_TASK_STACKSIZE         (2 * configMINIMAL_STACK_SIZE)
 #define LEDSEQCMD_TASK_STACKSIZE      configMINIMAL_STACK_SIZE
-#define ADC_TASK_STACKSIZE            configMINIMAL_STACK_SIZE
 #define PM_TASK_STACKSIZE             configMINIMAL_STACK_SIZE
 #define CRTP_RADIO_TX_TASK_STACKSIZE  configMINIMAL_STACK_SIZE
 #define CRTP_RADIO_RX_TASK_STACKSIZE  (2 * configMINIMAL_STACK_SIZE)
@@ -319,7 +314,6 @@
 #define USDWRITE_TASK_STACKSIZE       (3 * configMINIMAL_STACK_SIZE)
 #define PCA9685_TASK_STACKSIZE        (2 * configMINIMAL_STACK_SIZE)
 #define CMD_HIGH_LEVEL_TASK_STACKSIZE (2 * configMINIMAL_STACK_SIZE)
-#define MULTIRANGER_TASK_STACKSIZE    (2 * configMINIMAL_STACK_SIZE)
 #define ACTIVEMARKER_TASK_STACKSIZE   configMINIMAL_STACK_SIZE
 #define UART2_TASK_STACKSIZE          configMINIMAL_STACK_SIZE
 #define CRTP_SRV_TASK_STACKSIZE       configMINIMAL_STACK_SIZE
