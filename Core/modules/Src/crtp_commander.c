@@ -104,7 +104,7 @@ void commanderGenericCrtpCB(CRTPPacket* pk) {
 		height = setpoint.position.z;
 		break;
 	case SET_SETPOINT_USB_CHANNEL:
-		if (enableUsbControl || 1) {
+		if (enableUsbControl) {
 			crtpCommanderGenericDecodeSetpoint(&setpoint, pk);
 			DEBUG_PRINT("s:%.1f,%.1f\n", setpoint.velocity.x, setpoint.velocity.y);
 			// avoid large change in height 
@@ -129,7 +129,7 @@ void commanderGenericCrtpCB(CRTPPacket* pk) {
 		break;
 	case CONFIG_USB_CHANNEL:
 		enableUsbControl = (bool) pk->data[0];
-		DEBUG_PRINT("cuc:%d\n", pk->data[0]);
+		DEBUG_PRINT("usb:%d\n", pk->data[0]);
 		break;
 	default:
 		/*! Do nothing */

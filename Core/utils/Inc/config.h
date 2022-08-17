@@ -241,15 +241,11 @@
 #define MULTIRANGER_TASK_NAME   "MR"
 #define BQ_OSD_TASK_NAME        "BQ_OSDTASK"
 #define GTGPS_DECK_TASK_NAME    "GTGPS"
-#define LIGHTHOUSE_TASK_NAME    "LH"
-#define LPS_DECK_TASK_NAME      "LPS"
 #define OA_DECK_TASK_NAME       "OA"
 #define UART1_TEST_TASK_NAME    "UART1TEST"
 #define UART2_TEST_TASK_NAME    "UART2TEST"
 #define KALMAN_TASK_NAME        "KALMAN"
 #define ACTIVE_MARKER_TASK_NAME "ACTIVEMARKER-DECK"
-#define AI_DECK_GAP_TASK_NAME   "AI-DECK-GAP"
-#define AI_DECK_NINA_TASK_NAME  "AI-DECK-NINA"
 #define UART2_TASK_NAME         "UART2"
 #define CRTP_SRV_TASK_NAME      "CRTP-SRV"
 #define PLATFORM_SRV_TASK_NAME  "PLATFORM-SRV"
@@ -261,7 +257,7 @@
 #define SENSORS_TASK_PRI        4
 #define ADC_TASK_PRI            3
 #define FLOW_TASK_PRI           3
-#define MULTIRANGER_TASK_PRI    3
+#define MULTIRANGER_TASK_PRI    2
 #define SYSTEM_TASK_PRI         2
 #define CRTP_TX_TASK_PRI        2
 #define CRTP_RX_TASK_PRI        2
@@ -279,8 +275,6 @@
 #define CMD_HIGH_LEVEL_TASK_PRI 2
 #define BQ_OSD_TASK_PRI         1
 #define GTGPS_DECK_TASK_PRI     1
-#define LIGHTHOUSE_TASK_PRI     3
-#define LPS_DECK_TASK_PRI       3
 #define OA_DECK_TASK_PRI        3
 #define UART1_TEST_TASK_PRI     1
 #define UART2_TEST_TASK_PRI     1
@@ -290,13 +284,12 @@
 #define SYSLINK_TASK_PRI        3
 #define USBLINK_TASK_PRI        3
 #define ACTIVE_MARKER_TASK_PRI  3
-#define AI_DECK_TASK_PRI        3
 #define UART2_TASK_PRI          3
 #define CRTP_SRV_TASK_PRI       0
 #define PLATFORM_SRV_TASK_PRI   0
 
-#define TOF_TASK_PRI            2
-#define FRONT_DIS_TASK_PRI      2
+#define TOF_TASK_PRI            4
+#define FRONT_DIS_TASK_PRI      3
 
 // Task stack sizes
 #define SYSTEM_TASK_STACKSIZE         (2 * configMINIMAL_STACK_SIZE)
@@ -328,7 +321,6 @@
 #define CMD_HIGH_LEVEL_TASK_STACKSIZE (2 * configMINIMAL_STACK_SIZE)
 #define MULTIRANGER_TASK_STACKSIZE    (2 * configMINIMAL_STACK_SIZE)
 #define ACTIVEMARKER_TASK_STACKSIZE   configMINIMAL_STACK_SIZE
-#define AI_DECK_TASK_STACKSIZE        configMINIMAL_STACK_SIZE
 #define UART2_TASK_STACKSIZE          configMINIMAL_STACK_SIZE
 #define CRTP_SRV_TASK_STACKSIZE       configMINIMAL_STACK_SIZE
 #define PLATFORM_SRV_TASK_STACKSIZE   configMINIMAL_STACK_SIZE
