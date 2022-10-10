@@ -10,7 +10,7 @@ OPENOCD_TARGET    	?= target/stm32f4x.cfg
 OPENOCD_CMDS		?=
 LOAD_ADDRESS		?= 0x8004000
 PROG				?= $(BUILD_DIR)/$(TARGET)
-PLATFORM 			?= POD
+PLATFORM 			?= PODD
 ######################################
 # guojun's C source
 ######################################
@@ -86,7 +86,7 @@ all: bin/ build
 
 # remote load, require cflib
 cload:
-	python3 ./cfloader.py -w radio://0/80/2M/E7E7E7E7E7 flash $(PROG).bin stm32-fw
+	python3 ./py/cfloader.py -w radio://0/80/2M/E7E7E7E7E7 flash $(PROG).bin stm32-fw
 
 #Flash the stm.
 flash:

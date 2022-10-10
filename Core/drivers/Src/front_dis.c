@@ -27,6 +27,9 @@ int16_t dis3ch[3];
 static VL53L1_Dev_t vl53l1Dev;
 uint16_t frontDis = 0;
 #define FRONT_DIS_RATE RATE_25_HZ
+#else
+// for crazyflie
+uint16_t frontDis = 0;
 #endif
 
 static void sensorsMsDelay(uint32_t period) {
