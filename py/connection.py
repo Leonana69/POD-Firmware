@@ -48,7 +48,7 @@ class ConnectionTest:
         print('Connected to %s' % link_uri)
 
         # Start a timer to disconnect in 10s
-        t = Timer(3, self._cf.close_link)
+        t = Timer(30, self._cf.close_link)
         t.start()
 
     def _a_propTest_callback(self, name, value):

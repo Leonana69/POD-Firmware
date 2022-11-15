@@ -187,7 +187,7 @@ class MotorRampExample:
 
         cnt = 0
         while cnt < 20:
-            self._cf.commander.send_hover_setpoint(0, 0, 15, target_height)
+            self._cf.commander.send_hover_setpoint(0, 0, 0, target_height)
             cnt = cnt + 1
             time.sleep(0.1)
 
@@ -205,7 +205,6 @@ class MotorRampExample:
             self._cf.commander.send_hover_setpoint(0, 0, 0, h)
             cnt += 1
             time.sleep(0.1)
-
 
         # while thrust >= 1000 and thrust < 10000:
         #     self._cf.commander.send_setpoint(0, 0, 0, thrust)
