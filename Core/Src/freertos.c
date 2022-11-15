@@ -150,4 +150,3 @@ void StartDefaultTask(void *argument)
 
 /* USER CODE END Application */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
