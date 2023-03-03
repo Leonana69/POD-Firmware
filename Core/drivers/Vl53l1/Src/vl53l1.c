@@ -299,13 +299,14 @@ VL53L1_Error VL53L1_WaitValueMaskEx(VL53L1_Dev_t *pdev, uint32_t timeout_ms, uin
 		if ((byte_value & mask) == value)
 			found = 1;
 
-		/*if (status == VL53L1_ERROR_NONE  &&
+		// guojun: add this delay
+		if (status == VL53L1_ERROR_NONE  &&
 			found == 0 &&
 			poll_delay_ms > 0)
 			status = VL53L1_WaitMs(
 							pdev,
 							poll_delay_ms);
-		*/
+		
 
 		/* Update polling time (Compare difference rather than absolute to
 		negate 32bit wrap around issue) */

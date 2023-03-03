@@ -107,7 +107,6 @@ void frontDisTask() {
 	uint32_t wakeDelay = osKernelGetTickFreq() / FRONT_DIS_RATE;
 	VL53L1_RangingMeasurementData_t vl53l1RangingData;
 #endif
-
     while (1) {
     #if (FRONT_DIS_TYPE == FRONT_DIS_OPT3101)
         opt3101Sample(&opt3101);

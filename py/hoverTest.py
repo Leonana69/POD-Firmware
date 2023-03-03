@@ -178,7 +178,7 @@ class MotorRampExample:
 
         print("up")
         cnt = 0
-        while cnt < 50:
+        while cnt < 20:
             self._cf.commander.send_hover_setpoint(0, 0, 0, target_height)
             # print(h)
             cnt = cnt + 1

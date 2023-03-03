@@ -284,8 +284,8 @@
 #define CRTP_SRV_TASK_PRI       0
 #define PLATFORM_SRV_TASK_PRI   0
 
-#define TOF_TASK_PRI            3
-#define FRONT_DIS_TASK_PRI      3
+#define TOF_TASK_PRI            2
+#define FRONT_DIS_TASK_PRI      2
 
 // Task stack sizes
 #define SYSTEM_TASK_STACKSIZE         (2 * configMINIMAL_STACK_SIZE)
