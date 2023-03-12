@@ -82,7 +82,9 @@
   #define MOTORS_TYPE MOTORS_DSHOT
   /*! TIM */
   #define USEC_TIM         htim7
-
+  /* cf2.1 use t2c4 for m2 and t4c4 for m4,
+   * for dshot to work, we need dma which is not available for t4c4, and it's shared between t2c2 and t2c4
+   */
   #define MOTOR1_TIM       htim2
   #define MOTOR1_CHANNEL   TIM_CHANNEL_2
   #define MOTOR2_TIM       htim2

@@ -191,7 +191,6 @@ static void stabilizerTask() {
 	if (ENABLE_SELF_TEST && !selfTestPassed())
 		selfTestRun(&sensorData);
 
-	int cnt = 0;
 	while (1) {
 		/*! The sensor should unlock at 1kHz */
 		sensorsWaitDataReady();

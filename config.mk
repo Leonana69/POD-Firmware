@@ -10,7 +10,7 @@ OPENOCD_TARGET    	?= target/stm32f4x.cfg
 OPENOCD_CMDS		?=
 LOAD_ADDRESS		?= 0x8004000
 PROG				?= $(BUILD_DIR)/$(TARGET)
-PLATFORM 			?= POD
+PLATFORM 			?= PODD
 ######################################
 # guojun's C source
 ######################################
