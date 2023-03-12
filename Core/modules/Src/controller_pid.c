@@ -98,13 +98,8 @@ void controllerPidUpdate(control_t *control, setpoint_t *setpoint,
 		control->roll = capValueInt16(output.roll);
 		control->pitch = capValueInt16(output.pitch);
 		control->yaw = -capValueInt16(output.yaw);
+    control->thrust = actuatorThrust;
   }
-
-  // if (tiltCompensationEnabled) {
-	// 	// TODO: compensate gravity
-  //   control->thrust = actuatorThrust;// / sensfusion6GetInvThrustCompensationForTilt();
-  // } else
-  control->thrust = actuatorThrust;
 
   if (control->thrust == 0) {
     control->thrust = 0;

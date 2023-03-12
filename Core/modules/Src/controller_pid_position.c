@@ -12,7 +12,7 @@ static CascadePidObject cpidZ;
 
 static CascadePidParam paramX = {
 	.val = {
-		.kp = 2.0,
+		.kp = 4.0,
 		.ki = 0.5,
 		.kd = 0.0,
 		.rate = POSITION_RATE,
@@ -35,7 +35,7 @@ static CascadePidParam paramX = {
 
 static CascadePidParam paramY = {
 	.val = {
-		.kp = 2.0,
+		.kp = 4.0,
 		.ki = 0.5,
 		.kd = 0.0,
 		.rate = POSITION_RATE,
