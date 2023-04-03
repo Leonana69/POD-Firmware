@@ -476,9 +476,9 @@ static void sensorsCalculateVarianceAndMean(BiasObj* bias, Axis3f* varOut, Axis3
   meanOut->y = (float)sum[1] / SENSORS_GYRO_BIAS_SAMPLES_NBR;
   meanOut->z = (float)sum[2] / SENSORS_GYRO_BIAS_SAMPLES_NBR;
 
-	varOut->x = sumSq[0] / SENSORS_GYRO_BIAS_SAMPLES_NBR + meanOut->x * meanOut->x;
-	varOut->y = sumSq[1] / SENSORS_GYRO_BIAS_SAMPLES_NBR + meanOut->y * meanOut->y;
-	varOut->z = sumSq[2] / SENSORS_GYRO_BIAS_SAMPLES_NBR + meanOut->z * meanOut->z;
+	varOut->x = sumSq[0] / SENSORS_GYRO_BIAS_SAMPLES_NBR - meanOut->x * meanOut->x;
+	varOut->y = sumSq[1] / SENSORS_GYRO_BIAS_SAMPLES_NBR - meanOut->y * meanOut->y;
+	varOut->z = sumSq[2] / SENSORS_GYRO_BIAS_SAMPLES_NBR - meanOut->z * meanOut->z;
 }
 
 /**
